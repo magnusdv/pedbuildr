@@ -23,8 +23,10 @@ plotPeds = function(pedlist,  titles = NULL,
     origs = labs[!startsWith(labs, "p")]
 
     labs[!labs %in% origs] = ""
+    mar = if(is.null(tit)) c(1.5,1.5,1.5,1.5) else c(1.5,1.5,3,1.5)
 
-    plot(ped, shaded = origs, col = list(red=origs),  title = tit, ...) #id.lab = labs,
+    plot(ped, shaded = origs, col = list(red=origs),
+         margin = mar, id.lab = labs, title = tit, ...)
   }
 }
 
