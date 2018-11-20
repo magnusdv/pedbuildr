@@ -6,7 +6,7 @@ pedbuildr
 The goal of pedbuildr is to reconstruct small/medium-sized pedigrees from genotype data. The most important functions of the package are
 
 -   `buildPeds()` : generates all pedigrees containing a given set of members
--   `reconstruct()` (TO APPEAR SOON): finds the most likely pedigree given the available genotype data
+-   `reconstruct()` (TO APPEAR): finds the most likely pedigree given the available genotype data
 
 Installation
 ------------
@@ -25,10 +25,10 @@ library(pedbuildr)
 #> Loading required package: pedtools
 ```
 
-Suppose we are given 3 male individuals, labelled 1, 2 and 3. How many pedigrees can we find relate them?
+Suppose we are given 3 male individuals, labeled `1`, `2` and `3`. Using the `buildPeds()` function we create a list of all pedigrees containing these individuals:
 
 ``` r
-plist = buildPeds(ids = 1:3, sex = c(1, 1, 1), verbose = F)
+plist = buildPeds(ids = 1:3, sex = c(1, 1, 1))
 length(plist)
 #> [1] 130
 ```
@@ -39,26 +39,29 @@ Quite a large number! Let's see what the first 6 pedigrees look like. The functi
 plotPeds(plist[1:6])
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="85%" style="display: block; margin: auto;" />
 
-To reduce the number of pedigrees, we can put a heavy restriction on the family structure. Suppose (e.g. after pairwise relatedness estimation) is known that individuals 1 and 2 form a parent-offspring pair, and likewise 1 and 3. In both cases, however, it is unknown which one is the parent.
+------------------------------------------------------------------------
+
+To reduce the number of pedigrees, we can put a restriction on the family structure. Suppose (e.g. after pairwise relatedness estimation) is known that individuals 1 and 2 form a parent-offspring pair, and likewise 1 and 3. In both cases, however, it is unknown which one is the parent.
 
 We convey this new piece of information by using the `knownPO` parameter:
 
 ``` r
 plist2 = buildPeds(1:3, sex = c(1, 1, 1), knownPO = list(c(1,2), c(1,3)))
-#> Undirected adjacency matrices: 2 
-#> Directed adjacency matrices: 3 
-#> After adding parents: 15 
-#> Pedigrees: 15
 length(plist2)
 #> [1] 15
 ```
 
-Here they are:
+Here are the 15 pedigrees:
 
 ``` r
 plotPeds(plist2)
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="85%" style="display: block; margin: auto;" /> Note: The dotted curves indicate identical individuals. Hence there is a lot of inbreeding/incest in the pedigrees shown above.
+
+Which pedigrees are included in the `buildPeds()` algorithm?
+------------------------------------------------------------
+
+TODO
