@@ -17,7 +17,7 @@
 #' p = buildPeds(1:3, sex = c(1,1,1), knownPO = list(c(1,2),c(1,3)))
 #'
 #' @export
-buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL, verbose = T) {
+buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL, verbose = F) {
   N = length(ids)
   stopifnot(length(sex) == N, setequal(ids, 1:N))
 
