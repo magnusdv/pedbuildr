@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 The goal of pedbuildr is to reconstruct small/medium-sized pedigrees from genotype data. The most important functions of the package are
 
 * `buildPeds()` : generates all pedigrees containing a given set of members
-* `reconstruct()` (TO APPEAR): finds the most likely pedigree given the available genotype data
+* `reconstruct()`: (TO APPEAR) finds the most likely pedigree given the available genotype data
 
 ## Installation
 The development version of pedbuildr is available from GitHub:
@@ -52,9 +52,11 @@ length(plist2)
 ```
 
 Here are the 15 pedigrees:
+
 ```{r fig.height = 6, fig.width = 8, fig.align = "center"}
 plotPeds(plist2)
 ```
+
 Note: The dotted curves indicate identical individuals. Hence there is a lot of inbreeding/incest in the pedigrees shown above.
 
 ## Which pedigrees are included in the `buildPeds()` algorithm?

@@ -6,7 +6,7 @@ pedbuildr
 The goal of pedbuildr is to reconstruct small/medium-sized pedigrees from genotype data. The most important functions of the package are
 
 -   `buildPeds()` : generates all pedigrees containing a given set of members
--   `reconstruct()` (TO APPEAR): finds the most likely pedigree given the available genotype data
+-   `reconstruct()`: (TO APPEAR) finds the most likely pedigree given the available genotype data
 
 Installation
 ------------
@@ -59,7 +59,9 @@ Here are the 15 pedigrees:
 plotPeds(plist2)
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="85%" style="display: block; margin: auto;" /> Note: The dotted curves indicate identical individuals. Hence there is a lot of inbreeding/incest in the pedigrees shown above.
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="85%" style="display: block; margin: auto;" />
+
+Note: The dotted curves indicate identical individuals. Hence there is a lot of inbreeding/incest in the pedigrees shown above.
 
 Which pedigrees are included in the `buildPeds()` algorithm?
 ------------------------------------------------------------
