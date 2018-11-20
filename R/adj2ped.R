@@ -1,0 +1,34 @@
+# Convert adjacency matrix to ped format
+adj2ped = function(adj, origSize = ncol(adj)) {
+  sex = attr(adj, 'sex')
+  N = length(sex)
+
+  fid = mid = integer(N)
+  parents = which(rowSums(adj) > 0)
+
+  # TODO: make more efficient
+  for(i in parents) {
+    kids = which(adj[i, ] == 1)
+    switch(sex[i], {fid[kids] = i}, {mid[kids] = i})
+  }
+
+  p = ped(id=1:N, fid=fid, mid=mid, sex=sex, reorder=F)
+
+  # Relabel aded indivs to p1, p2, ...
+  relabelAddedParents(p, origSize)
+}
+
+relabelAddedParents = function(x, origSize) {
+  if(is.pedList(x)) {
+    y = lapply(x, relabelAddedParents, origSize)
+    class(y) = "pedList"
+    return(y)
+  }
+
+  numlabs = as.integer(labels(x))
+  added = numlabs[numlabs > origSize]
+  if(length(added) == 0)
+    return(x)
+
+  relabel(x, old = added, new = paste0("p", added-origSize))
+}
