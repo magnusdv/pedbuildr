@@ -25,8 +25,8 @@ addMissingParents = function(a) {
   if(nMissFa > 7) stop2("More than 7 extra fathers needed: Too many possible combinations")
   if(nMissMo > 7) stop2("More than 7 extra mothers needed: Too many possible combinations")
 
-  # Singletons (needed in a later step)
-  singls = which(rowSums(a) + colSums(a) == 0)
+  # Founders (needed in a later step)
+  fou = which(colSums(a) == 0)
 
   # Compute all set partitions for the fathers and the mothers
   if(nMissFa > 0) {
@@ -63,21 +63,26 @@ addMissingParents = function(a) {
 
     sexExp = c(sex, rep(1L, newfa), rep(2L, newmo))
     res = adjMatrix(adjExp, sexExp)
-    removeSingletonParents(res, singls)
+    removeFounderParents(res, fou)
   })
 }
 
-removeSingletonParents = function(adj, singls) {
-  if(length(singls) == 0) return(adj)
+# Remove parents of original founders, unless these parents have other children
+removeFounderParents = function(adj, fou) {
+  if(length(fou) == 0)
+    return(adj)
+
   remov = integer()
-  for(id in singls) {
+  for(id in fou) {
     pars = adj[, id]
     if(!any(adj[pars, -id])) # If parents have no other children
       remov = c(remov, which(pars))
   }
+
   if(length(remov) > 0) {
     sex = attr(adj, 'sex')
     adj = newAdjMatrix(adj[-remov, -remov], sex[-remov])
   }
+
   adj
 }
