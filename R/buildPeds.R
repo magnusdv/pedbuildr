@@ -9,6 +9,7 @@
 #'   of ids - except those in `notPO` - will be treated as potential
 #'   parent-offspring pairs.
 #' @param notPO A list of pairs of ID labels: Pairs known not to be parent-offspring.
+#' @param connected A logical; if TRUE only connected pedigrees are returned. Default: FALSE.
 #' @param maxLinearInbreeding A nonnegative integer, or `Inf` (default). If this
 #'   is a finite number, it disallows mating between pedigree members X and Y if
 #'   X is a linear descendant of Y separated by more than the given number. For
@@ -33,7 +34,7 @@
 #'
 #' @export
 buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
-                     maxLinearInbreeding = Inf, verbose = F) {
+                     connected = F, maxLinearInbreeding = Inf, verbose = F) {
   N = length(ids)
   stopifnot(length(sex) == N, setequal(ids, 1:N))
 
@@ -53,6 +54,11 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
   DA_EXT = lapply(DA, addMissingParents, maxLinearInbreeding = maxLinearInbreeding)
   DA_EXT = unlist(DA_EXT, recursive = F)
   if(verbose) cat("After adding parents:", length(DA_EXT), "\n")
+
+  if(connected) {
+    DA_EXT = DA_EXT[sapply(DA_EXT, isConnected)]
+    if(verbose) cat("Connected solutions: ", length(DA_EXT), "\n")
+  }
 
   # Convert to list of pedigrees
   peds = lapply(DA_EXT, adj2ped, origSize = N)

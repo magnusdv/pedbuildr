@@ -60,6 +60,33 @@ dagDescendants = function(adj, i, minDist = 1, maxDist = Inf) {
   as.integer(desc)
 }
 
+
+isConnected = function(adj) {
+  # If size 1: connected
+  if(nrow(adj) == 1)
+    return(TRUE)
+
+  # Adj of underlying (undirected) graph
+  a = adj | t.default(adj)
+
+  # Count in+out edges for each node
+  edgs = rowSums(a)
+  if(any(edgs == 0))
+    return(FALSE)
+
+  # Start at node with few edges
+  comp = integer()
+  new = which.min(edgs)
+  while(length(new) > 0) {
+    comp = unique.default(c(comp, new))
+    neigh = which(a[new, , drop = F], arr.ind = T)[, 2]
+    new = setdiff(neigh, comp)
+  }
+
+  # Connected iff all are included
+  length(comp) == nrow(adj)
+}
+
 rmat = function(N = 5) {
   m = matrix(0, ncol=N, nrow=N)
   for(i in which(sample(c(T, F), N, replace = T)))

@@ -5,7 +5,7 @@
 \title{Build all possible pedigrees}
 \usage{
 buildPeds(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
-  maxLinearInbreeding = Inf, verbose = F)
+  connected = F, maxLinearInbreeding = Inf, verbose = F)
 }
 \arguments{
 \item{ids}{A vector of ID labels}
@@ -21,6 +21,8 @@ of ids - except those in \code{notPO} - will be treated as potential
 parent-offspring pairs.}
 
 \item{notPO}{A list of pairs of ID labels: Pairs known not to be parent-offspring.}
+
+\item{connected}{A logical; if TRUE only connected pedigrees are returned. Default: FALSE.}
 
 \item{maxLinearInbreeding}{A nonnegative integer, or \code{Inf} (default). If this
 is a finite number, it disallows mating between pedigree members X and Y if
