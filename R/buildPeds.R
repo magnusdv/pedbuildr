@@ -9,15 +9,31 @@
 #'   of ids - except those in `notPO` - will be treated as potential
 #'   parent-offspring pairs.
 #' @param notPO A list of pairs of ID labels: Pairs known not to be parent-offspring.
+#' @param maxLinearInbreeding A nonnegative integer, or `Inf` (default). If this
+#'   is a finite number, it disallows mating between pedigree members X and Y if
+#'   X is a linear descendant of Y separated by more than the given number. For
+#'   example, setting `maxLinearInbreeding = 0` forbids mating between
+#'   parent-child, grandparent-grandchild, a.s.o. If `maxLinearInbreeding = 1`
+#'   then parent-child matings are allowed, but not grandparent-grandchild or
+#'   higher.
 #' @param verbose A logical
 #'
 #' @return A list
 #'
 #' @examples
-#' p = buildPeds(1:3, sex = c(1,1,1), knownPO = list(c(1,2),c(1,3)))
+#' p = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)))
+#' stopifnot(length(p) == 26)
+#' # plotPeds(p)
+#'
+#' # Remove pedigrees with linear inbreeding (e.g. parent-child)
+#' p2 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
+#'               maxLinearInbreeding = 0)
+#' stopifnot(length(p2) == 8)
+#' # plotPeds
 #'
 #' @export
-buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL, verbose = F) {
+buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
+                     maxLinearInbreeding = Inf, verbose = F) {
   N = length(ids)
   stopifnot(length(sex) == N, setequal(ids, 1:N))
 
@@ -34,7 +50,7 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL, verbo
   if(verbose) cat("Directed adjacency matrices:", length(DA), "\n")
 
   # Extend each matrix by adding parents in all possible ways
-  DA_EXT = lapply(DA, addMissingParents)
+  DA_EXT = lapply(DA, addMissingParents, maxLinearInbreeding = maxLinearInbreeding)
   DA_EXT = unlist(DA_EXT, recursive = F)
   if(verbose) cat("After adding parents:", length(DA_EXT), "\n")
 

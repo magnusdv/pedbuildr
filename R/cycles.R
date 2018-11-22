@@ -38,6 +38,28 @@ pedmatrixAncestors = function(m, i) {
   #sort.default(unique.default(anc))
 }
 
+# All descendants of a node (or set of nodes) in a DAG
+dagDescendants = function(adj, i, minDist = 1, maxDist = Inf) {
+  desc = if(minDist == 0) i else integer(0)
+
+  current = i # current set of individuals
+  dist = 0 # generation number
+
+  while(dist < maxDist && length(current) > 0) {
+    dist = dist + 1
+
+    # Next generation: All offspring of current
+    current = which(adj[current, , drop = F], arr.ind = T)[, 2]
+
+    # Add to storage if appropriate
+    if(dist >= minDist)
+      desc = c(desc, current)
+  }
+
+  # Return
+  as.integer(desc)
+}
+
 rmat = function(N = 5) {
   m = matrix(0, ncol=N, nrow=N)
   for(i in which(sample(c(T, F), N, replace = T)))
@@ -45,3 +67,5 @@ rmat = function(N = 5) {
   diag(m) = 0
   m
 }
+
+

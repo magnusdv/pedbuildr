@@ -5,7 +5,7 @@
 \title{Build all possible pedigrees}
 \usage{
 buildPeds(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
-  verbose = F)
+  maxLinearInbreeding = Inf, verbose = F)
 }
 \arguments{
 \item{ids}{A vector of ID labels}
@@ -22,6 +22,14 @@ parent-offspring pairs.}
 
 \item{notPO}{A list of pairs of ID labels: Pairs known not to be parent-offspring.}
 
+\item{maxLinearInbreeding}{A nonnegative integer, or \code{Inf} (default). If this
+is a finite number, it disallows mating between pedigree members X and Y if
+X is a linear descendant of Y separated by more than the given number. For
+example, setting \code{maxLinearInbreeding = 0} forbids mating between
+parent-child, grandparent-grandchild, a.s.o. If \code{maxLinearInbreeding = 1}
+then parent-child matings are allowed, but not grandparent-grandchild or
+higher.}
+
 \item{verbose}{A logical}
 }
 \value{
@@ -31,6 +39,14 @@ A list
 Build all possible pedigrees
 }
 \examples{
-p = buildPeds(1:3, sex = c(1,1,1), knownPO = list(c(1,2),c(1,3)))
+p = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)))
+stopifnot(length(p) == 26)
+# plotPeds(p)
+
+# Remove pedigrees with linear inbreeding (e.g. parent-child)
+p2 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
+              maxLinearInbreeding = 0)
+stopifnot(length(p2) == 8)
+# plotPeds
 
 }
