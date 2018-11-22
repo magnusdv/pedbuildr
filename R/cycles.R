@@ -5,31 +5,17 @@ hasCycle = function(m, maxlen = NA) {
   if(any(diag(m) == 1))
     return(TRUE)
 
-  if(is.na(maxlen))
-    maxlen = sum(m)
+  if(is.na(maxlen)) {
+    rowRank = sum(rowSums(m) > 0)
+    colRank = sum(colSums(m) > 0)
+    maxlen = min(rowRank, colRank)
+  }
 
   mpow = m
   for(i in 1:maxlen) {
     mpow = mpow %*% m
     if(any(diag(mpow) == 1))
       return(TRUE)
-  }
-
-  FALSE
-}
-
-hasCycle2 = function(m) {
-  if(all(m == 0))
-    return(FALSE)
-  if(any(diag(m) == 1))
-    return(TRUE)
-
-  for(i in 1:ncol(m)) {
-    anci = pedmatrixAncestors(m, i)
-    if(i %in% anci) {
-      #message(i, " is own anc")
-      return(TRUE)
-    }
   }
 
   FALSE
