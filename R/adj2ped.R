@@ -32,3 +32,15 @@ relabelAddedParents = function(x, origSize) {
 
   relabel(x, old = added, new = paste0("p", added-origSize))
 }
+
+
+# Convert pedigree to adjacency matrix
+ped2adj = function(ped) {
+  adj = matrix(0L, ncol = pedsize(ped), nrow = pedsize(ped),
+               dimnames = list(labels(ped), labels(ped)))
+
+  for(nf in nonfounders(ped))
+    adj[parents(ped, nf), nf] = 1L
+
+  adjMatrix(adj, sex = getSex(ped))
+}
