@@ -1,10 +1,15 @@
 #' @importFrom graphics par plot text title
 #' @export
-plotPeds = function(pedlist,  titles = NULL,
-                    nrow = floor(sqrt(length(pedlist))),
-                    ncol = ceiling(length(pedlist)/nrow), ...) {
+plotPeds = function(pedlist,  titles = NULL, nrow = NA, ...) {
 
-  op = par(mfrow = c(nrow, ncol)); on.exit(par(op))
+  L = length(pedlist)
+  if(is.na(nrow))
+    nrow = if(L<6) 1 else floor(sqrt(L))
+  ncol = ceiling(length(pedlist)/nrow)
+
+  op = par(mfrow = c(nrow, ncol))
+  on.exit(par(op))
+
   for(i in seq_along(pedlist)) {
     ped = pedlist[[i]]
 
