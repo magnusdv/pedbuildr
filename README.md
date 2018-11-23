@@ -133,7 +133,9 @@ The aim of this section is to show how to perform pedigree reconstruction. We st
 Example
 -------
 
-Suppose the true relationship between individuals `1`, `2` and `3` is as follows: <img src="man/figures/README-unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+Suppose the true relationship between individuals `1`, `2` and `3` is as follows:
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
 
 To generate some data, we create the true pedigree and simulate 10 markers (each with 4 alleles). The simulation is done with `markerSim()` from the `forrel` package.
 

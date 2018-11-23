@@ -112,6 +112,7 @@ The aim of this section is to show how to perform pedigree reconstruction. We st
 
 ## Example
 Suppose the true relationship between individuals `1`, `2` and `3` is as follows:
+
 ```{r echo = F, fig.height = 2.8, fig.width = 3}
 y = nuclearPed(fa = "fa", mother = "mo", children = 1:2)
 y = addDaughter(y, parent = 2, id = 3, verbose = F)
