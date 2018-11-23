@@ -35,4 +35,20 @@ plotPeds = function(pedlist,  titles = NULL, nrow = NA, ...) {
   }
 }
 
+#' @export
+plotBestPeds = function(x, top = 6) {
+  stopifnot(is.numeric(top), length(top) == 1, top > 0,
+            is.list(x), setequal(names(x), c("pedlist", "logliks")))
 
+  # Sort
+  ord = order(x$logliks, decreasing = T)
+  logliks = x$logliks[ord]
+  pedlist = x$pedlist[ord]
+
+  if(top > length(pedlist))
+    top = length(pedlist)
+
+  titles = paste("Loglik =", round(logliks, 2))
+
+  plotPeds(pedlist[1:top], titles = titles[1:top])
+}
