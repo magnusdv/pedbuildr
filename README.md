@@ -6,7 +6,7 @@ pedbuildr
 The goal of pedbuildr is to reconstruct small/medium-sized pedigrees from genotype data. The most important functions of the package are
 
 -   `buildPeds()` : generates all pedigrees containing a given set of members
--   `reconstruct()`: (SOON) finds the most likely pedigree given the available genotype data
+-   `reconstruct()`: finds the most likely pedigree given the available genotype data
 
 Installation
 ------------
@@ -17,13 +17,15 @@ The development version of pedbuildr is available from GitHub:
 remotes::install_github("magnusdv/pedbuildr")
 ```
 
-Building pedigree lists: A first example
-----------------------------------------
+Load the package into R as follows:
 
 ``` r
 library(pedbuildr)
 #> Loading required package: pedtools
 ```
+
+Building pedigree lists
+=======================
 
 Suppose we want to find all pedigrees linking 3 individuals: two males and one female, labeled `1`, `2` and `3` respectively. Without any restrictions `buildPeds()` identifies 142 such pedigrees:
 
@@ -122,3 +124,64 @@ Which pedigrees are included in the `buildPeds()` algorithm?
 ------------------------------------------------------------
 
 TODO
+
+Pedigree reconstruction
+=======================
+
+The aim of this section is to show how to perform pedigree reconstruction. We start with some "true" pedigree and simulate some marker data for it. We then forget the pedigree structure, and then see if we are able to reconstruct it from the marker data.
+
+Example
+-------
+
+Suppose the true relationship between individuals `1`, `2` and `3` is as follows: <img src="man/figures/README-unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+
+To generate some data, we create the true pedigree and simulate 10 markers (each with 4 alleles). The simulation is done with `markerSim()` from the `forrel` package.
+
+``` r
+x = nuclearPed(fa = "fa", mother = "mo", children = 1:2)
+x = addDaughter(x, parent = 2, id = 3)
+#> Mother: Creating new individual with ID = NN_1
+# plot(x)
+
+# Simulate
+x = forrel::markerSim(x, N = 10, ids = 1:3, alleles = 1:4, verbose = F, seed = 123)
+x
+#>    id fid  mid sex <1> <2> <3> <4> <5>
+#>    fa   *    *   1 -/- -/- -/- -/- -/-
+#>    mo   *    *   2 -/- -/- -/- -/- -/-
+#>     1  fa   mo   1 1/1 4/1 4/2 3/1 4/4
+#>     2  fa   mo   1 3/1 3/1 4/4 4/4 4/4
+#>  NN_1   *    *   2 -/- -/- -/- -/- -/-
+#>     3   2 NN_1   2 1/2 3/4 4/2 4/1 4/2
+#> Only 5 (out of 10) markers are shown. See `?print.ped` for options.
+```
+
+We extract the allele matrix and the locus attributes of the 10 markers.
+
+``` r
+genodata = getAlleles(x, ids = 1:3)
+loci = lapply(x$markerdata, attributes)
+```
+
+Now let us try to reconstruct the pedigree from the data. The main input to the `reconstruct()` function is the `alleleMatrix` and the `loci` parameters. By default the function will then call our friend `buildPeds()` from the previous section to generate a list of candidate pedigrees. (The number of target individuals is determined by the number of rows in `alleleMatrix`.) In this example we won't impose any restrictions on the pedigree space, so we simply indicate the genders.
+
+``` r
+result = reconstruct(alleleMatrix = genodata, loci = loci, sex = c(1, 1, 2))
+#> Building pedigree list
+#> Undirected adjacency matrices: 8 
+#> Directed adjacency matrices: 22 
+#> After adding parents: 142 
+#> Pedigrees: 142 
+#> 
+#> Computing likelihoods of 142 pedigrees...done!
+```
+
+The function `plotBestPeds()` show the pedigrees with the highest likelihood:
+
+``` r
+plotBestPeds(result, top = 6)
+```
+
+<img src="man/figures/README-unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
+
+Lo and behold - the correct pedigree was the most likely one!
