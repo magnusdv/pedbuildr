@@ -12,7 +12,7 @@ adj2ped = function(adj, origSize = ncol(adj)) {
     switch(sex[i], {fid[kids] = i}, {mid[kids] = i})
   }
 
-  p = ped(id=1:N, fid=fid, mid=mid, sex=sex, reorder=F)
+  p = ped(id = 1:N, fid = fid, mid = mid, sex = sex, reorder = F, validate = F)
 
   # Relabel aded indivs to p1, p2, ...
   relabelAddedParents(p, origSize)
