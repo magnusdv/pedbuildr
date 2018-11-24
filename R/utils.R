@@ -12,8 +12,10 @@ indent = function(depth) {
   strrep(" ", 2 * (depth - 1))
 }
 
+.mysetdiff = function(x, y)
+  unique.default(x[match(x, y, 0L) == 0L])
+
 #' @importFrom partitions setparts
-#' @export
 setPartitions = function(n) {
   m = setparts(n)
   lapply(1:ncol(m), function(i) m[, i])
@@ -23,7 +25,7 @@ setPartitions = function(n) {
 # Utility: Compute total loglikelihood
 loglikTotal = function(x) {
   if(is.pedList(x)) {
-    nm = sapply(x, nMarkers)
+    nm = vapply(x, nMarkers, 0L)
     stopifnot(all(nm == nm[1]))
     nMark = nm[1]
   }

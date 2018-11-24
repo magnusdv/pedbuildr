@@ -80,7 +80,7 @@ isConnected = function(adj) {
   while(length(new) > 0) {
     comp = c(comp, new)
     neigh = which(a[new, , drop = F], arr.ind = T)[, 2]
-    new = setdiff(neigh, comp)
+    new = .mysetdiff(neigh, comp)
   }
 
   # Connected iff all are included

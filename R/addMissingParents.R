@@ -79,7 +79,7 @@ addMissingParents = function(a, maxLinearInbreeding = Inf, partitions = NULL) {
     removeFounderParents(res, fou)
   })
 
-  res[!sapply(res, is.null)]
+  res[!unlist(lapply(res, is.null))]
 }
 
 linearInbreeding = function(adj, descList = NULL, dist = 1) {
