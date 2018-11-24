@@ -4,7 +4,7 @@
 \alias{adjMatrix}
 \title{Pedigree adjacency matrix}
 \usage{
-adjMatrix(adj, sex)
+adjMatrix(adj, sex, validate = TRUE)
 }
 \arguments{
 \item{adj}{A square matrix, converted internally to be of "logical" type. If
@@ -14,6 +14,9 @@ returned.}
 
 \item{sex}{A gender vector, i.e. a vector where all elements are 1 (male) or
 2 (female).}
+
+\item{validate}{A logical indicating if the validity of the created object
+should be checked.}
 }
 \value{
 An object of class \code{adjMatrix}. This is a square logical matrix, with

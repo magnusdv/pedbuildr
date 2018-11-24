@@ -20,6 +20,8 @@
 #'   returned.
 #' @param sex A gender vector, i.e. a vector where all elements are 1 (male) or
 #'   2 (female).
+#' @param validate A logical indicating if the validity of the created object
+#'   should be checked.
 #'
 #' @return An object of class `adjMatrix`. This is a square logical matrix, with
 #'   an attribute `sex` which is an integer vector of gender codes (1 = male; 2
@@ -34,7 +36,7 @@
 #' adjMatrix(sex = c(1,1,1))
 #'
 #' @export
-adjMatrix = function(adj, sex) {
+adjMatrix = function(adj, sex, validate = TRUE) {
   sex = as.integer(sex)
 
   if(missing(adj))
@@ -49,7 +51,9 @@ adjMatrix = function(adj, sex) {
   mode(adj) = "logical"
 
   obj = newAdjMatrix(adj, sex)
-  validateAdjMatrix(obj)
+  if(validate)
+    obj = validateAdjMatrix(obj)
+  obj
 }
 
 
@@ -59,7 +63,9 @@ newAdjMatrix = function(adj, sex) {
             nrow(adj) == ncol(adj), nrow(adj) == length(sex))))
     stop2("Wrong input to adjMatrix constructor")
 
-  structure(adj, sex = sex, class = "adjMatrix")
+  attr(adj, "sex") = sex
+  class(adj) = "adjMatrix"
+  adj
 }
 
 
