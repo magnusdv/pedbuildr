@@ -25,12 +25,12 @@ relabelAddedParents = function(x, origSize) {
     return(y)
   }
 
-  numlabs = as.integer(labels(x))
-  added = numlabs[numlabs > origSize]
-  if(length(added) == 0)
-    return(x)
+  added = as.numeric(x$ID) > origSize
+  if(any(added)) {
+    x$ID[added] = paste0("p", seq_len(sum(added)))
+  }
 
-  relabel(x, old = added, new = paste0("p", added-origSize))
+  x
 }
 
 
