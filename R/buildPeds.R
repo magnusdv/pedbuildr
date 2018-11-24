@@ -50,11 +50,16 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
   DA = unlist(DA, recursive = F)
   if(verbose) cat("Directed adjacency matrices:", length(DA), "\n")
 
+  # Pre-compute list of partitions used inside addMissingParents
+  partitions = lapply(seq_along(ids), setPartitions)
+
   # Extend each matrix by adding parents in all possible ways
-  DA_EXT = lapply(DA, addMissingParents, maxLinearInbreeding = maxLinearInbreeding)
+  DA_EXT = lapply(DA, addMissingParents, maxLinearInbreeding = maxLinearInbreeding,
+                  partitions = partitions)
   DA_EXT = unlist(DA_EXT, recursive = F)
   if(verbose) cat("After adding parents:", length(DA_EXT), "\n")
 
+  # If `connected = TRUE`, remove disconnected matrices
   if(connected) {
     DA_EXT = DA_EXT[sapply(DA_EXT, isConnected)]
     if(verbose) cat("Connected solutions: ", length(DA_EXT), "\n")

@@ -12,6 +12,13 @@ indent = function(depth) {
   strrep(" ", 2 * (depth - 1))
 }
 
+#' @importFrom partitions setparts
+#' @export
+setPartitions = function(n) {
+  m = setparts(n)
+  lapply(1:ncol(m), function(i) m[, i])
+}
+
 
 # Utility: Compute total loglikelihood
 loglikTotal = function(x) {

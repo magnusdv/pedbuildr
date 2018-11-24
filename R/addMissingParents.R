@@ -20,7 +20,7 @@
 #'
 #' @importFrom partitions setparts
 #' @export
-addMissingParents = function(a, maxLinearInbreeding = Inf) {
+addMissingParents = function(a, maxLinearInbreeding = Inf, partitions = NULL) {
   sex = attr(a, "sex")
 
   missingFa = which(colSums(a[sex == 1, , drop = F]) == 0)
@@ -41,18 +41,14 @@ addMissingParents = function(a, maxLinearInbreeding = Inf) {
     descList = lapply(1:ncol(a), function(id)
       dagDescendants(a, id, minDist = maxLinearInbreeding + 1))
 
-  # Compute all set partitions for the fathers and the mothers
-  if(nMissFa > 0) {
-    pFa_matr = partitions::setparts(nMissFa)
-    pFa = lapply(seq_len(ncol(pFa_matr)), function(i) pFa_matr[, i])
-  }
+  # All set partitions for the fathers and the mothers
+  if(nMissFa > 0)
+    pFa = if(is.null(partitions)) setPartitions(nMissFa) else partitions[[nMissFa]]
   else
     pFa = list(matrix(0L, ncol=1, nrow=1))
 
-  if(nMissMo > 0) {
-    pMo_matr = partitions::setparts(nMissMo)
-    pMo = lapply(seq_len(ncol(pMo_matr)), function(i) pMo_matr[, i])
-  }
+  if(nMissMo > 0)
+    pMo = if(is.null(partitions)) setPartitions(nMissMo) else partitions[[nMissMo]]
   else
     pMo = list(matrix(0L, ncol=1, nrow=1))
 
@@ -79,7 +75,7 @@ addMissingParents = function(a, maxLinearInbreeding = Inf) {
       return(NULL)
 
     sexExp = c(sex, rep(1L, newfa), rep(2L, newmo))
-    res = adjMatrix(adjExp, sexExp)
+    res = adjMatrix(adjExp, sexExp, validate = F)
     removeFounderParents(res, fou)
   })
 
