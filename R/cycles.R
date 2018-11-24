@@ -78,7 +78,7 @@ isConnected = function(adj) {
   comp = integer()
   new = which.min(edgs)
   while(length(new) > 0) {
-    comp = unique.default(c(comp, new))
+    comp = c(comp, new)
     neigh = which(a[new, , drop = F], arr.ind = T)[, 2]
     new = setdiff(neigh, comp)
   }

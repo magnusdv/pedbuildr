@@ -60,8 +60,8 @@ reconstruct = function(alleleMatrix, loci, pedlist = NULL, founderInb = 0, sortR
       founder_inbreeding(x, founders(x)) = founderInb
 
     # Compute loglikelihood
-    loglik = tryCatch(loglikTotal(x), error = function(e) {plot(x); NA})
-    loglik
+    #tryCatch(loglikTotal(x), error = function(e) {plot(x); NA})
+    loglikTotal(x)
   },
   FUN.VALUE = 0)
 

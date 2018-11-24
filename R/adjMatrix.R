@@ -55,8 +55,9 @@ adjMatrix = function(adj, sex) {
 
 # Constructor for class "adjMatrix"
 newAdjMatrix = function(adj, sex) {
-  stopifnot(is.logical(adj), is.integer(sex),
-            is.matrix(adj), nrow(adj) == ncol(adj), nrow(adj) == length(sex))
+  if(!all(c(is.logical(adj), is.integer(sex), is.matrix(adj),
+            nrow(adj) == ncol(adj), nrow(adj) == length(sex))))
+    stop2("Wrong input to adjMatrix constructor")
 
   structure(adj, sex = sex, class = "adjMatrix")
 }
