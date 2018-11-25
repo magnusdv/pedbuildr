@@ -38,6 +38,9 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
   N = length(ids)
   stopifnot(length(sex) == N, setequal(ids, 1:N))
 
+  if(allKnown && is.null(knownPO))
+    stop2("`knownPO` cannot be NULL when `allKnown = TRUE`")
+
   # List possible sets of parent-offspring
   POsets = listPOsets(knownPO = knownPO, allKnown = allKnown, notPO = notPO, N)
 
