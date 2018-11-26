@@ -36,6 +36,10 @@ relabelAddedParents = function(x, origSize) {
 
 # Convert pedigree to adjacency matrix
 ped2adj = function(ped) {
+  if(is.pedList(ped)) {
+    return(lapply(ped, ped2adj))
+  }
+
   adj = matrix(0L, ncol = pedsize(ped), nrow = pedsize(ped),
                dimnames = list(labels(ped), labels(ped)))
 
