@@ -8,7 +8,10 @@
 #'   parent-child, grandparent-grandchild, a.s.o. If `maxLinearInbreeding = 1`
 #'   then parent-child matings are allowed, but not grandparent-grandchild or
 #'   higher.
-#'
+#' @param genderSym A logical. If TRUE, pedigrees which are equal except for the
+#'   gender distribution of the *added* parents, are regarded as equivalent, and
+#'   only one of each equivalence class is returned. Example: paternal vs
+#'   maternal half sibs.
 #' @return A list of adjMatrix objects where all columns sum to either 0 or 2.
 #'
 #' @examples
@@ -20,8 +23,9 @@
 #'
 #' @importFrom partitions setparts
 #' @export
-addMissingParents = function(a, maxLinearInbreeding = Inf, partitions = NULL) {
+addMissingParents = function(a, maxLinearInbreeding = Inf, genderSym = FALSE, partitions = NULL) {
   sex = attr(a, "sex")
+  n = ncol(a)
 
   missingFa = which(colSums(a[sex == 1, , drop = F]) == 0)
   missingMo = which(colSums(a[sex == 2, , drop = F]) == 0)
@@ -35,10 +39,16 @@ addMissingParents = function(a, maxLinearInbreeding = Inf, partitions = NULL) {
   # Founders (needed in a later step)
   fou = which(colSums(a) == 0)
 
+  # Setup for gender symmetry restriction
+  if(genderSym) {
+    observedInvariants = character()
+    pows = 2^(0:(n - 1))
+  }
+
   # List of descendants
   checkInb = maxLinearInbreeding < Inf
   if(checkInb)
-    descList = lapply(1:ncol(a), function(id)
+    descList = lapply(1:n, function(id)
       dagDescendants(a, id, minDist = maxLinearInbreeding + 1))
 
   # All set partitions for the fathers and the mothers
@@ -53,31 +63,49 @@ addMissingParents = function(a, maxLinearInbreeding = Inf, partitions = NULL) {
     pMo = list(matrix(0L, ncol=1, nrow=1))
 
   # Loop over all combinations
-  res = apply(expand.grid(pFa, pMo), 1, function(r) {
-    pf = r$Var1
-    pm = r$Var2
+  res = vector(length(pFa) * length(pMo), mode = "list")
+  for(i in seq_along(pFa)) for(j in seq_along(pMo)) {
+    pf = pFa[[i]]
+    pm = pMo[[j]]
     newfa = max(pf)
     newmo = max(pm)
+    newpars = newfa + newmo
 
     # Matrix blocks to be added at the bottom of a
-    FA = matrix(0L, ncol = ncol(a), nrow = newfa)
+    FA = matrix(0L, ncol = n, nrow = newfa)
     FA[cbind(pf, missingFa)] = 1L
 
-    MO = matrix(0L, ncol = ncol(a), nrow = newmo)
+    MO = matrix(0L, ncol = n, nrow = newmo)
     MO[cbind(pm, missingMo)] = 1L
 
+    bottom = rbind(FA, MO)
+
+    # Gender restriction
+    if(genderSym && newpars > 1) {
+      inv_vec = rowSums(bottom * rep(pows, each = newpars))
+      inv = paste(sort.int(inv_vec), collapse = "-")
+      if(inv %in% observedInvariants)
+        next
+      observedInvariants = c(observedInvariants, inv)
+    }
+
     # Add blocks and create adjMatrix object
-    adjExp = rbind(a, FA, MO)
-    adjExp = cbind(adjExp, matrix(0L, ncol = newfa + newmo, nrow = nrow(adjExp)))
+    adjExp = rbind(a, bottom)
+    adjExp = cbind(adjExp, matrix(0L, ncol = newpars, nrow = nrow(adjExp)))
 
     # Check linear inbreeding
     if(checkInb && linearInbreeding(adjExp, descList))
-      return(NULL)
+      next
 
+    # Create adjMatrix object
     sexExp = c(sex, rep(1L, newfa), rep(2L, newmo))
-    res = adjMatrix(adjExp, sexExp, validate = F)
-    removeFounderParents(res, fou)
-  })
+    A = adjMatrix(adjExp, sexExp, validate = F)
+
+    # Remove superfluous added parents
+    A = removeFounderParents(A, fou)
+
+    res[[length(pMo) * (i-1) + j]] = A
+  }
 
   res[!unlist(lapply(res, is.null))]
 }

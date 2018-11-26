@@ -17,6 +17,11 @@
 #'   parent-child, grandparent-grandchild, a.s.o. If `maxLinearInbreeding = 1`
 #'   then parent-child matings are allowed, but not grandparent-grandchild or
 #'   higher.
+#' @param genderSym A logical. If TRUE, pedigrees which are equal except for the
+#'   gender distribution of the *added* parents, are regarded as equivalent, and
+#'   only one of each equivalence class is returned. Example: paternal vs
+#'   maternal half sibs.
+#'
 #' @param verbose A logical
 #'
 #' @return A list
@@ -26,15 +31,22 @@
 #' stopifnot(length(p) == 26)
 #' # plotPeds(p)
 #'
-#' # Remove pedigrees with linear inbreeding (e.g. parent-child)
+#' # Remove duplicates coming from gender swaps among added parents.
+#' # Only one such duplicate here: where 1 and 2 are paternal/maternal half sibs
 #' p2 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
+#'               genderSym = TRUE)
+#' stopifnot(length(p2) == 25)
+#' # plotPeds(p2)
+#'
+#' # Remove pedigrees with linear inbreeding (e.g. parent-child)
+#' p3 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
 #'               maxLinearInbreeding = 0)
-#' stopifnot(length(p2) == 8)
-#' # plotPeds
+#' stopifnot(length(p3) == 8)
+#' # plotPeds(p3)
 #'
 #' @export
 buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
-                     connected = F, maxLinearInbreeding = Inf, verbose = F) {
+                     connected = F, maxLinearInbreeding = Inf, genderSym = F, verbose = F) {
   N = length(ids)
   stopifnot(length(sex) == N, setequal(ids, 1:N))
 
@@ -58,7 +70,7 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
 
   # Extend each matrix by adding parents in all possible ways
   DA_EXT = lapply(DA, addMissingParents, maxLinearInbreeding = maxLinearInbreeding,
-                  partitions = partitions)
+                  genderSym = genderSym, partitions = partitions)
   DA_EXT = unlist(DA_EXT, recursive = F)
   if(verbose) cat("After adding parents:", length(DA_EXT), "\n")
 
