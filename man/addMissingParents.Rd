@@ -4,8 +4,7 @@
 \alias{addMissingParents}
 \title{Add missing parents to a pedigree adjacency matrix}
 \usage{
-addMissingParents(a, maxLinearInbreeding = Inf, genderSym = FALSE,
-  partitions = NULL)
+addMissingParents(a, maxLinearInbreeding = Inf, genderSym = FALSE)
 }
 \arguments{
 \item{a}{An adjMatrix object}

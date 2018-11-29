@@ -1,3 +1,4 @@
+^data-raw$
 ^README\.Rmd$
 ^pedbuildr\.Rproj$
 ^\.Rproj\.user$

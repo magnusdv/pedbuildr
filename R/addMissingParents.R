@@ -21,9 +21,8 @@
 #' b = adjMatrix(rbind(rep(1,4), 0,0,0), sex=c(1,1,1,1))
 #' addMissingParents(b)
 #'
-#' @importFrom partitions setparts
 #' @export
-addMissingParents = function(a, maxLinearInbreeding = Inf, genderSym = FALSE, partitions = NULL) {
+addMissingParents = function(a, maxLinearInbreeding = Inf, genderSym = FALSE) {
   sex = attr(a, "sex")
   n = ncol(a)
 
@@ -53,12 +52,12 @@ addMissingParents = function(a, maxLinearInbreeding = Inf, genderSym = FALSE, pa
 
   # All set partitions for the fathers and the mothers
   if(nMissFa > 0)
-    pFa = if(is.null(partitions)) setPartitions(nMissFa) else partitions[[nMissFa]]
+    pFa = partitions[[nMissFa]]
   else
     pFa = list(matrix(0L, ncol=1, nrow=1))
 
   if(nMissMo > 0)
-    pMo = if(is.null(partitions)) setPartitions(nMissMo) else partitions[[nMissMo]]
+    pMo = partitions[[nMissMo]]
   else
     pMo = list(matrix(0L, ncol=1, nrow=1))
 
