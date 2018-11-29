@@ -37,6 +37,7 @@
 #'
 #' }
 #'
+#' @importFrom utils setTxtProgressBar txtProgressBar
 #' @export
 reconstruct = function(alleleMatrix, loci, pedlist = NULL, founderInb = 0, sortResults = T, verbose = T, ...) {
   rownms = rownames(alleleMatrix)
@@ -48,12 +49,24 @@ reconstruct = function(alleleMatrix, loci, pedlist = NULL, founderInb = 0, sortR
     if(verbose) cat("Building pedigree list\n")
     pedlist = buildPeds(1:nrow(alleleMatrix), verbose = verbose, ...)
   }
-  else {
-    if(verbose) cat("Pedigree list:", length(pedlist), "pedigrees\n")
+
+  npeds = length(pedlist)
+  if(npeds == 0)
+    return(NULL)
+
+  if(verbose) {
+    cat("\nComputing likelihoods of", npeds, "pedigrees\n")
+    pb = txtProgressBar(min = 0, max = npeds, style = 3) # Progress bar
+
   }
 
-  if(verbose) cat("\nComputing likelihoods of", length(pedlist), "pedigrees...")
-  logliks = vapply(pedlist, function(ped) {
+  # Compute likelihoods
+  logliks = vapply(seq_len(npeds), function(i) {
+
+    # Update progressbar
+    if(verbose) setTxtProgressBar(pb, i)
+
+    ped = pedlist[[i]]
 
     # Attach marker data
     if(is.ped(ped)) {
@@ -74,7 +87,9 @@ reconstruct = function(alleleMatrix, loci, pedlist = NULL, founderInb = 0, sortR
   },
   FUN.VALUE = 0)
 
-  if(verbose) cat("done!\n")
+  if(verbose) {
+    close(pb) # Close progress bar
+  }
 
   if(sortResults) {
     ord = order(logliks, decreasing = T)
