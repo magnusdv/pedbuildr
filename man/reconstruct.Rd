@@ -36,11 +36,21 @@ A list with two entries:
 Reconstruct the most likely pedigree from genotype data
 }
 \examples{
-x = forrel::markerSim(nuclearPed(1), N = 10, alleles = 1:3)
+\dontrun{ # Requires the `forrel` package
+
+# Simulate genotype data for a trio family (increase N!)
+x = forrel::markerSim(nuclearPed(1), N = 5, alleles = 1:3, seed = 123)
+
+# Extract allele matrix and locus attributes (frequencies a.s.o.)
 m = getAlleles(x)
 loci = lapply(x$markerdata, attributes)
 
-res = reconstruct(m, loci, sex = c(1, 2, 1), connected = TRUE)
+# Reconstruct the most likely pedigree from the data
+res = reconstruct(m, loci, sex = c(1, 2, 1), connected = TRUE, genderSym = T)
 
+# Plot the best pedigrees
+plotBestPeds(res)
+
+}
 
 }

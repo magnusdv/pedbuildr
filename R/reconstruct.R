@@ -19,14 +19,23 @@
 #'
 #'  * `logliks` : A numerical vector containing the pedigree log-likelihoods
 #'
-#'
 #' @examples
-#' x = forrel::markerSim(nuclearPed(1), N = 10, alleles = 1:3)
+#' \dontrun{ # Requires the `forrel` package
+#'
+#' # Simulate genotype data for a trio family (increase N!)
+#' x = forrel::markerSim(nuclearPed(1), N = 5, alleles = 1:3, seed = 123)
+#'
+#' # Extract allele matrix and locus attributes (frequencies a.s.o.)
 #' m = getAlleles(x)
 #' loci = lapply(x$markerdata, attributes)
 #'
-#' res = reconstruct(m, loci, sex = c(1, 2, 1), connected = TRUE)
+#' # Reconstruct the most likely pedigree from the data
+#' res = reconstruct(m, loci, sex = c(1, 2, 1), connected = TRUE, genderSym = T)
 #'
+#' # Plot the best pedigrees
+#' plotBestPeds(res)
+#'
+#' }
 #'
 #' @export
 reconstruct = function(alleleMatrix, loci, pedlist = NULL, founderInb = 0, sortResults = T, verbose = T, ...) {
