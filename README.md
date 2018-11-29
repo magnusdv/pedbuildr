@@ -85,8 +85,7 @@ Known parent-child pairs are conveyed to `buildPeds()` using the `knownPO` param
 
 ``` r
 plist4 = buildPeds(ids = 1:3, sex = c(1, 1, 2), connected = TRUE, 
-                   maxLinearInbreeding = 0,
-                   knownPO = list(2:3))
+                   maxLinearInbreeding = 0, knownPO = list(2:3))
 length(plist4)
 #> [1] 22
 ```
@@ -101,24 +100,43 @@ plotPeds(plist4[c(2, 3, 11, 15, 22)])
 
 #### Further restrictions on parent-child pairs
 
-We may also know that certain pairs are *not* parent-child; this can be imposed by using the `notPO` parameter. Alternatively, we can include `allKnown = TRUE`, meaning that `knownPO` should be taken as the complete list of parent-child pairs among the input individuals.
+We may also know that certain pairs are *not* parent-child; this can be imposed by using the `notPO` parameter. Another option is to set `allKnown = TRUE`, meaning that `knownPO` should be taken as the complete list of parent-child pairs among the input individuals. We add this to our running example:
 
 ``` r
 plist5 = buildPeds(ids = 1:3, sex = c(1, 1, 2), connected = TRUE, 
-                   maxLinearInbreeding = 0,
-                   knownPO = list(2:3), 
+                   maxLinearInbreeding = 0, knownPO = list(2:3), 
                    allKnown = TRUE)
 length(plist5)
 #> [1] 10
 ```
 
-Here are the final solutions:
+Here are the 10 remaining pedigrees:
 
 ``` r
 plotPeds(plist5)
 ```
 
 <img src="man/figures/README-unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+
+#### Gender symmetries
+
+In the previous plot there are two pairs of pedigrees (3 and 5, and 7 and 10) which are identical except for the distribution of genders among the added parents. To avoid such redundancy, we add `genderSym = TRUE` to the call:
+
+``` r
+plist6 = buildPeds(ids = 1:3, sex = c(1, 1, 2), connected = TRUE, 
+                   maxLinearInbreeding = 0, knownPO = list(2:3), 
+                   allKnown = TRUE, genderSym = TRUE)
+length(plist6)
+#> [1] 8
+```
+
+Here are the final solutions:
+
+``` r
+plotPeds(plist6)
+```
+
+<img src="man/figures/README-unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
 
 Which pedigrees are included in the `buildPeds()` algorithm?
 ------------------------------------------------------------
@@ -135,7 +153,7 @@ Example
 
 Suppose the true relationship between individuals `1`, `2` and `3` is as follows:
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-13-1.png" style="display: block; margin: auto;" />
 
 To generate some data, we create the true pedigree and simulate 10 markers (each with 4 alleles). The simulation is done with `markerSim()` from the `forrel` package.
 
@@ -184,6 +202,6 @@ The function `plotBestPeds()` show the pedigrees with the highest likelihood:
 plotBestPeds(result, top = 6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-17-1.png" style="display: block; margin: auto;" />
 
 Lo and behold - the correct pedigree was the most likely one!
