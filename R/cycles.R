@@ -11,10 +11,13 @@ hasCycle = function(m, maxlen = NA) {
     maxlen = min(rowRank, colRank)
   }
 
+  if(maxlen < 2)
+    return(FALSE)
+
   mpow = m
-  for(i in 1:maxlen) {
+  for(i in 2:maxlen) {
     mpow = mpow %*% m
-    if(any(diag(mpow) == 1))
+    if(any(diag(mpow) > 0))
       return(TRUE)
   }
 
