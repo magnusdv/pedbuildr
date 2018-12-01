@@ -48,7 +48,10 @@
 buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
                      connected = F, maxLinearInbreeding = Inf, genderSym = F, verbose = F) {
   N = length(ids)
-  stopifnot(length(sex) == N, setequal(ids, 1:N))
+  if(!setequal(ids, 1:N))
+    stop2("`ids` must be an integer vector of the form `1:N`")
+  if(length(sex) != N)
+    stop2("`ids` and `sex` must have the same length")
 
   if(allKnown && is.null(knownPO))
     stop2("`knownPO` cannot be NULL when `allKnown = TRUE`")
@@ -164,7 +167,7 @@ addEdge = function(adj, id, father, mother, remaining, storage, verbose = T, dep
   # id is not parent of f,m
   remaining[id, c(father, mother)] =  F
 
-  # remaining adjacent are kids of id
+  # remaining adjacent are kids of id   # TODO: avoid `which()` here
   kids = which(remaining[id, ])
   if(verbose)
     cat("kids =", toString(kids), "\n")
@@ -197,7 +200,7 @@ addEdge = function(adj, id, father, mother, remaining, storage, verbose = T, dep
     return()
   }
 
-  # Remaining edges? If so - continue
+  # Remaining edges? If so - continue # TODO: avoid `which()`
   id = which.max(colSums(remaining))
   PF = which(remaining[, id] & SEX == 1)
   PM = which(remaining[, id] & SEX == 2)
