@@ -4,6 +4,19 @@ stop2 = function(...) {
   do.call(stop, a)
 }
 
+stopifnot2 = function(...) {
+  exprs = list(...)
+
+  for (i in seq_along(exprs)) {
+    expri = .subset2(exprs, i)
+    if (length(expri) != 1L || is.na(expri) || !expri) {
+      full_call = match.call()
+      call = deparse(full_call[[i + 1]])
+      stop(sQuote(call), " is not TRUE", call. = FALSE, domain = NA)
+    }
+  }
+}
+
 as_int = function(m) {
   structure(as.integer(m), dim = dim(m))
 }

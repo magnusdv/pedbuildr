@@ -37,7 +37,7 @@ plotPeds = function(pedlist,  titles = NULL, nrow = NA, ...) {
 
 #' @export
 plotBestPeds = function(x, top = 6) {
-  stopifnot(is.numeric(top), length(top) == 1, top > 0,
+  stopifnot2(is.numeric(top), length(top) == 1, top > 0,
             is.list(x), setequal(names(x), c("pedlist", "logliks")))
 
   # Sort
