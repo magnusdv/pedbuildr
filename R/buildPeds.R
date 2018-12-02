@@ -52,9 +52,25 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
     stop2("`ids` must be an integer vector of the form `1:N`")
   if(length(sex) != N)
     stop2("`ids` and `sex` must have the same length")
+  if(!identical(ids, 1:N)) {
+    ids = ids[order(ids)]
+    sex = sex[order(ids)]
+  }
 
   if(allKnown && is.null(knownPO))
     stop2("`knownPO` cannot be NULL when `allKnown = TRUE`")
+
+  if(verbose) {
+    cat("-----------\n")
+    cat("Building pedigrees relating the following individuals:\n")
+    print(data.frame(ids, sex), row.names = F)
+    cat("\nPedigree parameters:\n")
+    cat(" Known PO:", vapply(knownPO, paste, sep="-", collapse=", ", FUN.VALUE=""), "\n")
+    cat(" Known non-PO:", vapply(notPO, paste, sep="-", collapse=", ", FUN.VALUE=""), "\n")
+    cat(" Connected pedigrees only:", connected, "\n")
+    cat(" Symmetry reduction:", genderSym, "\n")
+    cat("-----------\n")
+  }
 
   # List possible sets of parent-offspring
   POsets = listPOsets(knownPO = knownPO, allKnown = allKnown, notPO = notPO, N)
