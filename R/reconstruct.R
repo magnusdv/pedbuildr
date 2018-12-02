@@ -40,14 +40,23 @@
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @export
 reconstruct = function(alleleMatrix, loci, pedlist = NULL, founderInb = 0, sortResults = T, verbose = T, ...) {
-  rownms = rownames(alleleMatrix)
-  if(!is.null(rownms) && !all.equal(rownms, as.character(seq_along(rownms))))
-    stop2("Pedigree labels other than 1,2, ... are not supported yet.\n",
-          "(Hence rownames of `alleleMatrix` must be 1,2, ... or NULL.)")
+  ids = rownames(alleleMatrix)
+  if(is.null(ids))
+    ids = idsnum = 1:nrow(alleleMatrix)
+  else {
+    idsnum = suppressWarnings(as.integer(ids))
+    if(anyNA(idsnum))
+      stop2("Non-integer ID labels detected in `alleleMatrix`: ",
+            ids[is.na(idsnum)])
+  }
+  if(verbose)
+    cat("ID labels inferred from allele matrix:", toString(ids[order(idsnum)]), "\n")
 
   if(is.null(pedlist)) {
-    if(verbose) cat("Building pedigree list\n")
-    pedlist = buildPeds(1:nrow(alleleMatrix), verbose = verbose, ...)
+    if(!identical(idsnum, 1:max(idsnum)))
+      stop2("\nFor now, only basic ID labels are supported. When `pedlist` is not supplied,\n",
+            "the rownames of `alleleMatrix` must be either NULL or 1,2,...,N")
+    pedlist = buildPeds(idsnum, verbose = verbose, ...)
   }
 
   npeds = length(pedlist)
@@ -99,9 +108,5 @@ reconstruct = function(alleleMatrix, loci, pedlist = NULL, founderInb = 0, sortR
 
   list(pedlist = pedlist, logliks = logliks)
 }
-
-# Plot top list
-#plotPeds(tutlist[top], nrow=3, cex = 1.2, margins = c(3,3,3,3),
-#         titles = sprintf("lnlik = %.2f; Fmax = %.2f", liks[top], inb[top]))
 
 
