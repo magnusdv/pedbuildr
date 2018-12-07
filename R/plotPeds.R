@@ -36,9 +36,11 @@ plotPeds = function(pedlist,  titles = NULL, nrow = NA, ...) {
 }
 
 #' @export
-plotBestPeds = function(x, top = 6) {
-  stopifnot2(is.numeric(top), length(top) == 1, top > 0,
-            is.list(x), setequal(names(x), c("pedlist", "logliks")))
+plotBestPeds = function(x, top = 6, ...) {
+  stopifnot2(is.numeric(top), length(top) == 1, top > 0)
+  if(!isTRUE(all(c("pedlist", "logliks", "alleleMatrix") %in% names(x)))) {
+    stop2("`x` is not a proper output of `reconstruct()`")
+  }
 
   # Sort
   ord = order(x$logliks, decreasing = T)
@@ -50,5 +52,5 @@ plotBestPeds = function(x, top = 6) {
 
   titles = paste("Loglik =", round(logliks, 2))
 
-  plotPeds(pedlist[1:top], titles = titles[1:top])
+  plotPeds(pedlist[1:top], titles = titles[1:top], ...)
 }
