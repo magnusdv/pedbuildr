@@ -4,8 +4,8 @@
 \alias{reconstruct}
 \title{Pedigree reconstruction}
 \usage{
-reconstruct(alleleMatrix, loci, pedlist = NULL, founderInb = 0,
-  sortResults = T, verbose = T, ...)
+reconstruct(alleleMatrix, loci, pedlist = NULL, pairwise = F,
+  founderInb = 0, sortResults = T, verbose = T, ...)
 }
 \arguments{
 \item{alleleMatrix}{A matrix with two columns for each marker}
@@ -14,6 +14,11 @@ reconstruct(alleleMatrix, loci, pedlist = NULL, founderInb = 0,
 
 \item{pedlist}{A list of pedigrees. If NULL, \code{\link[=buildPeds]{buildPeds()}} is used to
 generate a list}
+
+\item{pairwise}{A logical. If TRUE, an initial stage of pairwise IBD
+estimation is done, in order to infer certain parent-child pairs, as well
+as certain \emph{non}-parent-child pairs. When this option is used, arguments to
+\code{knownPO} and \code{notPO} are ignored}
 
 \item{founderInb}{A number in the interval \code{[0,1]}, used as background
 inbreeding level in all founders}
@@ -28,29 +33,30 @@ likely pedigree comes first}
 \value{
 A list with two entries:
 \itemize{
-\item \code{pedlist} : A list of pedigrees. This is the same as the input \code{pedlist}, but possibly sorted (if \code{sortResults = TRUE})
+\item \code{pedlist} : A list of pedigrees. This equals (except possibly for
+sorting) the input argument \code{pedlist} if this was given. If \code{sortResults =   TRUE} then the list is sorted so that the most likely pedigrees come first
 \item \code{logliks} : A numerical vector containing the pedigree log-likelihoods
+\item \code{alleleMatrix} The input allele matrix
 }
 }
 \description{
 Reconstruct the most likely pedigree from genotype data
 }
 \examples{
-\dontrun{ # Requires the `forrel` package
 
 # Simulate genotype data for a trio family (increase N!)
-x = forrel::markerSim(nuclearPed(1), N = 5, alleles = 1:3, seed = 123)
+x = forrel::markerSim(nuclearPed(1), N = 50, alleles = 1:3, seed = 123)
 
 # Extract allele matrix and locus attributes (frequencies a.s.o.)
 m = getAlleles(x)
 loci = lapply(x$markerdata, attributes)
 
 # Reconstruct the most likely pedigree from the data
-res = reconstruct(m, loci, sex = c(1, 2, 1), connected = TRUE, genderSym = T)
+res = reconstruct(m, loci, sex = c(1, 2, 1), connected = TRUE,
+                  genderSym = TRUE, pair=TRUE)
 
 # Plot the best pedigrees
 plotBestPeds(res)
 
-}
 
 }

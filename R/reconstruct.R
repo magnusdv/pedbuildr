@@ -6,6 +6,10 @@
 #' @param loci A list of marker attributes
 #' @param pedlist A list of pedigrees. If NULL, [buildPeds()] is used to
 #'   generate a list
+#' @param pairwise A logical. If TRUE, an initial stage of pairwise IBD
+#'   estimation is done, in order to infer certain parent-child pairs, as well
+#'   as certain *non*-parent-child pairs. When this option is used, arguments to
+#'   `knownPO` and `notPO` are ignored
 #' @param founderInb A number in the interval `[0,1]`, used as background
 #'   inbreeding level in all founders
 #' @param sortResults A logical. If TRUE, the output is sorted so that the most
@@ -15,31 +19,35 @@
 #'
 #' @return A list with two entries:
 #'
-#'  * `pedlist` : A list of pedigrees. This is the same as the input `pedlist`, but possibly sorted (if `sortResults = TRUE`)
+#'   * `pedlist` : A list of pedigrees. This equals (except possibly for
+#'   sorting) the input argument `pedlist` if this was given. If `sortResults =
+#'   TRUE` then the list is sorted so that the most likely pedigrees come first
 #'
-#'  * `logliks` : A numerical vector containing the pedigree log-likelihoods
+#'   * `logliks` : A numerical vector containing the pedigree log-likelihoods
+#'
+#'   * `alleleMatrix` The input allele matrix
 #'
 #' @examples
-#' \dontrun{ # Requires the `forrel` package
 #'
 #' # Simulate genotype data for a trio family (increase N!)
-#' x = forrel::markerSim(nuclearPed(1), N = 5, alleles = 1:3, seed = 123)
+#' x = forrel::markerSim(nuclearPed(1), N = 50, alleles = 1:3, seed = 123)
 #'
 #' # Extract allele matrix and locus attributes (frequencies a.s.o.)
 #' m = getAlleles(x)
 #' loci = lapply(x$markerdata, attributes)
 #'
 #' # Reconstruct the most likely pedigree from the data
-#' res = reconstruct(m, loci, sex = c(1, 2, 1), connected = TRUE, genderSym = T)
+#' res = reconstruct(m, loci, sex = c(1, 2, 1), connected = TRUE,
+#'                   genderSym = TRUE, pair=TRUE)
 #'
 #' # Plot the best pedigrees
 #' plotBestPeds(res)
 #'
-#' }
 #'
 #' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom forrel IBDestimate showInTriangle
 #' @export
-reconstruct = function(alleleMatrix, loci, pedlist = NULL, founderInb = 0, sortResults = T, verbose = T, ...) {
+reconstruct = function(alleleMatrix, loci, pedlist = NULL, pairwise = F, founderInb = 0, sortResults = T, verbose = T, ...) {
   ids = rownames(alleleMatrix)
   if(is.null(ids))
     ids = idsnum = 1:nrow(alleleMatrix)
@@ -56,7 +64,31 @@ reconstruct = function(alleleMatrix, loci, pedlist = NULL, founderInb = 0, sortR
     if(!identical(idsnum, 1:max(idsnum)))
       stop2("\nFor now, only basic ID labels are supported. When `pedlist` is not supplied,\n",
             "the rownames of `alleleMatrix` must be either NULL or 1,2,...,N")
-    pedlist = buildPeds(idsnum, verbose = verbose, ...)
+
+    args = list(...)
+
+    if(pairwise) {
+      if(length(args$knownPO) > 0 | length(args$knownPO) > 0)
+        stop2("`knownPO` and `notPO` must be NULL when `pairwise = TRUE`")
+
+      if(verbose) cat("Performing pairwise estimation in order to establish (unordered) parent-child pairs\n")
+      POresult = inferPO(alleleMatrix, loci, list = TRUE)
+
+      if(verbose) {
+        forrel::showInTriangle(POresult$kappa, labels = T, new=T)
+        cat("Certain parent-child:\n")
+        print(POresult$PO, row.names = F)
+        cat("\nCertain NON-parent-child:\n")
+        print(POresult$UN, row.names = F)
+        cat("\n")
+      }
+      args$knownPO = POresult$PO
+      args$notPO = POresult$notPO
+    }
+
+    args$ids = idsnum
+    args$verbose = verbose
+    pedlist = do.call(buildPeds, args)
   }
 
   npeds = length(pedlist)
@@ -80,15 +112,15 @@ reconstruct = function(alleleMatrix, loci, pedlist = NULL, founderInb = 0, sortR
     # Attach marker data
     if(is.ped(ped)) {
       x = setMarkers(ped, allele_matrix = alleleMatrix, locus_annotations = loci)
+      if(founderInb > 0) founder_inbreeding(x, founders(x)) = founderInb
     }
     else {
-      x = lapply(ped, function(comp)
-        setMarkers(comp, allele_matrix = alleleMatrix, locus_annotations = loci))
+      x = lapply(ped, function(comp) {
+        y = setMarkers(comp, allele_matrix = alleleMatrix, locus_annotations = loci)
+        if(founderInb > 0) founder_inbreeding(y, founders(y)) = founderInb
+        y
+      })
     }
-
-    # Founder inbreeding
-    if(founderInb > 0)
-      founder_inbreeding(x, founders(x)) = founderInb
 
     # Compute loglikelihood
     #tryCatch(loglikTotal(x), error = function(e) {plot(x); NA})
@@ -106,7 +138,7 @@ reconstruct = function(alleleMatrix, loci, pedlist = NULL, founderInb = 0, sortR
     logliks = logliks[ord]
   }
 
-  list(pedlist = pedlist, logliks = logliks)
+  list(pedlist = pedlist, logliks = logliks, alleleMatrix = alleleMatrix)
 }
 
 
