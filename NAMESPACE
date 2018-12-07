@@ -3,6 +3,7 @@
 export(addMissingParents)
 export(adjMatrix)
 export(buildPeds)
+export(inferPO)
 export(plotBestPeds)
 export(plotPeds)
 export(reconstruct)
