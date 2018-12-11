@@ -112,8 +112,8 @@ listPOsets = function(knownPO = NULL, allKnown = F, notPO = NULL, n) {
     return(if(is.null(knownPO)) list() else list(knownPO))
   }
 
-  knownPO = lapply(knownPO, sort.int)
-  notPO = lapply(notPO, sort.int)
+  knownPO = lapply(knownPO, .mysortInt)
+  notPO = lapply(notPO, .mysortInt)
 
   # Check for illegal overlaps
   knownPOchar = sapply(knownPO, paste, collapse="-")

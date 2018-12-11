@@ -82,7 +82,7 @@ addMissingParents = function(a, maxLinearInbreeding = Inf, genderSym = FALSE) {
     # Gender restriction
     if(genderSym && newpars > 1) {
       inv_vec = rowSums(bottom * rep(pows, each = newpars))
-      inv = paste(sort.int(inv_vec), collapse = "-")
+      inv = paste(.mysortInt(inv_vec), collapse = "-")
       if(inv %in% observedInvariants)
         next
       observedInvariants = c(observedInvariants, inv)

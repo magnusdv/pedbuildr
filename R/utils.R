@@ -25,6 +25,19 @@ indent = function(depth) {
   strrep(" ", 2 * (depth - 1))
 }
 
+# Faster version of sort.int, especially for vectors of size 1 and 2
+.mysortInt = function(v) {
+  L = length(v)
+  if(L == 1)
+    return(v)
+  if(L == 2) {
+    if(v[1] > v[2])
+      return(v[c(2, 1)])
+    else return(v)
+  }
+  sort.int(v, method = "shell")
+}
+
 .mysetdiff = function(x, y)
   unique.default(x[match(x, y, 0L) == 0L])
 
