@@ -112,12 +112,12 @@ reconstruct = function(alleleMatrix, loci, pedlist = NULL, pairwise = F, founder
     # Attach marker data
     if(is.ped(ped)) {
       x = setMarkers(ped, allele_matrix = alleleMatrix, locus_annotations = loci)
-      if(founderInb > 0) founder_inbreeding(x, founders(x)) = founderInb
+      if(founderInb > 0) founderInbreeding(x, founders(x)) = founderInb
     }
     else {
       x = lapply(ped, function(comp) {
         y = setMarkers(comp, allele_matrix = alleleMatrix, locus_annotations = loci)
-        if(founderInb > 0) founder_inbreeding(y, founders(y)) = founderInb
+        if(founderInb > 0) founderInbreeding(y, founders(y)) = founderInb
         y
       })
     }
