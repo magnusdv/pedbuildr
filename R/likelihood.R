@@ -33,7 +33,7 @@ tryBreakLoops = function(x) {
     y = breakLoops(x, verbose = F, errorIfFail = F)
 
   # In unsuccessful: Return NULL
-  if(has_unbroken_loops(y))
+  if(hasUnbrokenLoops(y))
     return(NULL)
 
   y
