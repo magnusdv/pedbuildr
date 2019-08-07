@@ -7,7 +7,7 @@ inferPO = function(alleleMatrix, loci, list = FALSE) {
     ids = idsnum = 1:nrow(alleleMatrix)
 
   slist = lapply(ids, function(i)
-    setMarkers(singleton(i, sex=0), allele_matrix = alleleMatrix, locus_annotations = loci))
+    setMarkers(singleton(i, sex=0), alleleMatrix = alleleMatrix, locusAttributes = loci))
 
   pairs = t.default(combn(ids, 2))
   kappa = forrel::IBDestimate(slist, pairs)
