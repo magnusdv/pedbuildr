@@ -34,7 +34,7 @@
 #'
 #' # Extract allele matrix and locus attributes (frequencies a.s.o.)
 #' m = getAlleles(x)
-#' loci = lapply(x$markerdata, attributes)
+#' loci = lapply(x$MARKERS, attributes)
 #'
 #' # Reconstruct the most likely pedigree from the data
 #' res = reconstruct(m, loci, sex = c(1, 2, 1), connected = TRUE,
