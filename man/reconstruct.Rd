@@ -49,7 +49,7 @@ x = forrel::markerSim(nuclearPed(1), N = 50, alleles = 1:3, seed = 123)
 
 # Extract allele matrix and locus attributes (frequencies a.s.o.)
 m = getAlleles(x)
-loci = lapply(x$markerdata, attributes)
+loci = lapply(x$MARKERS, attributes)
 
 # Reconstruct the most likely pedigree from the data
 res = reconstruct(m, loci, sex = c(1, 2, 1), connected = TRUE,
