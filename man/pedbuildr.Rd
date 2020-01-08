@@ -3,7 +3,6 @@
 \docType{package}
 \name{pedbuildr}
 \alias{pedbuildr}
-\alias{pedbuildr-package}
 \title{pedbuildr: Pedigree reconstruction in R}
 \description{
 Functions for generating all possible pedigrees connecting a given set of individuals

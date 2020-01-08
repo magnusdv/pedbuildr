@@ -34,10 +34,11 @@
 #'
 #' # Extract allele matrix and locus attributes (frequencies a.s.o.)
 #' m = getAlleles(x)
-#' loci = lapply(x$MARKERS, attributes)
+#' loci = getLocusAttributes(x)
+#' sex = getSex(x)
 #'
 #' # Reconstruct the most likely pedigree from the data
-#' res = reconstruct(m, loci, sex = c(1, 2, 1), connected = TRUE,
+#' res = reconstruct(m, loci, sex = sex, connected = TRUE,
 #'                   genderSym = TRUE, pair=TRUE)
 #'
 #' # Plot the best pedigrees
@@ -47,7 +48,8 @@
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom forrel IBDestimate showInTriangle
 #' @export
-reconstruct = function(alleleMatrix, loci, pedlist = NULL, pairwise = F, founderInb = 0, sortResults = T, verbose = T, ...) {
+reconstruct = function(alleleMatrix, loci, pedlist = NULL, pairwise = FALSE,
+                       founderInb = 0, sortResults = TRUE, verbose = TRUE, ...) {
   ids = rownames(alleleMatrix)
   if(is.null(ids))
     ids = idsnum = 1:nrow(alleleMatrix)
@@ -75,11 +77,11 @@ reconstruct = function(alleleMatrix, loci, pedlist = NULL, pairwise = F, founder
       POresult = inferPO(alleleMatrix, loci, list = TRUE)
 
       if(verbose) {
-        forrel::showInTriangle(POresult$kappa, labels = T, new=T)
+        forrel::showInTriangle(POresult$kappa, labels = TRUE, new = TRUE)
         cat("Certain parent-child:\n")
-        print(POresult$PO, row.names = F)
+        print(POresult$PO, row.names = FALSE)
         cat("\nCertain NON-parent-child:\n")
-        print(POresult$UN, row.names = F)
+        print(POresult$UN, row.names = FALSE)
         cat("\n")
       }
       args$knownPO = POresult$PO
@@ -133,7 +135,7 @@ reconstruct = function(alleleMatrix, loci, pedlist = NULL, pairwise = F, founder
   }
 
   if(sortResults) {
-    ord = order(logliks, decreasing = T)
+    ord = order(logliks, decreasing = TRUE)
     pedlist = pedlist[ord]
     logliks = logliks[ord]
   }

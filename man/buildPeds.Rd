@@ -4,9 +4,17 @@
 \alias{buildPeds}
 \title{Build all possible pedigrees}
 \usage{
-buildPeds(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
-  connected = F, maxLinearInbreeding = Inf, genderSym = F,
-  verbose = F)
+buildPeds(
+  ids,
+  sex,
+  knownPO = NULL,
+  allKnown = FALSE,
+  notPO = NULL,
+  connected = FALSE,
+  maxLinearInbreeding = Inf,
+  genderSym = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{ids}{A vector of ID labels}

@@ -4,8 +4,16 @@
 \alias{reconstruct}
 \title{Pedigree reconstruction}
 \usage{
-reconstruct(alleleMatrix, loci, pedlist = NULL, pairwise = F,
-  founderInb = 0, sortResults = T, verbose = T, ...)
+reconstruct(
+  alleleMatrix,
+  loci,
+  pedlist = NULL,
+  pairwise = FALSE,
+  founderInb = 0,
+  sortResults = TRUE,
+  verbose = TRUE,
+  ...
+)
 }
 \arguments{
 \item{alleleMatrix}{A matrix with two columns for each marker}
@@ -20,7 +28,7 @@ estimation is done, in order to infer certain parent-child pairs, as well
 as certain \emph{non}-parent-child pairs. When this option is used, arguments to
 \code{knownPO} and \code{notPO} are ignored}
 
-\item{founderInb}{A number in the interval \code{[0,1]}, used as background
+\item{founderInb}{A number in the interval \verb{[0,1]}, used as background
 inbreeding level in all founders}
 
 \item{sortResults}{A logical. If TRUE, the output is sorted so that the most
@@ -49,10 +57,11 @@ x = forrel::markerSim(nuclearPed(1), N = 50, alleles = 1:3, seed = 123)
 
 # Extract allele matrix and locus attributes (frequencies a.s.o.)
 m = getAlleles(x)
-loci = lapply(x$MARKERS, attributes)
+loci = getLocusAttributes(x)
+sex = getSex(x)
 
 # Reconstruct the most likely pedigree from the data
-res = reconstruct(m, loci, sex = c(1, 2, 1), connected = TRUE,
+res = reconstruct(m, loci, sex = sex, connected = TRUE,
                   genderSym = TRUE, pair=TRUE)
 
 # Plot the best pedigrees

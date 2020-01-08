@@ -45,8 +45,9 @@
 #' # plotPeds(p3)
 #'
 #' @export
-buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
-                     connected = F, maxLinearInbreeding = Inf, genderSym = F, verbose = F) {
+buildPeds = function(ids, sex, knownPO = NULL, allKnown = FALSE, notPO = NULL,
+                     connected = FALSE, maxLinearInbreeding = Inf,
+                     genderSym = FALSE, verbose = FALSE) {
   N = length(ids)
   if(!setequal(ids, 1:N))
     stop2("`ids` must be an integer vector of the form `1:N`")
@@ -63,10 +64,10 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
   if(verbose) {
     cat("-----------\n")
     cat("Building pedigrees relating the following individuals:\n")
-    print(data.frame(ids, sex), row.names = F)
+    print(data.frame(ids, sex), row.names = FALSE)
     cat("\nPedigree parameters:\n")
-    cat(" Known PO:",   toString(vapply(knownPO, paste, collapse="-", FUN.VALUE="")), "\n")
-    cat(" Known non-PO:", toString(vapply(notPO, paste, collapse="-", FUN.VALUE="")), "\n")
+    cat(" Known PO:",   toString(vapply(knownPO, paste, collapse = "-", FUN.VALUE="")), "\n")
+    cat(" Known non-PO:", toString(vapply(notPO, paste, collapse = "-", FUN.VALUE="")), "\n")
     cat(" Connected pedigrees only:", connected, "\n")
     cat(" Symmetry reduction:", genderSym, "\n")
     cat("-----------\n")
@@ -80,14 +81,14 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
   if(verbose) cat("Undirected adjacency matrices:", length(UA), "\n")
 
   # For each undirAdj, build list of directed adjacency matrices
-  DA = lapply(UA, function(ua) directedAdjs(ua, sex, verbose = F))
-  DA = unlist(DA, recursive = F)
+  DA = lapply(UA, function(ua) directedAdjs(ua, sex, verbose = FALSE))
+  DA = unlist(DA, recursive = FALSE)
   if(verbose) cat("Directed adjacency matrices:", length(DA), "\n")
 
   # Extend each matrix by adding parents in all possible ways
   DA_EXT = lapply(DA, addMissingParents, maxLinearInbreeding = maxLinearInbreeding,
                   genderSym = genderSym)
-  DA_EXT = unlist(DA_EXT, recursive = F)
+  DA_EXT = unlist(DA_EXT, recursive = FALSE)
   if(verbose) cat("After adding parents:", length(DA_EXT), "\n")
 
   # If `connected = TRUE`, remove disconnected matrices
@@ -105,7 +106,7 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = F, notPO = NULL,
 
 # Auxiliary function for listing all possible PO sets
 #' @importFrom utils combn
-listPOsets = function(knownPO = NULL, allKnown = F, notPO = NULL, n) {
+listPOsets = function(knownPO = NULL, allKnown = FALSE, notPO = NULL, n) {
   if(allKnown) {
     if(!is.null(notPO))
       stop2("When `allKnown`is TRUE, `notPO` must be NULL")
@@ -117,20 +118,20 @@ listPOsets = function(knownPO = NULL, allKnown = F, notPO = NULL, n) {
 
   # Check for illegal overlaps
   knownPOchar = sapply(knownPO, paste, collapse="-")
-  notPOchar = sapply(notPO, paste, collapse="-")
+  notPOchar = sapply(notPO, paste, collapse = "-")
   if(length(err <- intersect(knownPOchar, notPOchar)))
     stop2("`knownPO` and `notPO` must be disjoint: ", err)
 
   # Potential extra parent-offspring: All pairs except "knownPO" and "notPO"
-  allPO = combn(n, 2, simplify = F)
-  allPOchar = sapply(allPO, paste, collapse="-")
+  allPO = combn(n, 2, simplify = FALSE)
+  allPOchar = sapply(allPO, paste, collapse = "-")
   potentialPO = allPO[!allPOchar %in% c(knownPOchar, notPOchar)]
 
   if(length(potentialPO) == 0)
     return(list(knownPO))
 
   # Loop over all subsets of potentialPO and add to knownPO
-  subs = expand.grid(rep(list(c(F,T)), length(potentialPO)))
+  subs = expand.grid(rep(list(c(FALSE, TRUE)), length(potentialPO)))
   totalPO = apply(subs, 1, function(s) c(knownPO, potentialPO[s]))
 
   totalPO
@@ -139,13 +140,13 @@ listPOsets = function(knownPO = NULL, allKnown = F, notPO = NULL, n) {
 
 # Convert list of PO pairs to undirected (symmetric) adjacency matrix
 po2adj = function(po, n) {
-  m = matrix(F, ncol = n, nrow = n)
+  m = matrix(FALSE, ncol = n, nrow = n)
   for(e in po)
-    m[e[1], e[2]] = m[e[2], e[1]] = T
+    m[e[1], e[2]] = m[e[2], e[1]] = TRUE
   m
 }
 
-directedAdjs = function(undirAdj, sex, verbose = T) {
+directedAdjs = function(undirAdj, sex, verbose = TRUE) {
 
   # Environment for holding the identified pedigrees
   storage = new.env()
@@ -170,7 +171,7 @@ directedAdjs = function(undirAdj, sex, verbose = T) {
   storage$dirAdjs
 }
 
-addEdge = function(adj, id, father, mother, remaining, storage, verbose = T, depth = 1) {
+addEdge = function(adj, id, father, mother, remaining, storage, verbose = TRUE, depth = 1) {
   if(verbose)
     cat(sprintf("%sDepth %d. ID = %d, father = %d, mother = %d, ",
                 indent(depth), depth, id, father, mother))
@@ -178,10 +179,10 @@ addEdge = function(adj, id, father, mother, remaining, storage, verbose = T, dep
   SEX = attr(adj, 'sex')
 
   # parents of id are f and m
-  adj[c(father, mother), id] = T
+  adj[c(father, mother), id] = TRUE
 
   # id is not parent of f,m
-  remaining[id, c(father, mother)] =  F
+  remaining[id, c(father, mother)] =  FALSE
 
   # remaining adjacent are kids of id   # TODO: avoid `which()` here
   kids = which(remaining[id, ])
@@ -189,18 +190,18 @@ addEdge = function(adj, id, father, mother, remaining, storage, verbose = T, dep
     cat("kids =", toString(kids), "\n")
 
   if(length(kids)) {
-    adj[id, kids] = T
+    adj[id, kids] = TRUE
 
     # no-one else with same sex as id is parent of kids
-    remaining[SEX == SEX[id], kids] = F
-    remaining[id, kids] = T # restore these
+    remaining[SEX == SEX[id], kids] = FALSE
+    remaining[id, kids] = TRUE # restore these
 
     # no kids are parent of c(id,f,m) # utvid til alle ancs!!!
-    remaining[kids, c(id, father, mother)] = F
+    remaining[kids, c(id, father, mother)] = FALSE
   }
 
   # Remove from "remaining" edges involving id
-  remaining[id, ] = remaining[, id] = F
+  remaining[id, ] = remaining[, id] = FALSE
 
   # No remaining edges?
   if(!any(remaining)) {
