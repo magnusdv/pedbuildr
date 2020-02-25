@@ -5,46 +5,53 @@
 \title{Pedigree reconstruction}
 \usage{
 reconstruct(
-  alleleMatrix,
-  loci,
+  x,
+  ids,
+  alleleMatrix = NULL,
+  loci = NULL,
   pedlist = NULL,
   pairwise = FALSE,
-  founderInb = 0,
   sortResults = TRUE,
+  founderInb = 0,
   verbose = TRUE,
   ...
 )
 }
 \arguments{
-\item{alleleMatrix}{A matrix with two columns for each marker}
+\item{x}{A \code{ped} object or a list of such.}
 
-\item{loci}{A list of marker attributes}
+\item{ids}{A vector of ID labels from \code{x}. By default, the genotyped members of \code{x} are used.}
+
+\item{alleleMatrix}{A matrix with two columns for each marker.}
+
+\item{loci}{A list of marker attributes.}
 
 \item{pedlist}{A list of pedigrees. If NULL, \code{\link[=buildPeds]{buildPeds()}} is used to
-generate a list}
+generate a list.}
 
 \item{pairwise}{A logical. If TRUE, an initial stage of pairwise IBD
 estimation is done, in order to infer certain parent-child pairs, as well
 as certain \emph{non}-parent-child pairs. When this option is used, arguments to
-\code{knownPO} and \code{notPO} are ignored}
+\code{knownPO} and \code{notPO} are ignored.}
+
+\item{sortResults}{A logical. If TRUE, the output is sorted so that the most
+likely pedigree comes first.}
 
 \item{founderInb}{A number in the interval \verb{[0,1]}, used as background
 inbreeding level in all founders}
 
-\item{sortResults}{A logical. If TRUE, the output is sorted so that the most
-likely pedigree comes first}
-
 \item{verbose}{A logical; verbose output or not}
 
-\item{...}{Additional parameters passed on to \code{\link[=buildPeds]{buildPeds()}}}
+\item{...}{Additional parameters passed on to \code{\link[=buildPeds]{buildPeds()}}, e.g.,
+\code{sex}, \code{knownPO}, \code{notPO}, \code{connected}, \code{maxLinearInbreeding}, \code{genderSym}.}
 }
 \value{
-A list with two entries:
+An object of class \code{reconResult}, which is essentially list with the following entries:
 \itemize{
-\item \code{pedlist} : A list of pedigrees. This equals (except possibly for
-sorting) the input argument \code{pedlist} if this was given. If \code{sortResults =   TRUE} then the list is sorted so that the most likely pedigrees come first
+\item \code{pedlist} : A list of pedigrees, equal to the input argument \code{pedlist} if this was given. If \code{sortResults =   TRUE} then the list is sorted so that the most likely pedigrees come first
 \item \code{logliks} : A numerical vector containing the pedigree log-likelihoods
-\item \code{alleleMatrix} The input allele matrix
+\item \code{alleleMatrix} : The input allele matrix
+\item \code{labels} : A character vector of ID labels
 }
 }
 \description{
@@ -53,19 +60,30 @@ Reconstruct the most likely pedigree from genotype data
 \examples{
 
 # Simulate genotype data for a trio family (increase N!)
-x = forrel::markerSim(nuclearPed(1), N = 50, alleles = 1:3, seed = 123)
+x = forrel::markerSim(nuclearPed(1), N = 50, alleles = 1:3,
+                      seed = 123, verbose = FALSE)
 
-# Extract allele matrix and locus attributes (frequencies a.s.o.)
+# Extract marker data and reconstruct
+res = reconstruct(x, pairwise = TRUE)
+
+# Plot most likely pedigrees
+plot(res[1:6])
+
+# Alternative workflow: Extract data manually...
 m = getAlleles(x)
 loci = getLocusAttributes(x)
 sex = getSex(x)
 
-# Reconstruct the most likely pedigree from the data
-res = reconstruct(m, loci, sex = sex, connected = TRUE,
-                  genderSym = TRUE, pair=TRUE)
+# ...and then reconstruct
+res2 = reconstruct(alleleMatrix = m, loci = loci, sex = sex,
+                  pairwise = TRUE)
 
-# Plot the best pedigrees
-plotBestPeds(res)
+#
+y = forrel::markerSim(nuclearPed(children = c("s1", "s2")), ids = c("s1", "s2"),
+                      N = 50, alleles = 1:2, seed = 123, verbose = FALSE)
 
+# Reconstruct
+res3 = reconstruct(y, connected = FALSE)
+plot(res3)
 
 }
