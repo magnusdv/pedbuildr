@@ -8,8 +8,10 @@
 #'   assigned as parent-offspring. If FALSE (default), all pairwise combinations
 #'   of ids - except those in `notPO` - will be treated as potential
 #'   parent-offspring pairs.
-#' @param notPO A list of pairs of ID labels: Pairs known not to be parent-offspring.
-#' @param connected A logical; if TRUE only connected pedigrees are returned. Default: FALSE.
+#' @param notPO A list of pairs of ID labels: Pairs known not to be
+#'   parent-offspring.
+#' @param connected A logical. If TRUE (default), only connected pedigrees are
+#'   returned.
 #' @param maxLinearInbreeding A nonnegative integer, or `Inf` (default). If this
 #'   is a finite number, it disallows mating between pedigree members X and Y if
 #'   X is a linear descendant of Y separated by more than the given number. For
@@ -17,10 +19,10 @@
 #'   parent-child, grandparent-grandchild, a.s.o. If `maxLinearInbreeding = 1`
 #'   then parent-child matings are allowed, but not grandparent-grandchild or
 #'   higher.
-#' @param genderSym A logical. If TRUE, pedigrees which are equal except for the
-#'   gender distribution of the *added* parents, are regarded as equivalent, and
-#'   only one of each equivalence class is returned. Example: paternal vs
-#'   maternal half sibs.
+#' @param genderSym A logical. If TRUE (default), pedigrees which are equal
+#'   except for the gender distribution of the *added* parents, are regarded as
+#'   equivalent, and only one of each equivalence class is returned. Example:
+#'   paternal vs maternal half sibs.
 #'
 #' @param verbose A logical
 #'
@@ -28,26 +30,26 @@
 #'
 #' @examples
 #' p = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)))
-#' stopifnot(length(p) == 26)
+#' stopifnot(length(p) == 25)
 #' # plotPeds(p)
 #'
-#' # Remove duplicates coming from gender swaps among added parents.
-#' # Only one such duplicate here: where 1 and 2 are paternal/maternal half sibs
+#' # By default, one pedigree was removed above.
+#' # Keep all gender combinations (in this case paternal/maternal half sibs):
 #' p2 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
-#'               genderSym = TRUE)
-#' stopifnot(length(p2) == 25)
+#'               genderSym = FALSE)
+#' stopifnot(length(p2) == 26)
 #' # plotPeds(p2)
 #'
 #' # Remove pedigrees with linear inbreeding (e.g. parent-child)
 #' p3 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
 #'               maxLinearInbreeding = 0)
-#' stopifnot(length(p3) == 8)
+#' stopifnot(length(p3) == 7)
 #' # plotPeds(p3)
 #'
 #' @export
 buildPeds = function(ids, sex, knownPO = NULL, allKnown = FALSE, notPO = NULL,
-                     connected = FALSE, maxLinearInbreeding = Inf,
-                     genderSym = FALSE, verbose = FALSE) {
+                     connected = TRUE, maxLinearInbreeding = Inf,
+                     genderSym = TRUE, verbose = FALSE) {
   N = length(ids)
   if(!setequal(ids, 1:N))
     stop2("`ids` must be an integer vector of the form `1:N`")

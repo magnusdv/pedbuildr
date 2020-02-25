@@ -10,9 +10,9 @@ buildPeds(
   knownPO = NULL,
   allKnown = FALSE,
   notPO = NULL,
-  connected = FALSE,
+  connected = TRUE,
   maxLinearInbreeding = Inf,
-  genderSym = FALSE,
+  genderSym = TRUE,
   verbose = FALSE
 )
 }
@@ -29,9 +29,11 @@ assigned as parent-offspring. If FALSE (default), all pairwise combinations
 of ids - except those in \code{notPO} - will be treated as potential
 parent-offspring pairs.}
 
-\item{notPO}{A list of pairs of ID labels: Pairs known not to be parent-offspring.}
+\item{notPO}{A list of pairs of ID labels: Pairs known not to be
+parent-offspring.}
 
-\item{connected}{A logical; if TRUE only connected pedigrees are returned. Default: FALSE.}
+\item{connected}{A logical. If TRUE (default), only connected pedigrees are
+returned.}
 
 \item{maxLinearInbreeding}{A nonnegative integer, or \code{Inf} (default). If this
 is a finite number, it disallows mating between pedigree members X and Y if
@@ -41,10 +43,10 @@ parent-child, grandparent-grandchild, a.s.o. If \code{maxLinearInbreeding = 1}
 then parent-child matings are allowed, but not grandparent-grandchild or
 higher.}
 
-\item{genderSym}{A logical. If TRUE, pedigrees which are equal except for the
-gender distribution of the \emph{added} parents, are regarded as equivalent, and
-only one of each equivalence class is returned. Example: paternal vs
-maternal half sibs.}
+\item{genderSym}{A logical. If TRUE (default), pedigrees which are equal
+except for the gender distribution of the \emph{added} parents, are regarded as
+equivalent, and only one of each equivalence class is returned. Example:
+paternal vs maternal half sibs.}
 
 \item{verbose}{A logical}
 }
@@ -56,20 +58,20 @@ Build all possible pedigrees
 }
 \examples{
 p = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)))
-stopifnot(length(p) == 26)
+stopifnot(length(p) == 25)
 # plotPeds(p)
 
-# Remove duplicates coming from gender swaps among added parents.
-# Only one such duplicate here: where 1 and 2 are paternal/maternal half sibs
+# By default, one pedigree was removed above.
+# Keep all gender combinations (in this case paternal/maternal half sibs):
 p2 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
-              genderSym = TRUE)
-stopifnot(length(p2) == 25)
+              genderSym = FALSE)
+stopifnot(length(p2) == 26)
 # plotPeds(p2)
 
 # Remove pedigrees with linear inbreeding (e.g. parent-child)
 p3 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
               maxLinearInbreeding = 0)
-stopifnot(length(p3) == 8)
+stopifnot(length(p3) == 7)
 # plotPeds(p3)
 
 }
