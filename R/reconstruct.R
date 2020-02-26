@@ -67,11 +67,13 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
                        pedlist = NULL, pairwise = FALSE, sortResults = TRUE,
                        founderInb = 0, verbose = TRUE, ...) {
   if(!missing(x)) {
-    if(!is.ped(x) || is.pedList(x))
+    if(!is.ped(x) && !is.pedList(x))
       stop2("Argument `x` must be a `ped` object, or a list of such")
 
     if(missing(ids))
       ids = typedMembers(x)
+
+    ids = as.character(ids) # in case of pedlist
 
     if(is.null(alleleMatrix))
       alleleMatrix = getAlleles(x, ids)
