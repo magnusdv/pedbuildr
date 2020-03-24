@@ -32,7 +32,7 @@ library(pedbuildr)
 
 # Building pedigree lists
 
-Suppose we want to find all pedigrees linking 3 individuals: two males and one female, labeled `1`, `2` and `3` respectively. Without any restrictions `buildPeds()` identifies 142 such pedigrees:
+Suppose we want to find all pedigrees linking 3 individuals: two males and one female, labeled `1`, `2` and `3` respectively. Using the default restriction to connected pedigrees, `buildPeds()` identifies 105 such pedigrees:
 ```{r}
 plist = buildPeds(ids = 1:3, sex = c(1, 1, 2))
 length(plist)
@@ -41,33 +41,21 @@ length(plist)
 Here are some of them: 
 
 ```{r fig.height=2, fig.width = 8}
-plotPeds(plist[c(1, 20, 100, 141)])
+plotPeds(plist[c(1, 20, 50, 105)])
 ```
 
-The function `plotPeds()` is a thin wrapper around `pedtools::plot.ped()`, and highlights the original individuals in each pedigree. It does not handle disconnected pedigrees, so to inspect these we may use `pedtools::plotPedList()` instead:
-```{r fig.height=2, fig.width = 3.5, fig.align = "center"}
-plotPedList(plist[[20]], frames = F)
-```
+The function `plotPeds()` is a thin wrapper around `pedtools::plot.ped()`, and highlights the original individuals in each pedigree. 
 
 ## Restricting the pedigree search
 
 With more than a handful individuals, the number of pedigrees quickly becomes uncontrollably large. Hence it becomes vital to impose restrictions on the pedigree space. 
 
-#### Connectedness
-By adding `connected = TRUE` to the call, `buildPeds()` will return only connected pedigrees. In our example, this takes the total number down to 120:
-
-```{r}
-plist2 = buildPeds(ids = 1:3, sex = c(1, 1, 2), connected = TRUE)
-length(plist2)
-```
-
 #### Linear inbreeding
 As a further restriction, one may disallow certain types of inbreeding. Many of the pedigrees found above contain matings between parent-offspring, or even grandparent-grandchild. In many practical cases these may be irrelevant. To skip pedigrees with such features, we add `maxLinearInbreeding = 0`. 
 
 ```{r}
-plist3 = buildPeds(ids = 1:3, sex = c(1, 1, 2), connected = TRUE, 
-                   maxLinearInbreeding = 0)
-length(plist3)
+plist2 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInbreeding = 0)
+length(plist2)
 ```
 
 If we set `maxLinearInbreeding = 1` instead, then parent-child mating is allowed, but not grandparent-grandchild or higher separations.
@@ -76,53 +64,36 @@ If we set `maxLinearInbreeding = 1` instead, then parent-child mating is allowed
 Known parent-child pairs are conveyed to `buildPeds()` using the `knownPO` parameter. For instance, in our running example suppose we know that 2 and 3 form a parent-child pair (in some order).
 
 ```{r}
-plist4 = buildPeds(ids = 1:3, sex = c(1, 1, 2), connected = TRUE, 
-                   maxLinearInbreeding = 0, knownPO = list(2:3))
-length(plist4)
+plist3 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInbreeding = 0, 
+                   knownPO = list(2:3))
+length(plist3)
 ```
 
 Here is a selection of these pedigrees:
 
 ```{r fig.height=2, fig.width = 8}
-plotPeds(plist4[c(2, 3, 11, 15, 22)])
+plotPeds(plist3[c(2, 3, 9, 18)])
 ```
 
 #### Further restrictions on parent-child pairs
 We may also know that certain pairs are *not* parent-child; this can be imposed by using the `notPO` parameter. Another option is to set `allKnown = TRUE`, meaning that `knownPO` should be taken as the complete list of parent-child pairs among the input individuals. We add this to our running example:
 
 ```{r}
-plist5 = buildPeds(ids = 1:3, sex = c(1, 1, 2), connected = TRUE, 
-                   maxLinearInbreeding = 0, knownPO = list(2:3), 
-                   allKnown = TRUE)
-length(plist5)
+plist4 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInbreeding = 0, 
+                   knownPO = list(2:3), allKnown = TRUE)
+length(plist4)
 ```
 
-Here are the 10 remaining pedigrees:
-```{r fig.height=5, fig.width = 8.5}
-plotPeds(plist5)
-```
-
-#### Gender symmetries
-In the previous plot there are two pairs of pedigrees (3 and 5, and 7 and 10) which are identical except for the distribution of genders among the added parents. To avoid such redundancy, we add `genderSym = TRUE` to the call:
-
-```{r}
-plist6 = buildPeds(ids = 1:3, sex = c(1, 1, 2), connected = TRUE, 
-                   maxLinearInbreeding = 0, knownPO = list(2:3), 
-                   allKnown = TRUE, genderSym = TRUE)
-length(plist6)
-```
-
-Here are the final solutions:
+Here are the remaining pedigrees:
 ```{r fig.height=4, fig.width = 8.5}
-plotPeds(plist6)
+plotPeds(plist4)
 ```
-
 
 ## Which pedigrees are included in the `buildPeds()` algorithm?
 TODO
 
 # Pedigree reconstruction
-The aim of this section is to show how to perform pedigree reconstruction. We start with some "true" pedigree and simulate some marker data for it. We then forget the pedigree structure, and then see if we are able to reconstruct it from the marker data.
+The aim of this section is to show how to perform pedigree reconstruction. We start with the "true" pedigree and simulate some marker data for it. We will then try to reconstruct it from the marker data.
 
 ## Example
 Suppose the true relationship between individuals `1`, `2` and `3` is as follows:
@@ -145,15 +116,10 @@ x = forrel::markerSim(x, N = 10, ids = 1:3, alleles = 1:4, verbose = F, seed = 1
 x
 ```
 
-We extract the allele matrix and the locus attributes of the 10 markers.
-```{r}
-genodata = getAlleles(x, ids = 1:3)
-loci = lapply(x$markerdata, attributes)
-```
 
-Now let us try to reconstruct the pedigree from the data. The main input to the `reconstruct()` function is the `alleleMatrix` and the `loci` parameters. By default the function will then call our friend `buildPeds()` from the previous section to generate a list of candidate pedigrees. (The number of target individuals is determined by the number of rows in `alleleMatrix`.) In this example we won't impose any restrictions on the pedigree space, so we simply indicate the genders.
+Now let us try to reconstruct the pedigree from the data, using the `reconstruct()` function. When we feed `x` into this function, it will extract the allele matrix, marker attributes and gender data, but strip the pedigree information. It will then call our friend `buildPeds()` from the previous section to generate a list of candidate pedigrees. By default In this example we won't impose any restrictions on the pedigree space, so we simply indicate the genders.
 ```{r}
-result = reconstruct(alleleMatrix = genodata, loci = loci, sex = c(1, 1, 2))
+result = reconstruct(x)
 ```
 
 The function `plotBestPeds()` show the pedigrees with the highest likelihood:
@@ -162,5 +128,5 @@ The function `plotBestPeds()` show the pedigrees with the highest likelihood:
 plotBestPeds(result, top = 6)
 ```
 
-Lo and behold - the correct pedigree was the most likely one! 
+The correct pedigree was the most likely one, but only just so! With more markers the difference would have been bigger.
 
