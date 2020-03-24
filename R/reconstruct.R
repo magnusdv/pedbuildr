@@ -133,7 +133,6 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
   if(verbose) {
     cat("\nComputing likelihoods of", npeds, "pedigrees\n")
     pb = txtProgressBar(min = 0, max = npeds, style = 3) # Progress bar
-
   }
 
   # Compute likelihoods
@@ -158,10 +157,18 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
     }
 
     # Compute loglikelihood
-    #tryCatch(loglikTotal(x), error = function(e) {plot(x); NA})
-    loglikTotal(x)
+    tryCatch(loglikTotal(x), error = function(e) NA_real_)
   },
   FUN.VALUE = 0)
+
+  # Deal with failed likelihoods
+  errs = is.na(logliks)
+  errIdx = which(errs)
+  errPeds = pedlist[errs]
+  if(any(errs)) {
+    pedlist = pedlist[!errs]
+    logliks = logliks[!errs]
+  }
 
   if(verbose) {
     close(pb) # Close progress bar
@@ -176,7 +183,9 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
   structure(list(pedlist = pedlist,
                  logliks = logliks,
                  alleleMatrix = alleleMatrix,
-                 labels = ids),
+                 labels = ids,
+                 errPeds = errPeds,
+                 errIdx = errIdx),
             class = "reconResult")
 }
 
