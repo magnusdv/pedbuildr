@@ -106,18 +106,20 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
       args$sex = getSex(x, ids)
     }
 
-    # Do pairwise analysis first?
+    # (Optional) pairwise analysis to establish parent-child relationships
     if(pairwise) {
+      if(verbose)
+        cat("Pairwise estimation:\n")
+
       if(length(args$knownPO) > 0 | length(args$knownPO) > 0)
         stop2("`knownPO` and `notPO` must be NULL when `pairwise = TRUE`")
 
-      if(verbose) cat("Performing pairwise estimation in order to establish (unordered) parent-child pairs\n")
       POresult = inferPO(alleleMatrix, loci, list = TRUE)
 
       if(verbose) {
         forrel::showInTriangle(POresult$kappa, labels = TRUE, new = TRUE)
-        cat("Certain parent-child:", toString(sapply(POresult$PO, paste, collapse = "-")), "\n")
-        cat("Certain NON-parent-child:", toString(sapply(POresult$notPO, paste, collapse = "-")), "\n")
+        cat("  PO:", toString(sapply(POresult$PO, paste, collapse = "-")), "\n")
+        cat("  non-PO:", toString(sapply(POresult$notPO, paste, collapse = "-")), "\n\n")
       }
 
       args$knownPO = POresult$PO
@@ -134,7 +136,7 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
     stop2("Empty pedigree list")
 
   if(verbose)
-    cat("\nComputing likelihoods of", npeds, "pedigrees\n")
+    cat("\nComputing the likelihood of", npeds, "pedigrees\n")
 
   # Progress bar
   if(progbar <- verbose && interactive())

@@ -64,44 +64,49 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = FALSE, notPO = NULL,
     stop2("`knownPO` cannot be NULL when `allKnown = TRUE`")
 
   if(verbose) {
-    cat("-----------\n")
-    cat("Building pedigrees relating the following individuals:\n")
-    print(data.frame(ids, sex), row.names = FALSE)
-    cat("\nPedigree parameters:\n")
-    cat(" Known PO:",   toString(vapply(knownPO, paste, collapse = "-", FUN.VALUE="")), "\n")
-    cat(" Known non-PO:", toString(vapply(notPO, paste, collapse = "-", FUN.VALUE="")), "\n")
-    cat(" Connected pedigrees only:", connected, "\n")
-    cat(" Symmetry reduction:", genderSym, "\n")
-    cat("-----------\n")
+    .knownPO = toString(vapply(knownPO, paste, collapse = "-", FUN.VALUE=""))
+    .notPO = toString(vapply(notPO, paste, collapse = "-", FUN.VALUE=""))
+
+    print(glue::glue("
+      Pedigree parameters:
+        ID labels: {toString(ids)}
+        Sex: {toString(sex)}
+        Known PO: {.knownPO}
+        Known non-PO: {.notPO}
+        Connected only: {connected}
+        Symmetry filter: {genderSym}
+        Linear inbreeding: {maxLinearInbreeding}"
+    ))
   }
+
+  if(verbose) cat("\nBuilding pedigree list:\n")
 
   # List possible sets of parent-offspring
   POsets = listPOsets(knownPO = knownPO, allKnown = allKnown, notPO = notPO, N)
 
   # Convert POlists to undirected adjacency matrices
   UA = lapply(POsets, po2adj, n = N)
-  if(verbose) cat("Undirected adjacency matrices:", length(UA), "\n")
+  if(verbose) cat("  Undirected adjacency matrices:", length(UA), "\n")
 
   # For each undirAdj, build list of directed adjacency matrices
   DA = lapply(UA, function(ua) directedAdjs(ua, sex, verbose = FALSE))
   DA = unlist(DA, recursive = FALSE)
-  if(verbose) cat("Directed adjacency matrices:", length(DA), "\n")
+  if(verbose) cat("  Directed adjacency matrices:", length(DA), "\n")
 
   # Extend each matrix by adding parents in all possible ways
   DA_EXT = lapply(DA, addMissingParents, maxLinearInbreeding = maxLinearInbreeding,
                   genderSym = genderSym)
   DA_EXT = unlist(DA_EXT, recursive = FALSE)
-  if(verbose) cat("After adding parents:", length(DA_EXT), "\n")
+  if(verbose) cat("  After adding parents:", length(DA_EXT), "\n")
 
   # If `connected = TRUE`, remove disconnected matrices
   if(connected) {
     DA_EXT = DA_EXT[sapply(DA_EXT, isConnected)]
-    if(verbose) cat("Connected solutions: ", length(DA_EXT), "\n")
+    if(verbose) cat("  Connected solutions:", length(DA_EXT), "\n")
   }
 
   # Convert to list of pedigrees
   peds = lapply(DA_EXT, adj2ped, origSize = N)
-  if(verbose) cat("Pedigrees:", length(peds), "\n")
 
   invisible(peds)
 }
@@ -162,8 +167,9 @@ directedAdjs = function(undirAdj, sex, verbose = TRUE) {
   id = which.max(colSums(undirAdj))
 
   # Potential fathers and mothers
-  PF = which(undirAdj[, id] & sex == 1)
-  PM = which(undirAdj[, id] & sex == 2)
+  rownum = seq_along(sex)
+  PF = rownum[undirAdj[, id] & sex == 1]
+  PM = rownum[undirAdj[, id] & sex == 2]
 
   # Add edges recursively
   for(f in c(0, PF)) for(m in c(0, PM)) {
@@ -179,6 +185,7 @@ addEdge = function(adj, id, father, mother, remaining, storage, verbose = TRUE, 
                 indent(depth), depth, id, father, mother))
 
   SEX = attr(adj, 'sex')
+  rownum = seq_len(dim(remaining)[1])
 
   # parents of id are f and m
   adj[c(father, mother), id] = TRUE
@@ -186,8 +193,8 @@ addEdge = function(adj, id, father, mother, remaining, storage, verbose = TRUE, 
   # id is not parent of f,m
   remaining[id, c(father, mother)] =  FALSE
 
-  # remaining adjacent are kids of id   # TODO: avoid `which()` here
-  kids = which(remaining[id, ])
+  # remaining adjacent are kids of id
+  kids = rownum[remaining[id, ]]
   if(verbose)
     cat("kids =", toString(kids), "\n")
 
@@ -219,10 +226,10 @@ addEdge = function(adj, id, father, mother, remaining, storage, verbose = TRUE, 
     return()
   }
 
-  # Remaining edges? If so - continue # TODO: avoid `which()`
+  # Remaining edges? If so - continue
   id = which.max(colSums(remaining))
-  PF = which(remaining[, id] & SEX == 1)
-  PM = which(remaining[, id] & SEX == 2)
+  PF = rownum[remaining[, id] & SEX == 1]
+  PM = rownum[remaining[, id] & SEX == 2]
 
   for(f in c(0, PF)) for(m in c(0, PM)) {
     addEdge(adj, id, f, m, remaining, storage, verbose = verbose, depth = depth + 1)
