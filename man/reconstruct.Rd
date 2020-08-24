@@ -20,7 +20,8 @@ reconstruct(
 \arguments{
 \item{x}{A \code{ped} object or a list of such.}
 
-\item{ids}{A vector of ID labels from \code{x}. By default, the genotyped members of \code{x} are used.}
+\item{ids}{A vector of ID labels from \code{x}. By default, the genotyped members
+of \code{x} are used.}
 
 \item{alleleMatrix}{A matrix with two columns for each marker.}
 
@@ -42,13 +43,16 @@ inbreeding level in all founders}
 
 \item{verbose}{A logical; verbose output or not}
 
-\item{...}{Additional parameters passed on to \code{\link[=buildPeds]{buildPeds()}}, e.g.,
-\code{sex}, \code{knownPO}, \code{notPO}, \code{connected}, \code{maxLinearInbreeding}, \code{genderSym}.}
+\item{...}{Additional parameters passed on to \code{\link[=buildPeds]{buildPeds()}}, e.g., \code{sex},
+\code{knownPO}, \code{notPO}, \code{connected}, \code{maxLinearInbreeding}, \code{genderSym}.}
 }
 \value{
-An object of class \code{reconResult}, which is essentially list with the following entries:
+An object of class \code{reconResult}, which is essentially list with the
+following entries:
 \itemize{
-\item \code{pedlist} : A list of pedigrees, equal to the input argument \code{pedlist} if this was given. If \code{sortResults =   TRUE} then the list is sorted so that the most likely pedigrees come first
+\item \code{pedlist} : A list of pedigrees, equal to the input argument \code{pedlist} if
+this was given. If \code{sortResults = TRUE} then the list is sorted so that the
+most likely pedigrees come first
 \item \code{logliks} : A numerical vector containing the pedigree log-likelihoods
 \item \code{alleleMatrix} : The input allele matrix
 \item \code{labels} : A character vector of ID labels

@@ -3,7 +3,8 @@
 #' Reconstruct the most likely pedigree from genotype data
 #'
 #' @param x A `ped` object or a list of such.
-#' @param ids A vector of ID labels from `x`. By default, the genotyped members of `x` are used.
+#' @param ids A vector of ID labels from `x`. By default, the genotyped members
+#'   of `x` are used.
 #' @param alleleMatrix A matrix with two columns for each marker.
 #' @param loci A list of marker attributes.
 #' @param pedlist A list of pedigrees. If NULL, [buildPeds()] is used to
@@ -17,13 +18,15 @@
 #' @param sortResults A logical. If TRUE, the output is sorted so that the most
 #'   likely pedigree comes first.
 #' @param verbose A logical; verbose output or not
-#' @param ... Additional parameters passed on to [buildPeds()], e.g.,
-#'   `sex`, `knownPO`, `notPO`, `connected`, `maxLinearInbreeding`, `genderSym`.
+#' @param ... Additional parameters passed on to [buildPeds()], e.g., `sex`,
+#'   `knownPO`, `notPO`, `connected`, `maxLinearInbreeding`, `genderSym`.
 #'
-#' @return An object of class `reconResult`, which is essentially list with the following entries:
+#' @return An object of class `reconResult`, which is essentially list with the
+#'   following entries:
 #'
-#'   * `pedlist` : A list of pedigrees, equal to the input argument `pedlist` if this was given. If `sortResults =
-#'   TRUE` then the list is sorted so that the most likely pedigrees come first
+#'   * `pedlist` : A list of pedigrees, equal to the input argument `pedlist` if
+#'   this was given. If `sortResults = TRUE` then the list is sorted so that the
+#'   most likely pedigrees come first
 #'
 #'   * `logliks` : A numerical vector containing the pedigree log-likelihoods
 #'
