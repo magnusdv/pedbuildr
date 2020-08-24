@@ -1,14 +1,23 @@
 Package: pedbuildr
-Title: Pedigree Reconstruction in R
-Version: 0.1.0
-Authors@R: person(given = "Magnus Dehli", family = "Vigeland", role = c("aut", "cre"), email = "m.d.vigeland@medisin.uio.no")
-Description: Reconstruct the most likely pedigree, given marker data for up to 10 individuals.
-License: GPL-3
-Depends: R (>= 3.5.0), pedtools
+Title: Pedigree Reconstruction
+Version: 0.1.0.9000
+Authors@R: person("Magnus Dehli", family = "Vigeland", role = c("aut", "cre"), 
+    email = "m.d.vigeland@medisin.uio.no", 
+    comment = c(ORCID = "0000-0002-9134-4962"))
+Description: Reconstruct the most likely pedigree, given marker data for up to 
+    10 individuals.
 Encoding: UTF-8
+Language: en-GB
 LazyData: true
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
-Imports: pedprobr, forrel
+License: GPL-3
+Depends: 
+    R (>= 3.5.0),
+    pedtools (>= 0.9.5)
+Imports: 
+    pedprobr,
+    forrel,
+    glue
 URL: https://github.com/magnusdv/pedbuildr
 BugReports: https://github.com/magnusdv/pedbuildr/issues
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
