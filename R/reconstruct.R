@@ -196,6 +196,7 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
             class = "reconResult")
 }
 
+
 #' @export
 `[.reconResult` = function(x, i) {
   structure(list(pedlist = x$pedlist[i],
@@ -205,10 +206,23 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
             class = "reconResult")
 }
 
+
+#' @importFrom glue glue
+#' @export
+print.reconResult = function(x, ...) {
+  print(glue::glue("
+    Pedigree reconstruction result.
+    Input: {length(x$labels)} individuals typed with {ncol(x$alleleMatrix)/2} markers.
+    Ouput: {length(x$pedlist)} pedigrees sorted by likelihood."
+  ))
+}
+
+
 #' @importFrom graphics par plot text title
 #' @export
-plot.reconResult = function(x, titles = "logliks", nrow = NA, labs = x$labels,
-                            hatched = x$labels, col = list(red = x$labels), ...) {
+plot.reconResult = function(x, titles = "LR", nrow = NA,
+                            labs = x$labels, hatched = x$labels,
+                            col = list(red = x$labels), ...) {
 
   L = length(x$pedlist)
   if(is.na(nrow))
@@ -217,8 +231,16 @@ plot.reconResult = function(x, titles = "logliks", nrow = NA, labs = x$labels,
   op = par(mfrow = c(nrow, ceiling(L/nrow)))
   on.exit(par(op))
 
-  if(identical(titles, "logliks"))
-    titles = paste("Loglik =", round(x$logliks, 2))
+  # Titles
+  if(identical(titles, "LR")) {
+    ll = x$loglik
+    titles = bquote("Loglik" == .(round(ll[1], 2))) # bquote to avoid bold
+    if(L > 1) {
+      lr = round(exp(ll[1] - ll), 1)
+      titles2 = sapply(2:L, function(i) bquote(LR[1:.(i)] == .(lr[i])))
+      titles = c(titles, titles2)
+    }
+  }
 
   labs = x$labels
 
