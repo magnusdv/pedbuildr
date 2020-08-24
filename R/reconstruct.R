@@ -200,8 +200,8 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
 
 #' @importFrom graphics par plot text title
 #' @export
-plot.reconResult = function(x, titles = "logliks", nrow = NA, id.labels = x$labels,
-                            shaded = x$labels, col = list(red = x$labels), ...) {
+plot.reconResult = function(x, titles = "logliks", nrow = NA, labs = x$labels,
+                            hatched = x$labels, col = list(red = x$labels), ...) {
 
   L = length(x$pedlist)
   if(is.na(nrow))
@@ -234,7 +234,7 @@ plot.reconResult = function(x, titles = "logliks", nrow = NA, id.labels = x$labe
 
     ped = relabel(ped, old = seq_along(labs), labs)
 
-    plot(ped, id.label = id.labels, shaded = shaded, col = col,
+    plot(ped, labs = labs, hatched = hatched, col = col,
          margin = mar, title = tit, ...)
   }
 }

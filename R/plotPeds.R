@@ -30,8 +30,8 @@ plotPeds = function(pedlist,  titles = NULL, nrow = NA, ...) {
     labs[!labs %in% origs] = ""
     mar = if(is.null(tit)) c(1.5,1.5,1.5,1.5) else c(1.5,1.5,3,1.5)
 
-    plot(ped, shaded = origs, col = list(red=origs),
-         margin = mar, id.label = labs, title = tit, ...)
+    plot(ped, hatched = origs, col = list(red = origs),
+         margin = mar, labs = labs, title = tit, ...)
   }
 }
 
