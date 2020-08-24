@@ -33,9 +33,9 @@ parent of B. Since no pedigree member have more than 2 parents, any node of
 the corresponding graphs has at most 2 incoming edges.
 
 The adjacency matrix of a graph G is a square logical matrix with TRUE in
-entry (i,j) if and only if there is an edge from node i to node j.
+entry \verb{(i,j)} if and only if there is an edge from node \code{i} to node \code{j}.
 
-Since gender is not encoded in the adjacency matrix itself, we add the vector
+Since sex is not encoded in the adjacency matrix itself, we add the vector
 of genders as an attribute \code{sex}.
 }
 \examples{
