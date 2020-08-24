@@ -130,16 +130,18 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
   if(npeds == 0)
     stop2("Empty pedigree list")
 
-  if(verbose) {
+  if(verbose)
     cat("\nComputing likelihoods of", npeds, "pedigrees\n")
-    pb = txtProgressBar(min = 0, max = npeds, style = 3) # Progress bar
-  }
+
+  # Progress bar
+  if(progbar <- verbose && interactive())
+    pb = txtProgressBar(min = 0, max = npeds, style = 3)
 
   # Compute likelihoods
   logliks = vapply(seq_len(npeds), function(i) {
 
     # Update progressbar
-    if(verbose) setTxtProgressBar(pb, i)
+    if(progbar) setTxtProgressBar(pb, i)
 
     ped = pedlist[[i]]
 
@@ -170,7 +172,7 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
     logliks = logliks[!errs]
   }
 
-  if(verbose) {
+  if(progbar) {
     close(pb) # Close progress bar
   }
 
