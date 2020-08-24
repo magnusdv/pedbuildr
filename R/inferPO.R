@@ -9,7 +9,7 @@ inferPO = function(alleleMatrix, loci, list = FALSE) {
   slist = lapply(ids, function(i)
     setMarkers(singleton(i, sex=0), alleleMatrix = alleleMatrix, locusAttributes = loci))
 
-  pairs = t.default(combn(ids, 2))
+  pairs = .comb2(ids)
   kappa = forrel::IBDestimate(slist, pairs)
 
   PO = kappa[kappa$k0 < 0.01 & kappa$k2 < 0.5, , drop = F]
