@@ -7,6 +7,7 @@
 buildPeds(
   ids,
   sex,
+  age = NULL,
   knownPO = NULL,
   allKnown = FALSE,
   notPO = NULL,
@@ -17,12 +18,16 @@ buildPeds(
 )
 }
 \arguments{
-\item{ids}{A vector of ID labels}
+\item{ids}{A vector of ID labels.}
 
 \item{sex}{A vector of the same length as \code{ids}, with entries 1 (male) or 2
-(female)}
+(female).}
 
-\item{knownPO}{A list of pairs of ID labels: The known parent-offspring pairs}
+\item{age}{A numeric vector of the same length as \code{ids}. If \code{age[i] < age[j]}, individual \code{i} will not be an ancestor of individual \code{j}. The
+numbers themselves are irrelevant, only the partial ordering is used.}
+
+\item{knownPO}{A list of pairs of ID labels: The known parent-offspring
+pairs.}
 
 \item{allKnown}{A logical. If TRUE, no other pairs than \code{knownPO} will be
 assigned as parent-offspring. If FALSE (default), all pairwise combinations
@@ -46,12 +51,12 @@ higher.}
 \item{genderSym}{A logical. If TRUE (default), pedigrees which are equal
 except for the gender distribution of the \emph{added} parents, are regarded as
 equivalent, and only one of each equivalence class is returned. Example:
-paternal vs maternal half sibs.}
+paternal vs. maternal half sibs.}
 
-\item{verbose}{A logical}
+\item{verbose}{A logical.}
 }
 \value{
-A list
+A list of pedigrees.
 }
 \description{
 Build all possible pedigrees

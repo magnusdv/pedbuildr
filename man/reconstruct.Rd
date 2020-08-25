@@ -44,7 +44,7 @@ inbreeding level in all founders}
 \item{verbose}{A logical; verbose output or not}
 
 \item{...}{Additional parameters passed on to \code{\link[=buildPeds]{buildPeds()}}, e.g., \code{sex},
-\code{knownPO}, \code{notPO}, \code{connected}, \code{maxLinearInbreeding}, \code{genderSym}.}
+\code{age}, \code{knownPO}, \code{notPO}, \code{connected}, \code{maxLinearInbreeding}, \code{genderSym}.}
 }
 \value{
 An object of class \code{reconResult}, which is essentially list with the

@@ -1,9 +1,13 @@
 #' Build all possible pedigrees
 #'
-#' @param ids A vector of ID labels
+#' @param ids A vector of ID labels.
 #' @param sex A vector of the same length as `ids`, with entries 1 (male) or 2
-#'   (female)
-#' @param knownPO A list of pairs of ID labels: The known parent-offspring pairs
+#'   (female).
+#' @param age A numeric vector of the same length as `ids`. If `age[i] <
+#'   age[j]`, individual `i` will not be an ancestor of individual `j`. The
+#'   numbers themselves are irrelevant, only the partial ordering is used.
+#' @param knownPO A list of pairs of ID labels: The known parent-offspring
+#'   pairs.
 #' @param allKnown A logical. If TRUE, no other pairs than `knownPO` will be
 #'   assigned as parent-offspring. If FALSE (default), all pairwise combinations
 #'   of ids - except those in `notPO` - will be treated as potential
@@ -22,11 +26,11 @@
 #' @param genderSym A logical. If TRUE (default), pedigrees which are equal
 #'   except for the gender distribution of the *added* parents, are regarded as
 #'   equivalent, and only one of each equivalence class is returned. Example:
-#'   paternal vs maternal half sibs.
+#'   paternal vs. maternal half sibs.
 #'
-#' @param verbose A logical
+#' @param verbose A logical.
 #'
-#' @return A list
+#' @return A list of pedigrees.
 #'
 #' @examples
 #' p = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)))
@@ -47,14 +51,17 @@
 #' # plotPeds(p3)
 #'
 #' @export
-buildPeds = function(ids, sex, knownPO = NULL, allKnown = FALSE, notPO = NULL,
+buildPeds = function(ids, sex, age = NULL,
+                     knownPO = NULL, allKnown = FALSE, notPO = NULL,
                      connected = TRUE, maxLinearInbreeding = Inf,
                      genderSym = TRUE, verbose = FALSE) {
   N = length(ids)
   if(!setequal(ids, 1:N))
     stop2("`ids` must be an integer vector of the form `1:N`")
   if(length(sex) != N)
-    stop2("`ids` and `sex` must have the same length")
+    stop2("`ids` and `sex` must have the same length\nids: ", ids, "\nsex: ", sex)
+
+  # Sort by ids
   if(!identical(ids, 1:N)) {
     ids = ids[order(ids)]
     sex = sex[order(ids)]
@@ -63,14 +70,22 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = FALSE, notPO = NULL,
   if(allKnown && is.null(knownPO))
     stop2("`knownPO` cannot be NULL when `allKnown = TRUE`")
 
+  # Convert age vector into matrix with all ordered pairs (works with NULL)
+  if(!is.null(age) && (length(age) != N || !is.numeric(age)))
+    stop2("`ids` and `age` must have the same length\nids: ", ids, "\nage: ", age)
+  ageMat = which(outer(age, age, `<`), arr.ind = TRUE)
+
   if(verbose) {
-    .knownPO = toString(vapply(knownPO, paste, collapse = "-", FUN.VALUE=""))
-    .notPO = toString(vapply(notPO, paste, collapse = "-", FUN.VALUE=""))
+    `%e%` = function(x, y) if(x != "") x else y
+    .knownPO = toString(vapply(knownPO, paste, collapse = "-", FUN.VALUE="")) %e% "-"
+    .notPO = toString(vapply(notPO, paste, collapse = "-", FUN.VALUE="")) %e% "-"
+    .age = toString(paste(ageMat[, 1], ageMat[, 2], sep = "<")) %e% "-"
 
     print(glue::glue("
       Pedigree parameters:
         ID labels: {toString(ids)}
         Sex: {toString(sex)}
+        Age info: {.age}
         Known PO: {.knownPO}
         Known non-PO: {.notPO}
         Connected only: {connected}
@@ -85,17 +100,17 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = FALSE, notPO = NULL,
   POsets = listPOsets(knownPO = knownPO, allKnown = allKnown, notPO = notPO, N)
 
   # Convert POlists to undirected adjacency matrices
-  UA = lapply(POsets, po2adj, n = N)
+  UA = lapply(POsets, function(po) po2adj(po, N))
   if(verbose) cat("  Undirected adjacency matrices:", length(UA), "\n")
 
   # For each undirAdj, build list of directed adjacency matrices
-  DA = lapply(UA, function(ua) directedAdjs(ua, sex, verbose = FALSE))
+  DA = lapply(UA, function(ua) directedAdjs(ua, sex, ageMat = ageMat, verbose = FALSE))
   DA = unlist(DA, recursive = FALSE)
   if(verbose) cat("  Directed adjacency matrices:", length(DA), "\n")
 
   # Extend each matrix by adding parents in all possible ways
-  DA_EXT = lapply(DA, addMissingParents, maxLinearInbreeding = maxLinearInbreeding,
-                  genderSym = genderSym)
+  DA_EXT = lapply(DA, function(da)
+    addMissingParents(da, maxLinearInbreeding = maxLinearInbreeding, genderSym = genderSym))
   DA_EXT = unlist(DA_EXT, recursive = FALSE)
   if(verbose) cat("  After adding parents:", length(DA_EXT), "\n")
 
@@ -106,7 +121,7 @@ buildPeds = function(ids, sex, knownPO = NULL, allKnown = FALSE, notPO = NULL,
   }
 
   # Convert to list of pedigrees
-  peds = lapply(DA_EXT, adj2ped, origSize = N)
+  peds = lapply(DA_EXT, function(a) adj2ped(a, origSize = N))
 
   invisible(peds)
 }
@@ -153,15 +168,21 @@ po2adj = function(po, n) {
   m
 }
 
-directedAdjs = function(undirAdj, sex, verbose = TRUE) {
+
+directedAdjs = function(undirAdj, sex, ageMat, verbose = TRUE) {
 
   # Environment for holding the identified pedigrees
   storage = new.env()
   storage$dirAdjs = list()
   storage$target = sum(undirAdj)/2 # the target number of edges
+  storage$ageData = lapply(unique.default(ageMat[, 1]), function(i)
+    list(id = i, older = as.numeric(ageMat[ageMat[,1] == i, 2])))
 
   # Empty (directed) adjacency matrix
   adj = adjMatrix(sex = sex)
+
+  # Apply age info
+  undirAdj[ageMat] = FALSE
 
   # Start with an individual of max degree
   id = which.max(colSums(undirAdj))
@@ -215,7 +236,10 @@ addEdge = function(adj, id, father, mother, remaining, storage, verbose = TRUE, 
   # No remaining edges?
   if(!any(remaining)) {
 
-    if(sum(adj) == storage$target && !hasCycle(adj)) { # Correct total number of edges, and no cycles
+    if(sum(adj) == storage$target &&           # correct number of edges
+       !hasCycle(adj) &&                       # no cycles
+       !ageViolation(adj, storage$ageData)     # no older descendants
+      ) {
       if(verbose) cat(indent(depth+1), "Adj matrix found\n")
       storage$dirAdjs = c(storage$dirAdjs, list(adj))
     }
@@ -234,4 +258,14 @@ addEdge = function(adj, id, father, mother, remaining, storage, verbose = TRUE, 
   for(f in c(0, PF)) for(m in c(0, PM)) {
     addEdge(adj, id, f, m, remaining, storage, verbose = verbose, depth = depth + 1)
   }
+}
+
+# Check if any individual has descendants who are supposed to be older
+ageViolation = function(adj, ageData) {
+  # ageData: List of lists: list(id = 1, older = 2:4)
+  for(dat in ageData) {
+    if(any(dat$older %in% dagDescendants(adj, dat$id, minDist = 2)))
+      return(TRUE)
+  }
+  return(FALSE)
 }

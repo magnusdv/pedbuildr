@@ -19,7 +19,7 @@
 #'   likely pedigree comes first.
 #' @param verbose A logical; verbose output or not
 #' @param ... Additional parameters passed on to [buildPeds()], e.g., `sex`,
-#'   `knownPO`, `notPO`, `connected`, `maxLinearInbreeding`, `genderSym`.
+#'   `age`, `knownPO`, `notPO`, `connected`, `maxLinearInbreeding`, `genderSym`.
 #'
 #' @return An object of class `reconResult`, which is essentially list with the
 #'   following entries:
