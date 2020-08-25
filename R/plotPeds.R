@@ -1,4 +1,5 @@
 #' @importFrom graphics par plot text title
+#' @export
 plotPeds = function(pedlist,  titles = NULL, nrow = NA, ...) {
 
   L = length(pedlist)
@@ -32,23 +33,4 @@ plotPeds = function(pedlist,  titles = NULL, nrow = NA, ...) {
     plot(ped, hatched = origs, col = list(red = origs),
          margin = mar, labs = labs, title = tit, ...)
   }
-}
-
-plotBestPeds = function(x, top = 6, ...) {
-  stopifnot2(is.numeric(top), length(top) == 1, top > 0)
-  if(!isTRUE(all(c("pedlist", "logliks", "alleleMatrix") %in% names(x)))) {
-    stop2("`x` is not a proper output of `reconstruct()`")
-  }
-
-  # Sort
-  ord = order(x$logliks, decreasing = T)
-  logliks = x$logliks[ord]
-  pedlist = x$pedlist[ord]
-
-  if(top > length(pedlist))
-    top = length(pedlist)
-
-  titles = paste("Loglik =", round(logliks, 2))
-
-  plotPeds(pedlist[1:top], titles = titles[1:top], ...)
 }
