@@ -1,5 +1,4 @@
 #' @importFrom graphics par plot text title
-#' @export
 plotPeds = function(pedlist,  titles = NULL, nrow = NA, ...) {
 
   L = length(pedlist)
@@ -35,7 +34,6 @@ plotPeds = function(pedlist,  titles = NULL, nrow = NA, ...) {
   }
 }
 
-#' @export
 plotBestPeds = function(x, top = 6, ...) {
   stopifnot2(is.numeric(top), length(top) == 1, top > 0)
   if(!isTRUE(all(c("pedlist", "logliks", "alleleMatrix") %in% names(x)))) {
