@@ -1,4 +1,6 @@
-^data-raw$
-^README\.Rmd$
-^pedbuildr\.Rproj$
+^.*\.Rproj$
 ^\.Rproj\.user$
+^README\.Rmd$
+^data-raw$
+^cran-comments\.md$
+^CRAN-RELEASE$
