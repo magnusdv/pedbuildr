@@ -32,7 +32,7 @@ library(pedbuildr)
 
 # Building pedigree lists
 
-Suppose we want to find all pedigrees linking 3 individuals: two males and one female, labeled `1`, `2` and `3` respectively. Using the default restriction to connected pedigrees, `buildPeds()` identifies 105 such pedigrees:
+Suppose we want to find all pedigrees linking 3 individuals: two males and one female, labelled `1`, `2` and `3` respectively. Using the default restriction to connected pedigrees, `buildPeds()` identifies 105 such pedigrees:
 ```{r}
 plist = buildPeds(ids = 1:3, sex = c(1, 1, 2))
 length(plist)
@@ -98,35 +98,38 @@ The aim of this section is to show how to perform pedigree reconstruction. We st
 ## Example
 Suppose the true relationship between individuals `1`, `2` and `3` is as follows:
 
-```{r echo = F, fig.height = 2.8, fig.width = 3}
-y = nuclearPed(fa = "fa", mother = "mo", children = 1:2)
-y = addDaughter(y, parent = 2, id = 3, verbose = F)
-plot(y, col = list(red = 1:3), hatched = 1:3, symbolsize = 1.2, id=1:3, margin = c(1,1,2,1))
-```
-
-To generate some data, we create the true pedigree and simulate 10 markers (each with 4 alleles). The simulation is done with `markerSim()` from the `forrel` package.
-
-```{r}
+```{r ex-ped, echo = F, fig.keep = "none", message=F}
 x = nuclearPed(fa = "fa", mother = "mo", children = 1:2)
 x = addDaughter(x, parent = 2, id = 3)
-# plot(x)
 
-# Simulate
+# Plot
+plot(x, hatched = 1:3, labs = 1:3, col = list(red = 1:3))
+```
+```{r echo = F, fig.height = 2.8, fig.width = 3}
+plot(x, hatched = 1:3, labs = 1:3, col = list(red = 1:3), symbolsize = 1.2, margin = c(1,1,1,1))
+```
+
+The pedigree is created with the following code.
+```{r, ref.label = "ex-ped", eval = F}
+```
+
+We simulate genotypes for 10 markers, each with 4 alleles. The simulation is done with the `markerSim()` function from the `forrel` package.
+```{r}
 x = forrel::markerSim(x, N = 10, ids = 1:3, alleles = 1:4, verbose = F, seed = 123)
 x
 ```
 
 
-Now let us try to reconstruct the pedigree from the data, using the `reconstruct()` function. When we feed `x` into this function, it will extract the allele matrix, marker attributes and gender data, but strip the pedigree information. It will then call our friend `buildPeds()` from the previous section to generate a list of candidate pedigrees. By default In this example we won't impose any restrictions on the pedigree space, so we simply indicate the genders.
+Now we try to reconstruct the pedigree from the data, using the `reconstruct()` function. When we feed `x` into this function, it will extract the allele matrix, marker attributes and gender data, but strip the pedigree information. It then calls `buildPeds()` to generate a list of candidate pedigrees. Finally, it computes the likelihood of each alternative, and sort them in descending probability.
+
 ```{r}
 result = reconstruct(x)
 ```
 
-The function `plotBestPeds()` show the pedigrees with the highest likelihood:
+Here are the top results:
 
 ```{r fig.height = 4, fig.width = 7}
-plotBestPeds(result, top = 6)
+plot(result[1:6])
 ```
 
 The correct pedigree was the most likely one, but only just so! With more markers the difference would have been bigger.
-
