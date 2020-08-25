@@ -5,9 +5,10 @@ hasCycle = function(m, maxlen = NA) {
   if(any(diag(m) == 1))
     return(TRUE)
 
+  n = dim(m)[1]
   if(is.na(maxlen)) {
-    rowRank = sum(rowSums(m) > 0)
-    colRank = sum(colSums(m) > 0)
+    rowRank = sum(.rowSums(m, n, n) > 0)
+    colRank = sum(.colSums(m, n, n) > 0)
     maxlen = min(rowRank, colRank)
   }
 
@@ -65,15 +66,17 @@ dagDescendants = function(adj, i, minDist = 1, maxDist = Inf) {
 
 
 isConnected = function(adj) {
+  n = dim(adj)[1]
+
   # If size 1: connected
-  if(nrow(adj) == 1)
+  if(n == 1)
     return(TRUE)
 
   # Adj of underlying (undirected) graph
   a = adj | t.default(adj)
 
   # Count in+out edges for each node
-  edgs = rowSums(a)
+  edgs = .rowSums(a, n, n)
   if(any(edgs == 0))
     return(FALSE)
 

@@ -1,20 +1,24 @@
 # Convert adjacency matrix to ped format
 adj2ped = function(adj, origSize = ncol(adj)) {
   sex = attr(adj, 'sex')
-  N = length(sex)
+  n = length(sex)
+  idvec = seq_len(n)
 
-  fid = mid = integer(N)
-  parents = which(rowSums(adj) > 0)
+  fid = mid = integer(n)
+  parents = idvec[.rowSums(adj, n, n) > 0]
 
-  # TODO: make more efficient
+
   for(i in parents) {
-    kids = which(adj[i, ] == 1)
-    switch(sex[i], {fid[kids] = i}, {mid[kids] = i})
+    kids = idvec[adj[i, ]]
+    if(sex[i] == 1)
+      fid[kids] = i
+    else
+      mid[kids] = i
   }
 
-  p = ped(id = 1:N, fid = fid, mid = mid, sex = sex, reorder = F, validate = F)
+  p = ped(id = idvec, fid = fid, mid = mid, sex = sex, reorder = F, validate = F)
 
-  # Relabel aded indivs to p1, p2, ...
+  # Relabel added indivs to p1, p2, ...
   relabelAddedParents(p, origSize)
 }
 

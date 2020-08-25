@@ -25,9 +25,10 @@
 addMissingParents = function(a, maxLinearInbreeding = Inf, genderSym = FALSE) {
   sex = attr(a, "sex")
   n = ncol(a)
+  idvec = seq_len(n)
 
-  missingFa = which(colSums(a[sex == 1, , drop = F]) == 0)
-  missingMo = which(colSums(a[sex == 2, , drop = F]) == 0)
+  missingFa = idvec[colSums(a[sex == 1, , drop = F]) == 0]
+  missingMo = idvec[colSums(a[sex == 2, , drop = F]) == 0]
 
   nMissFa = length(missingFa)
   nMissMo = length(missingMo)
@@ -36,7 +37,7 @@ addMissingParents = function(a, maxLinearInbreeding = Inf, genderSym = FALSE) {
   if(nMissMo > 7) stop2("More than 7 extra mothers needed: Too many possible combinations")
 
   # Founders (needed in a later step)
-  fou = which(colSums(a) == 0)
+  fou = idvec[colSums(a) == 0]
 
   # Setup for gender symmetry restriction
   if(genderSym) {
@@ -81,7 +82,7 @@ addMissingParents = function(a, maxLinearInbreeding = Inf, genderSym = FALSE) {
 
     # Gender restriction
     if(genderSym && newpars > 1) {
-      inv_vec = rowSums(bottom * rep(pows, each = newpars))
+      inv_vec = .rowSums(bottom * rep(pows, each = newpars), m = newpars, n = n)
       inv = paste(.mysortInt(inv_vec), collapse = "-")
       if(inv %in% observedInvariants)
         next
@@ -110,14 +111,17 @@ addMissingParents = function(a, maxLinearInbreeding = Inf, genderSym = FALSE) {
 }
 
 linearInbreeding = function(adj, descList = NULL, dist = 1) {
+  n = dim(adj)[1]
+  idvec = seq_len(n)
+
   if(is.null(descList)) {
-    descList = lapply(1:nrow(adj), function(id)
+    descList = lapply(idvec, function(id)
       dagDescendants(adj, i = id, minDist = dist))
   }
 
-  hasMultipleKids = which(rowSums(adj) > 0)
+  hasMultipleKids = idvec[.rowSums(adj, n, n) > 1]
   for(i in hasMultipleKids) {
-    kids = which(adj[i, ] == 1)
+    kids = idvec[adj[i, ] == 1]
     for(k in kids)
       if(any(kids %in% descList[[k]]))
         return(TRUE)
@@ -132,11 +136,13 @@ removeFounderParents = function(adj, fou) {
   if(length(fou) == 0)
     return(adj)
 
+  idvec = seq_len(dim(adj)[1])
+
   remov = integer()
   for(id in fou) {
     pars = adj[, id]
     if(!any(adj[pars, -id])) # If parents have no other children
-      remov = c(remov, which(pars))
+      remov = c(remov, idvec[pars])
   }
 
   if(length(remov) > 0) {
