@@ -69,6 +69,8 @@
 reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
                        pedlist = NULL, pairwise = FALSE, sortResults = TRUE,
                        founderInb = 0, verbose = TRUE, ...) {
+  st = Sys.time()
+
   if(!missing(x)) {
     if(!is.ped(x) && !is.pedList(x))
       stop2("Argument `x` must be a `ped` object, or a list of such")
@@ -186,6 +188,10 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
     pedlist = pedlist[ord]
     logliks = logliks[ord]
   }
+
+  time = Sys.time() - st
+  if(verbose)
+    message("Total time used: ", format(time, digits = 3))
 
   structure(list(pedlist = pedlist,
                  logliks = logliks,
