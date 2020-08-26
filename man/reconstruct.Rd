@@ -77,7 +77,7 @@ x = markerSim(x, N = 50, alleles = 1:3, seed = 123, verbose = FALSE)
 res = reconstruct(x, inferPO = TRUE)
 
 # Plot most likely pedigrees
-plot(res[1:6])
+plot(res, top = 6)
 
 # Alternative workflow: Extract data manually...
 m    = getAlleles(x)

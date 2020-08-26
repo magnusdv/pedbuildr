@@ -48,7 +48,7 @@
 #' res = reconstruct(x, inferPO = TRUE)
 #'
 #' # Plot most likely pedigrees
-#' plot(res[1:6])
+#' plot(res, top = 6)
 #'
 #' # Alternative workflow: Extract data manually...
 #' m    = getAlleles(x)
@@ -241,9 +241,11 @@ print.pedrec = function(x, ...) {
 
 #' @importFrom graphics par plot text title
 #' @export
-plot.pedrec = function(x, titles = "LR", nrow = NA,
-                            labs = x$labels, hatched = x$labels,
-                            col = list(red = x$labels), ...) {
+plot.pedrec = function(x, top = NULL, nrow = NA, titles = "LR", labs = x$labels,
+                       hatched = x$labels, col = list(red = x$labels), ...) {
+
+  if(!is.null(top))
+    x = x[seq_len(top)]
 
   L = length(x$pedlist)
   if(is.na(nrow))
