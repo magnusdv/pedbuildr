@@ -10,9 +10,10 @@ reconstruct(
   alleleMatrix = NULL,
   loci = NULL,
   pedlist = NULL,
-  pairwise = FALSE,
+  inferPO = FALSE,
   sortResults = TRUE,
   founderInb = 0,
+  pairwise = NULL,
   verbose = TRUE,
   ...
 )
@@ -30,7 +31,7 @@ of \code{x} are used.}
 \item{pedlist}{A list of pedigrees. If NULL, \code{\link[=buildPeds]{buildPeds()}} is used to
 generate a list.}
 
-\item{pairwise}{A logical. If TRUE, an initial stage of pairwise IBD
+\item{inferPO}{A logical. If TRUE, an initial stage of pairwise IBD
 estimation is done, in order to infer certain parent-child pairs, as well
 as certain \emph{non}-parent-child pairs. When this option is used, arguments to
 \code{knownPO} and \code{notPO} are ignored.}
@@ -40,6 +41,8 @@ likely pedigree comes first.}
 
 \item{founderInb}{A number in the interval \verb{[0,1]}, used as background
 inbreeding level in all founders}
+
+\item{pairwise}{Deprecated; renamed to \code{inferPO}.}
 
 \item{verbose}{A logical; verbose output or not}
 
@@ -63,30 +66,36 @@ Reconstruct the most likely pedigree from genotype data
 }
 \examples{
 
-# Simulate genotype data for a trio family (increase N!)
-x = forrel::markerSim(nuclearPed(1), N = 50, alleles = 1:3,
-                      seed = 123, verbose = FALSE)
+# Load `forrel` (for simulation)
+library(forrel)
 
-# Extract marker data and reconstruct
-res = reconstruct(x, pairwise = TRUE)
+### Example 1: Family trio
+x = nuclearPed()
+x = markerSim(x, N = 50, alleles = 1:3, seed = 123, verbose = FALSE)
+
+# Reconstruct
+res = reconstruct(x, inferPO = TRUE)
 
 # Plot most likely pedigrees
 plot(res[1:6])
 
 # Alternative workflow: Extract data manually...
-m = getAlleles(x)
+m    = getAlleles(x)
 loci = getLocusAttributes(x)
-sex = getSex(x)
+sex  = getSex(x)
 
 # ...and then reconstruct
 res2 = reconstruct(alleleMatrix = m, loci = loci, sex = sex,
-                  pairwise = TRUE)
+                  inferPO = TRUE)
 
-#
-y = forrel::markerSim(nuclearPed(children = c("s1", "s2")), ids = c("s1", "s2"),
-                      N = 50, alleles = 1:2, seed = 123, verbose = FALSE)
+stopifnot(identical(res, res2))
 
-# Reconstruct
+### Example 2: Full siblings
+ids = c("s1", "s2")
+y = nuclearPed(children = ids)
+y = markerSim(y, N = 50, ids = ids, seed = 123, verbose = FALSE)
+
+# Reconstruct and plot
 res3 = reconstruct(y, connected = FALSE)
 plot(res3)
 
