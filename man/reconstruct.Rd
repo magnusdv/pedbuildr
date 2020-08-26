@@ -50,7 +50,7 @@ inbreeding level in all founders}
 \code{age}, \code{knownPO}, \code{notPO}, \code{connected}, \code{maxLinearInbreeding}, \code{genderSym}.}
 }
 \value{
-An object of class \code{reconResult}, which is essentially list with the
+An object of class \code{pedrec}, which is essentially list with the
 following entries:
 \itemize{
 \item \code{pedlist} : A list of pedigrees, equal to the input argument \code{pedlist} if

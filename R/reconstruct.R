@@ -22,7 +22,7 @@
 #' @param ... Additional parameters passed on to [buildPeds()], e.g., `sex`,
 #'   `age`, `knownPO`, `notPO`, `connected`, `maxLinearInbreeding`, `genderSym`.
 #'
-#' @return An object of class `reconResult`, which is essentially list with the
+#' @return An object of class `pedrec`, which is essentially list with the
 #'   following entries:
 #'
 #'   * `pedlist` : A list of pedigrees, equal to the input argument `pedlist` if
@@ -212,23 +212,23 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
                  labels = ids,
                  errPeds = errPeds,
                  errIdx = errIdx),
-            class = "reconResult")
+            class = "pedrec")
 }
 
 
 #' @export
-`[.reconResult` = function(x, i) {
+`[.pedrec` = function(x, i) {
   structure(list(pedlist = x$pedlist[i],
                  logliks = x$logliks[i],
                  alleleMatrix = x$alleleMatrix,
                  labels = x$labels),
-            class = "reconResult")
+            class = "pedrec")
 }
 
 
 #' @importFrom glue glue
 #' @export
-print.reconResult = function(x, ...) {
+print.pedrec = function(x, ...) {
   print(glue::glue("
     Pedigree reconstruction result.
     Input: {length(x$labels)} individuals typed with {ncol(x$alleleMatrix)/2} markers.
@@ -239,7 +239,7 @@ print.reconResult = function(x, ...) {
 
 #' @importFrom graphics par plot text title
 #' @export
-plot.reconResult = function(x, titles = "LR", nrow = NA,
+plot.pedrec = function(x, titles = "LR", nrow = NA,
                             labs = x$labels, hatched = x$labels,
                             col = list(red = x$labels), ...) {
 
