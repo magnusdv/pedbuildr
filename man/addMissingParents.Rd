@@ -4,16 +4,16 @@
 \alias{addMissingParents}
 \title{Add missing parents to a pedigree adjacency matrix}
 \usage{
-addMissingParents(a, maxLinearInbreeding = Inf, genderSym = FALSE)
+addMissingParents(a, maxLinearInb = Inf, genderSym = FALSE)
 }
 \arguments{
 \item{a}{An adjMatrix object}
 
-\item{maxLinearInbreeding}{A nonnegative integer, or \code{Inf} (default). If this
+\item{maxLinearInb}{A nonnegative integer, or \code{Inf} (default). If this
 is a finite number, it disallows mating between pedigree members X and Y if
 X is a linear descendant of Y separated by more than the given number. For
-example, setting \code{maxLinearInbreeding = 0} forbids mating between
-parent-child, grandparent-grandchild, a.s.o. If \code{maxLinearInbreeding = 1}
+example, setting \code{maxLinearInb = 0} forbids mating between
+parent-child, grandparent-grandchild, a.s.o. If \code{maxLinearInb = 1}
 then parent-child matings are allowed, but not grandparent-grandchild or
 higher.}
 

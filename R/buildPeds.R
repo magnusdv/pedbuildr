@@ -16,11 +16,11 @@
 #'   parent-offspring.
 #' @param connected A logical. If TRUE (default), only connected pedigrees are
 #'   returned.
-#' @param maxLinearInbreeding A nonnegative integer, or `Inf` (default). If this
+#' @param maxLinearInb A nonnegative integer, or `Inf` (default). If this
 #'   is a finite number, it disallows mating between pedigree members X and Y if
 #'   X is a linear descendant of Y separated by more than the given number. For
-#'   example, setting `maxLinearInbreeding = 0` forbids mating between
-#'   parent-child, grandparent-grandchild, a.s.o. If `maxLinearInbreeding = 1`
+#'   example, setting `maxLinearInb = 0` forbids mating between
+#'   parent-child, grandparent-grandchild, a.s.o. If `maxLinearInb = 1`
 #'   then parent-child matings are allowed, but not grandparent-grandchild or
 #'   higher.
 #' @param genderSym A logical. If TRUE (default), pedigrees which are equal
@@ -46,14 +46,14 @@
 #'
 #' # Remove pedigrees with linear inbreeding (e.g. parent-child)
 #' p3 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
-#'               maxLinearInbreeding = 0)
+#'               maxLinearInb = 0)
 #' stopifnot(length(p3) == 7)
 #' # plotPeds(p3)
 #'
 #' @export
 buildPeds = function(ids, sex, age = NULL,
                      knownPO = NULL, allKnown = FALSE, notPO = NULL,
-                     connected = TRUE, maxLinearInbreeding = Inf,
+                     connected = TRUE, maxLinearInb = Inf,
                      genderSym = TRUE, verbose = FALSE) {
   N = length(ids)
   if(!setequal(ids, 1:N))
@@ -89,7 +89,7 @@ buildPeds = function(ids, sex, age = NULL,
         Known non-PO: {.notPO}
         Connected only: {connected}
         Symmetry filter: {genderSym}
-        Linear inbreeding: {maxLinearInbreeding}"
+        Linear inbreeding: {maxLinearInb}"
     ))
   }
 
@@ -109,7 +109,7 @@ buildPeds = function(ids, sex, age = NULL,
 
   # Extend each matrix by adding parents in all possible ways
   DA_EXT = lapply(DA, function(da)
-    addMissingParents(da, maxLinearInbreeding = maxLinearInbreeding, genderSym = genderSym))
+    addMissingParents(da, maxLinearInb = maxLinearInb, genderSym = genderSym))
   DA_EXT = unlist(DA_EXT, recursive = FALSE)
   if(verbose) cat("  After adding parents:", length(DA_EXT), "\n")
 

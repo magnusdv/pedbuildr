@@ -1,11 +1,11 @@
 #' Add missing parents to a pedigree adjacency matrix
 #'
 #' @param a An adjMatrix object
-#' @param maxLinearInbreeding A nonnegative integer, or `Inf` (default). If this
+#' @param maxLinearInb A nonnegative integer, or `Inf` (default). If this
 #'   is a finite number, it disallows mating between pedigree members X and Y if
 #'   X is a linear descendant of Y separated by more than the given number. For
-#'   example, setting `maxLinearInbreeding = 0` forbids mating between
-#'   parent-child, grandparent-grandchild, a.s.o. If `maxLinearInbreeding = 1`
+#'   example, setting `maxLinearInb = 0` forbids mating between
+#'   parent-child, grandparent-grandchild, a.s.o. If `maxLinearInb = 1`
 #'   then parent-child matings are allowed, but not grandparent-grandchild or
 #'   higher.
 #' @param genderSym A logical. If TRUE, pedigrees which are equal except for the
@@ -22,7 +22,7 @@
 #' addMissingParents(b)
 #'
 #' @export
-addMissingParents = function(a, maxLinearInbreeding = Inf, genderSym = FALSE) {
+addMissingParents = function(a, maxLinearInb = Inf, genderSym = FALSE) {
   sex = attr(a, "sex")
   n = ncol(a)
   idvec = seq_len(n)
@@ -46,10 +46,10 @@ addMissingParents = function(a, maxLinearInbreeding = Inf, genderSym = FALSE) {
   }
 
   # List of descendants
-  checkInb = maxLinearInbreeding < Inf
+  checkInb = maxLinearInb < Inf
   if(checkInb)
     descList = lapply(1:n, function(id)
-      dagDescendants(a, id, minDist = maxLinearInbreeding + 1))
+      dagDescendants(a, id, minDist = maxLinearInb + 1))
 
   # All set partitions for the fathers and the mothers
   if(nMissFa > 0)

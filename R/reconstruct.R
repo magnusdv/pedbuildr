@@ -20,7 +20,7 @@
 #' @param pairwise Deprecated; renamed to `inferPO`.
 #' @param verbose A logical; verbose output or not
 #' @param ... Additional parameters passed on to [buildPeds()], e.g., `sex`,
-#'   `age`, `knownPO`, `notPO`, `connected`, `maxLinearInbreeding`, `genderSym`.
+#'   `age`, `knownPO`, `notPO`, `connected`, `maxLinearInb`, `genderSym`.
 #'
 #' @return An object of class `pedrec`, which is essentially list with the
 #'   following entries:
