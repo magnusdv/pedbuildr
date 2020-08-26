@@ -151,7 +151,7 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
     stop2("Empty pedigree list")
 
   if(verbose)
-    cat("\nComputing the likelihood of", npeds, "pedigrees\n")
+    cat("\nComputing the likelihood of", npeds, "pedigrees.\n")
 
   # Progress bar
   if(progbar <- verbose && interactive())
@@ -197,6 +197,8 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
   }
 
   if(sortResults) {
+    if(verbose)
+      cat("Sorting by descending likelihood.\n")
     ord = order(logliks, decreasing = TRUE)
     pedlist = pedlist[ord]
     logliks = logliks[ord]
@@ -204,7 +206,7 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
 
   time = Sys.time() - st
   if(verbose)
-    cat("Total time used: ", format(time, digits = 3))
+    cat("Total time used: ", format(time, digits = 3), "\n")
 
   structure(list(pedlist = pedlist,
                  logliks = logliks,
