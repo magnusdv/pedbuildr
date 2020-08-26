@@ -17,6 +17,15 @@ stopifnot2 = function(...) {
   }
 }
 
+
+`%||%` = function(x, y) {
+  if(is.null(x)) y else x
+}
+
+`%e%` = function(x, y) {
+  if(x == "") y else x
+}
+
 as_int = function(m) {
   structure(as.integer(m), dim = dim(m))
 }

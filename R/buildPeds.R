@@ -76,7 +76,6 @@ buildPeds = function(ids, sex, age = NULL,
   ageMat = which(outer(age, age, `<`), arr.ind = TRUE)
 
   if(verbose) {
-    `%e%` = function(x, y) if(x != "") x else y
     .knownPO = toString(vapply(knownPO, paste, collapse = "-", FUN.VALUE="")) %e% "-"
     .notPO = toString(vapply(notPO, paste, collapse = "-", FUN.VALUE="")) %e% "-"
     .age = toString(paste(ageMat[, 1], ageMat[, 2], sep = "<")) %e% "-"
