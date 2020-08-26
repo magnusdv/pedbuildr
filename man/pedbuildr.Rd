@@ -3,7 +3,8 @@
 \docType{package}
 \name{pedbuildr}
 \alias{pedbuildr}
-\title{pedbuildr: Pedigree reconstruction in R}
+\title{pedbuildr: Pedigree reconstruction}
 \description{
-Functions for generating all possible pedigrees connecting a given set of individuals
+Reconstruct the most likely pedigree, given marker data for up to 10
+individuals.
 }
