@@ -259,7 +259,7 @@ plot.pedrec = function(x, top = NULL, nrow = NA, titles = "LR", labs = x$labels,
     ll = x$loglik
     titles = bquote("Loglik" == .(round(ll[1], 2))) # bquote to avoid bold
     if(L > 1) {
-      lr = round(exp(ll[1] - ll), 1)
+      lr = sprintf("%.4g", exp(ll[1] - ll))
       titles2 = sapply(2:L, function(i) bquote(LR[1:.(i)] == .(lr[i])))
       titles = c(titles, titles2)
     }
