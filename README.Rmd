@@ -51,20 +51,20 @@ The function `plotPeds()` is a thin wrapper around `pedtools::plot.ped()`, and h
 With more than a handful individuals, the number of pedigrees quickly becomes uncontrollably large. Hence it becomes vital to impose restrictions on the pedigree space. 
 
 #### Linear inbreeding
-As a further restriction, one may disallow certain types of inbreeding. Many of the pedigrees found above contain matings between parent-offspring, or even grandparent-grandchild. In many practical cases these may be irrelevant. To skip pedigrees with such features, we add `maxLinearInbreeding = 0`. 
+As a further restriction, one may disallow certain types of inbreeding. Many of the pedigrees found above contain matings between parent-offspring, or even grandparent-grandchild. In many practical cases these may be irrelevant. To skip pedigrees with such features, we add `maxLinearInb = 0`. 
 
 ```{r}
-plist2 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInbreeding = 0)
+plist2 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInb = 0)
 length(plist2)
 ```
 
-If we set `maxLinearInbreeding = 1` instead, then parent-child mating is allowed, but not grandparent-grandchild or higher separations.
+If we set `maxLinearInb = 1` instead, then parent-child mating is allowed, but not grandparent-grandchild or higher separations.
 
 #### Known parent-child pairs
 Known parent-child pairs are conveyed to `buildPeds()` using the `knownPO` parameter. For instance, in our running example suppose we know that 2 and 3 form a parent-child pair (in some order).
 
 ```{r}
-plist3 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInbreeding = 0, 
+plist3 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInb = 0, 
                    knownPO = list(2:3))
 length(plist3)
 ```
@@ -79,7 +79,7 @@ plotPeds(plist3[c(2, 3, 9, 18)])
 We may also know that certain pairs are *not* parent-child; this can be imposed by using the `notPO` parameter. Another option is to set `allKnown = TRUE`, meaning that `knownPO` should be taken as the complete list of parent-child pairs among the input individuals. We add this to our running example:
 
 ```{r}
-plist4 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInbreeding = 0, 
+plist4 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInb = 0, 
                    knownPO = list(2:3), allKnown = TRUE)
 length(plist4)
 ```
@@ -89,8 +89,6 @@ Here are the remaining pedigrees:
 plotPeds(plist4)
 ```
 
-## Which pedigrees are included in the `buildPeds()` algorithm?
-TODO
 
 # Pedigree reconstruction
 The aim of this section is to show how to perform pedigree reconstruction. We start with the "true" pedigree and simulate some marker data for it. We will then try to reconstruct it from the marker data.
@@ -129,7 +127,7 @@ result = reconstruct(x)
 Here are the top results:
 
 ```{r fig.height = 4, fig.width = 7}
-plot(result[1:6])
+plot(result, top = 6)
 ```
 
 The correct pedigree was the most likely one, but only just so! With more markers the difference would have been bigger.

@@ -63,15 +63,15 @@ As a further restriction, one may disallow certain types of inbreeding.
 Many of the pedigrees found above contain matings between
 parent-offspring, or even grandparent-grandchild. In many practical
 cases these may be irrelevant. To skip pedigrees with such features, we
-add `maxLinearInbreeding = 0`.
+add `maxLinearInb = 0`.
 
 ``` r
-plist2 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInbreeding = 0)
+plist2 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInb = 0)
 length(plist2)
 #> [1] 50
 ```
 
-If we set `maxLinearInbreeding = 1` instead, then parent-child mating is
+If we set `maxLinearInb = 1` instead, then parent-child mating is
 allowed, but not grandparent-grandchild or higher separations.
 
 #### Known parent-child pairs
@@ -81,7 +81,7 @@ Known parent-child pairs are conveyed to `buildPeds()` using the
 know that 2 and 3 form a parent-child pair (in some order).
 
 ``` r
-plist3 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInbreeding = 0, 
+plist3 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInb = 0, 
                    knownPO = list(2:3))
 length(plist3)
 #> [1] 19
@@ -104,7 +104,7 @@ complete list of parent-child pairs among the input individuals. We add
 this to our running example:
 
 ``` r
-plist4 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInbreeding = 0, 
+plist4 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInb = 0, 
                    knownPO = list(2:3), allKnown = TRUE)
 length(plist4)
 #> [1] 8
@@ -117,10 +117,6 @@ plotPeds(plist4)
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
-
-## Which pedigrees are included in the `buildPeds()` algorithm?
-
-TODO
 
 # Pedigree reconstruction
 
@@ -188,14 +184,15 @@ result = reconstruct(x)
 #>   After adding parents: 124 
 #>   Connected solutions: 105 
 #> 
-#> Computing the likelihood of 105 pedigrees
-#> Total time used: 1.18 secs
+#> Computing the likelihood of 105 pedigrees.
+#> Sorting by descending likelihood.
+#> Total time used:  1.22 secs
 ```
 
 Here are the top results:
 
 ``` r
-plot(result[1:6])
+plot(result, top = 6)
 ```
 
 <img src="man/figures/README-unnamed-chunk-13-1.png" style="display: block; margin: auto;" />
