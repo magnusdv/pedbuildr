@@ -14,6 +14,7 @@ reconstruct(
   sortResults = TRUE,
   founderInb = 0,
   pairwise = NULL,
+  genderSym = NULL,
   verbose = TRUE,
   ...
 )
@@ -42,12 +43,12 @@ likely pedigree comes first.}
 \item{founderInb}{A number in the interval \verb{[0,1]}, used as background
 inbreeding level in all founders}
 
-\item{pairwise}{Deprecated; renamed to \code{inferPO}.}
+\item{pairwise, genderSym}{Deprecated.}
 
 \item{verbose}{A logical; verbose output or not}
 
 \item{...}{Additional parameters passed on to \code{\link[=buildPeds]{buildPeds()}}, e.g., \code{sex},
-\code{age}, \code{knownPO}, \code{notPO}, \code{connected}, \code{maxLinearInb}, \code{genderSym}.}
+\code{age}, \code{knownPO}, \code{notPO}, \code{connected}, \code{maxLinearInb}, \code{sexSymmetry}.}
 }
 \value{
 An object of class \code{pedrec}, which is essentially list with the

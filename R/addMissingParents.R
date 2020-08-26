@@ -8,7 +8,7 @@
 #'   parent-child, grandparent-grandchild, a.s.o. If `maxLinearInb = 1`
 #'   then parent-child matings are allowed, but not grandparent-grandchild or
 #'   higher.
-#' @param genderSym A logical. If TRUE, pedigrees which are equal except for the
+#' @param sexSymmetry A logical. If TRUE, pedigrees which are equal except for the
 #'   gender distribution of the *added* parents, are regarded as equivalent, and
 #'   only one of each equivalence class is returned. Example: paternal vs
 #'   maternal half sibs.
@@ -22,7 +22,7 @@
 #' addMissingParents(b)
 #'
 #' @export
-addMissingParents = function(a, maxLinearInb = Inf, genderSym = FALSE) {
+addMissingParents = function(a, maxLinearInb = Inf, sexSymmetry = FALSE) {
   sex = attr(a, "sex")
   n = ncol(a)
   idvec = seq_len(n)
@@ -40,7 +40,7 @@ addMissingParents = function(a, maxLinearInb = Inf, genderSym = FALSE) {
   fou = idvec[colSums(a) == 0]
 
   # Setup for gender symmetry restriction
-  if(genderSym) {
+  if(sexSymmetry) {
     observedInvariants = character()
     pows = 2^(0:(n - 1))
   }
@@ -81,7 +81,7 @@ addMissingParents = function(a, maxLinearInb = Inf, genderSym = FALSE) {
     bottom = rbind(FA, MO)
 
     # Gender restriction
-    if(genderSym && newpars > 1) {
+    if(sexSymmetry && newpars > 1) {
       inv_vec = .rowSums(bottom * rep(pows, each = newpars), m = newpars, n = n)
       inv = paste(.mysortInt(inv_vec), collapse = "-")
       if(inv %in% observedInvariants)

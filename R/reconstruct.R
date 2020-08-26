@@ -17,10 +17,10 @@
 #'   inbreeding level in all founders
 #' @param sortResults A logical. If TRUE, the output is sorted so that the most
 #'   likely pedigree comes first.
-#' @param pairwise Deprecated; renamed to `inferPO`.
+#' @param pairwise,genderSym Deprecated.
 #' @param verbose A logical; verbose output or not
 #' @param ... Additional parameters passed on to [buildPeds()], e.g., `sex`,
-#'   `age`, `knownPO`, `notPO`, `connected`, `maxLinearInb`, `genderSym`.
+#'   `age`, `knownPO`, `notPO`, `connected`, `maxLinearInb`, `sexSymmetry`.
 #'
 #' @return An object of class `pedrec`, which is essentially list with the
 #'   following entries:
@@ -75,12 +75,16 @@
 #' @export
 reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
                        pedlist = NULL, inferPO = FALSE, sortResults = TRUE,
-                       founderInb = 0, pairwise = NULL, verbose = TRUE, ...) {
+                       founderInb = 0, pairwise = NULL, genderSym = NULL,
+                       verbose = TRUE, ...) {
   if(!is.null(pairwise)) {
     message("Argument `pairwise` has been renamed to `inferPO` and will be removed in a future version")
     inferPO = pairwise
   }
-
+  if(!is.null(genderSym)) {
+    message("Argument `genderSym` has been renamed to `sexSymmetry` and will be removed in a future version")
+    sexSymmetry = genderSym
+  }
   st = Sys.time()
 
   if(!missing(x)) {

@@ -4,7 +4,7 @@
 \alias{addMissingParents}
 \title{Add missing parents to a pedigree adjacency matrix}
 \usage{
-addMissingParents(a, maxLinearInb = Inf, genderSym = FALSE)
+addMissingParents(a, maxLinearInb = Inf, sexSymmetry = FALSE)
 }
 \arguments{
 \item{a}{An adjMatrix object}
@@ -17,7 +17,7 @@ parent-child, grandparent-grandchild, a.s.o. If \code{maxLinearInb = 1}
 then parent-child matings are allowed, but not grandparent-grandchild or
 higher.}
 
-\item{genderSym}{A logical. If TRUE, pedigrees which are equal except for the
+\item{sexSymmetry}{A logical. If TRUE, pedigrees which are equal except for the
 gender distribution of the \emph{added} parents, are regarded as equivalent, and
 only one of each equivalence class is returned. Example: paternal vs
 maternal half sibs.}

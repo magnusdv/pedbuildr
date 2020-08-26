@@ -13,7 +13,7 @@ buildPeds(
   notPO = NULL,
   connected = TRUE,
   maxLinearInb = Inf,
-  genderSym = TRUE,
+  sexSymmetry = TRUE,
   verbose = FALSE
 )
 }
@@ -48,7 +48,7 @@ parent-child, grandparent-grandchild, a.s.o. If \code{maxLinearInb = 1}
 then parent-child matings are allowed, but not grandparent-grandchild or
 higher.}
 
-\item{genderSym}{A logical. If TRUE (default), pedigrees which are equal
+\item{sexSymmetry}{A logical. If TRUE (default), pedigrees which are equal
 except for the gender distribution of the \emph{added} parents, are regarded as
 equivalent, and only one of each equivalence class is returned. Example:
 paternal vs. maternal half sibs.}
@@ -69,7 +69,7 @@ stopifnot(length(p) == 25)
 # By default, one pedigree was removed above.
 # Keep all gender combinations (in this case paternal/maternal half sibs):
 p2 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
-              genderSym = FALSE)
+              sexSymmetry = FALSE)
 stopifnot(length(p2) == 26)
 # plotPeds(p2)
 

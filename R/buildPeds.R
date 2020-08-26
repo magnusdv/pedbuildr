@@ -23,7 +23,7 @@
 #'   parent-child, grandparent-grandchild, a.s.o. If `maxLinearInb = 1`
 #'   then parent-child matings are allowed, but not grandparent-grandchild or
 #'   higher.
-#' @param genderSym A logical. If TRUE (default), pedigrees which are equal
+#' @param sexSymmetry A logical. If TRUE (default), pedigrees which are equal
 #'   except for the gender distribution of the *added* parents, are regarded as
 #'   equivalent, and only one of each equivalence class is returned. Example:
 #'   paternal vs. maternal half sibs.
@@ -40,7 +40,7 @@
 #' # By default, one pedigree was removed above.
 #' # Keep all gender combinations (in this case paternal/maternal half sibs):
 #' p2 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
-#'               genderSym = FALSE)
+#'               sexSymmetry = FALSE)
 #' stopifnot(length(p2) == 26)
 #' # plotPeds(p2)
 #'
@@ -54,7 +54,7 @@
 buildPeds = function(ids, sex, age = NULL,
                      knownPO = NULL, allKnown = FALSE, notPO = NULL,
                      connected = TRUE, maxLinearInb = Inf,
-                     genderSym = TRUE, verbose = FALSE) {
+                     sexSymmetry = TRUE, verbose = FALSE) {
   N = length(ids)
   if(!setequal(ids, 1:N))
     stop2("`ids` must be an integer vector of the form `1:N`")
@@ -88,7 +88,7 @@ buildPeds = function(ids, sex, age = NULL,
         Known PO: {.knownPO}
         Known non-PO: {.notPO}
         Connected only: {connected}
-        Symmetry filter: {genderSym}
+        Symmetry filter: {sexSymmetry}
         Linear inbreeding: {maxLinearInb}"
     ))
   }
@@ -109,7 +109,7 @@ buildPeds = function(ids, sex, age = NULL,
 
   # Extend each matrix by adding parents in all possible ways
   DA_EXT = lapply(DA, function(da)
-    addMissingParents(da, maxLinearInb = maxLinearInb, genderSym = genderSym))
+    addMissingParents(da, maxLinearInb = maxLinearInb, sexSymmetry = sexSymmetry))
   DA_EXT = unlist(DA_EXT, recursive = FALSE)
   if(verbose) cat("  After adding parents:", length(DA_EXT), "\n")
 
