@@ -55,6 +55,8 @@ buildPeds = function(ids, sex, age = NULL,
                      knownPO = NULL, allKnown = FALSE, notPO = NULL,
                      connected = TRUE, maxLinearInb = Inf,
                      sexSymmetry = TRUE, verbose = FALSE) {
+  origIds = ids
+  ids = seq_along(ids)
   N = length(ids)
   if(!setequal(ids, 1:N))
     stop2("`ids` must be an integer vector of the form `1:N`")
@@ -76,13 +78,13 @@ buildPeds = function(ids, sex, age = NULL,
   ageMat = which(outer(age, age, `<`), arr.ind = TRUE)
 
   if(verbose) {
-    .knownPO = toString(vapply(knownPO, paste, collapse = "-", FUN.VALUE="")) %e% "-"
-    .notPO = toString(vapply(notPO, paste, collapse = "-", FUN.VALUE="")) %e% "-"
-    .age = toString(paste(ageMat[, 1], ageMat[, 2], sep = "<")) %e% "-"
+    .knownPO = toString(vapply(knownPO, function(p) paste(origIds[p], collapse = "-"), FUN.VALUE="")) %e% "-"
+    .notPO = toString(vapply(notPO, function(p) paste(origIds[p], collapse = "-"), FUN.VALUE="")) %e% "-"
+    .age = toString(paste(origIds[ageMat[, 1]], origIds[ageMat[, 2]], sep = "<")) %e% "-"
 
     print(glue::glue("
       Pedigree parameters:
-        ID labels: {toString(ids)}
+        ID labels: {toString(origIds)}
         Sex: {toString(sex)}
         Age info: {.age}
         Known PO: {.knownPO}

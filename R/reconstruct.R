@@ -19,8 +19,7 @@
 #'   likely pedigree comes first.
 #' @param pairwise,genderSym Deprecated.
 #' @param verbose A logical; verbose output or not
-#' @param ... Additional parameters passed on to [buildPeds()], e.g., `sex`,
-#'   `age`, `knownPO`, `notPO`, `connected`, `maxLinearInb`, `sexSymmetry`.
+#' @inheritParams buildPeds
 #'
 #' @return An object of class `pedrec`, which is essentially list with the
 #'   following entries:
@@ -74,9 +73,12 @@
 #' @importFrom forrel IBDestimate showInTriangle
 #' @export
 reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
-                       pedlist = NULL, inferPO = FALSE, sortResults = TRUE,
+                       pedlist = NULL, inferPO = FALSE, sex = NULL,
+                       age = NULL, knownPO = NULL, allKnown = FALSE,
+                       notPO = NULL, connected = TRUE, maxLinearInb = Inf,
+                       sexSymmetry = TRUE, sortResults = TRUE,
                        founderInb = 0, pairwise = NULL, genderSym = NULL,
-                       verbose = TRUE, ...) {
+                       verbose = TRUE) {
   if(!is.null(pairwise)) {
     message("Argument `pairwise` has been renamed to `inferPO` and will be removed in a future version")
     inferPO = pairwise
@@ -91,16 +93,17 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
     if(!is.ped(x) && !is.pedList(x))
       stop2("Argument `x` must be a `ped` object, or a list of such")
 
-    if(missing(ids))
-      ids = typedMembers(x)
-
-    ids = as.character(ids) # in case of pedlist
-
-    if(is.null(alleleMatrix))
-      alleleMatrix = getAlleles(x, ids)
-    else
+    if(!is.null(sex))
+      stop2("When a ped/pedlist `x` is given as input, `sex` must be NULL (it is extracted from `x`)")
+    if(!is.null(alleleMatrix))
       stop2("When a ped/pedlist `x` is given as input, `alleleMatrix` must be NULL. (Data is extracted from `x`)")
 
+    if(missing(ids))
+      ids = typedMembers(x)
+    ids = as.character(ids) # in case of pedlist
+
+    sex = getSex(x, ids)
+    alleleMatrix = getAlleles(x, ids)
     loci = getLocusAttributes(x, markers = loci)
   }
   else {
@@ -110,44 +113,41 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
   }
 
   # Change to numeric ids
-  idsnum = seq_along(ids)
-  rownames(alleleMatrix) = idsnum
+  if(!is.null(knownPO))
+    knownPO = lapply(knownPO, function(p) match(p, ids))
+  if(!is.null(notPO))
+    notPO = lapply(notPO, function(p) match(p, ids))
+  if(!is.null(names(age)))
+    age = as.numeric(age[ids])
+  rownames(alleleMatrix) = seq_along(ids)
 
   ### Build pedigree list
   if(is.null(pedlist)) {
-    args = list(...)
-
-    # Sex: If `x` is given, extract from this
-    if(!missing(x)) {
-      if(!is.null(args$sex))
-        stop2("When a ped/pedlist `x` is given as input, `sex` must be NULL (it is extracted from `x`)")
-      args$sex = getSex(x, ids)
-    }
 
     # (Optional) pairwise analysis to establish parent-child relationships
     if(inferPO) {
 
-      if(length(args$knownPO) > 0 | length(args$knownPO) > 0)
+      if(length(knownPO) > 0 | length(knownPO) > 0)
         stop2("`knownPO` and `notPO` must be NULL when `inferPO = TRUE`")
 
       POresult = inferPO(alleleMatrix, loci, list = TRUE)
+      knownPO = POresult$PO
+      notPO = POresult$notPO
 
       if(verbose) {
         forrel::showInTriangle(POresult$kappa, labels = TRUE, new = TRUE)
-        po = toString(sapply(POresult$PO, paste, collapse = "-")) %e% "None identified"
-        notpo = toString(sapply(POresult$notPO, paste, collapse = "-")) %e% "None identified"
+        po = toString(sapply(knownPO, paste, collapse = "-")) %e% "None identified"
+        notpo = toString(sapply(notPO, paste, collapse = "-")) %e% "None identified"
         cat("Pairwise estimation:\n")
         cat("  PO:", po, "\n")
         cat("  non-PO:", notpo, "\n\n")
       }
-
-      args$knownPO = POresult$PO
-      args$notPO = POresult$notPO
     }
 
-    args$ids = idsnum
-    args$verbose = verbose
-    pedlist = do.call(buildPeds, args)
+    pedlist = buildPeds(ids = ids, sex = sex, age = age,
+                        knownPO = knownPO, allKnown = allKnown, notPO = notPO,
+                        connected = connected, maxLinearInb = maxLinearInb,
+                        sexSymmetry = sexSymmetry, verbose = verbose)
   }
 
   npeds = length(pedlist)

@@ -11,12 +11,19 @@ reconstruct(
   loci = NULL,
   pedlist = NULL,
   inferPO = FALSE,
+  sex = NULL,
+  age = NULL,
+  knownPO = NULL,
+  allKnown = FALSE,
+  notPO = NULL,
+  connected = TRUE,
+  maxLinearInb = Inf,
+  sexSymmetry = TRUE,
   sortResults = TRUE,
   founderInb = 0,
   pairwise = NULL,
   genderSym = NULL,
-  verbose = TRUE,
-  ...
+  verbose = TRUE
 )
 }
 \arguments{
@@ -37,6 +44,39 @@ estimation is done, in order to infer certain parent-child pairs, as well
 as certain \emph{non}-parent-child pairs. When this option is used, arguments to
 \code{knownPO} and \code{notPO} are ignored.}
 
+\item{sex}{A vector of the same length as \code{ids}, with entries 1 (male) or 2
+(female).}
+
+\item{age}{A numeric vector of the same length as \code{ids}. If \code{age[i] < age[j]}, individual \code{i} will not be an ancestor of individual \code{j}. The
+numbers themselves are irrelevant, only the partial ordering is used.}
+
+\item{knownPO}{A list of pairs of ID labels: The known parent-offspring
+pairs.}
+
+\item{allKnown}{A logical. If TRUE, no other pairs than \code{knownPO} will be
+assigned as parent-offspring. If FALSE (default), all pairwise combinations
+of ids - except those in \code{notPO} - will be treated as potential
+parent-offspring pairs.}
+
+\item{notPO}{A list of pairs of ID labels: Pairs known not to be
+parent-offspring.}
+
+\item{connected}{A logical. If TRUE (default), only connected pedigrees are
+returned.}
+
+\item{maxLinearInb}{A nonnegative integer, or \code{Inf} (default). If this
+is a finite number, it disallows mating between pedigree members X and Y if
+X is a linear descendant of Y separated by more than the given number. For
+example, setting \code{maxLinearInb = 0} forbids mating between
+parent-child, grandparent-grandchild, a.s.o. If \code{maxLinearInb = 1}
+then parent-child matings are allowed, but not grandparent-grandchild or
+higher.}
+
+\item{sexSymmetry}{A logical. If TRUE (default), pedigrees which are equal
+except for the gender distribution of the \emph{added} parents, are regarded as
+equivalent, and only one of each equivalence class is returned. Example:
+paternal vs. maternal half sibs.}
+
 \item{sortResults}{A logical. If TRUE, the output is sorted so that the most
 likely pedigree comes first.}
 
@@ -46,9 +86,6 @@ inbreeding level in all founders}
 \item{pairwise, genderSym}{Deprecated.}
 
 \item{verbose}{A logical; verbose output or not}
-
-\item{...}{Additional parameters passed on to \code{\link[=buildPeds]{buildPeds()}}, e.g., \code{sex},
-\code{age}, \code{knownPO}, \code{notPO}, \code{connected}, \code{maxLinearInb}, \code{sexSymmetry}.}
 }
 \value{
 An object of class \code{pedrec}, which is essentially list with the
