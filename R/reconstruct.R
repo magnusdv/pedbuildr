@@ -232,11 +232,19 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
 `[.pedrec` = function(x, i) {
   structure(list(pedlist = x$pedlist[i],
                  logliks = x$logliks[i],
+                 kappa = x$kappa,
                  alleleMatrix = x$alleleMatrix,
+                 loci = x$loci,
                  labels = x$labels),
             class = "pedrec")
 }
 
+#' @export
+`[[.pedrec` = function(x, i) {
+  y = x$pedlist[[i]]
+  y = setMarkers(y, alleleMatrix = x$alleleMatrix, locusAttributes = x$loci)
+  relabel(y, new = x$labels, old = seq_along(x$labels))
+}
 
 #' @importFrom glue glue
 #' @export
