@@ -72,7 +72,7 @@
 #' plot(res3)
 #'
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' @importFrom forrel IBDestimate showInTriangle
+#' @importFrom forrel showInTriangle
 #' @export
 reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
                        pedlist = NULL, inferPO = FALSE, sex = NULL,

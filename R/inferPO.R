@@ -1,5 +1,7 @@
 # Estimate pairwise IBD coefficients and return
 # list of certain parent-child and *not* parent-child.
+
+#' @importFrom forrel IBDestimate
 inferPO = function(alleleMatrix, loci, list = FALSE) {
   ids = rownames(alleleMatrix)
   if(is.null(ids))
