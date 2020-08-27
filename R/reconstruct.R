@@ -24,15 +24,17 @@
 #' @return An object of class `pedrec`, which is essentially list with the
 #'   following entries:
 #'
-#'   * `pedlist` : A list of pedigrees, equal to the input argument `pedlist` if
-#'   this was given. If `sortResults = TRUE` then the list is sorted so that the
-#'   most likely pedigrees come first
+#'   * `pedlist`: A list of pedigrees, either built by [buildPeds()] or as
+#'   supplied in the input argument `pedlist`. If `sortResults = TRUE`, the
+#'   list is sorted so that the most likely pedigrees come first
 #'
-#'   * `logliks` : A numerical vector containing the pedigree log-likelihoods
+#'   * `logliks`: A numerical vector containing the pedigree log-likelihoods
 #'
-#'   * `alleleMatrix` : The input allele matrix
+#'   * `alleleMatrix`: A matrix of marker alleles
 #'
-#'   * `labels` : A character vector of ID labels
+#'   * `loci`: A list of marker locus attributes
+#'
+#'   * `labels`: A character vector of ID labels
 #'
 #' @examples
 #'
@@ -121,6 +123,8 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
     age = as.numeric(age[ids])
   rownames(alleleMatrix) = seq_along(ids)
 
+  kappa = NULL
+
   ### Build pedigree list
   if(is.null(pedlist)) {
 
@@ -133,9 +137,9 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
       POresult = inferPO(alleleMatrix, loci, list = TRUE)
       knownPO = POresult$PO
       notPO = POresult$notPO
+      kappa = POresult$kappa
 
       if(verbose) {
-        forrel::showInTriangle(POresult$kappa, labels = TRUE, new = TRUE)
         po = toString(sapply(knownPO, paste, collapse = "-")) %e% "None identified"
         notpo = toString(sapply(notPO, paste, collapse = "-")) %e% "None identified"
         cat("Pairwise estimation:\n")
@@ -214,7 +218,9 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
 
   structure(list(pedlist = pedlist,
                  logliks = logliks,
+                 kappa = kappa,
                  alleleMatrix = alleleMatrix,
+                 loci = loci,
                  labels = ids,
                  errPeds = errPeds,
                  errIdx = errIdx),

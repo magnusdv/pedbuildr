@@ -91,12 +91,13 @@ inbreeding level in all founders}
 An object of class \code{pedrec}, which is essentially list with the
 following entries:
 \itemize{
-\item \code{pedlist} : A list of pedigrees, equal to the input argument \code{pedlist} if
-this was given. If \code{sortResults = TRUE} then the list is sorted so that the
-most likely pedigrees come first
-\item \code{logliks} : A numerical vector containing the pedigree log-likelihoods
-\item \code{alleleMatrix} : The input allele matrix
-\item \code{labels} : A character vector of ID labels
+\item \code{pedlist}: A list of pedigrees, either built by \code{\link[=buildPeds]{buildPeds()}} or as
+supplied in the input argument \code{pedlist}. If \code{sortResults = TRUE}, the
+list is sorted so that the most likely pedigrees come first
+\item \code{logliks}: A numerical vector containing the pedigree log-likelihoods
+\item \code{alleleMatrix}: A matrix of marker alleles
+\item \code{loci}: A list of marker locus attributes
+\item \code{labels}: A character vector of ID labels
 }
 }
 \description{
