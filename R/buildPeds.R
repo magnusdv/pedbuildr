@@ -3,9 +3,9 @@
 #' @param ids A vector of ID labels.
 #' @param sex A vector of the same length as `ids`, with entries 1 (male) or 2
 #'   (female).
-#' @param age A numeric vector of the same length as `ids`. If `age[i] <
-#'   age[j]`, individual `i` will not be an ancestor of individual `j`. The
-#'   numbers themselves are irrelevant, only the partial ordering is used.
+#' @param age A numeric vector of the same length as `ids`. If `age[i]` is less
+#'   or equal to `age[j]`, individual `i` will not be an ancestor of individual
+#'   `j`. The numbers themselves are irrelevant, only the partial ordering.
 #' @param knownPO A list of pairs of ID labels: The known parent-offspring
 #'   pairs.
 #' @param allKnown A logical. If TRUE, no other pairs than `knownPO` will be
@@ -16,13 +16,12 @@
 #'   parent-offspring.
 #' @param connected A logical. If TRUE (default), only connected pedigrees are
 #'   returned.
-#' @param maxLinearInb A nonnegative integer, or `Inf` (default). If this
-#'   is a finite number, it disallows mating between pedigree members X and Y if
-#'   X is a linear descendant of Y separated by more than the given number. For
-#'   example, setting `maxLinearInb = 0` forbids mating between
-#'   parent-child, grandparent-grandchild, a.s.o. If `maxLinearInb = 1`
-#'   then parent-child matings are allowed, but not grandparent-grandchild or
-#'   higher.
+#' @param maxLinearInb A nonnegative integer, or `Inf` (default). If this is a
+#'   finite number, it disallows mating between pedigree members X and Y if X is
+#'   a linear descendant of Y separated by more than the given number. For
+#'   example, `maxLinearInb = 1` allows parent-child matings, but not
+#'   grandparent-grandchild or more distant. Setting `maxLinearInb = 0`
+#'   disallows all inbreeding of this type.
 #' @param sexSymmetry A logical. If TRUE (default), pedigrees which are equal
 #'   except for the gender distribution of the *added* parents, are regarded as
 #'   equivalent, and only one of each equivalence class is returned. Example:
@@ -44,7 +43,7 @@
 #' stopifnot(length(p2) == 26)
 #' # plotPeds(p2)
 #'
-#' # Remove pedigrees with linear inbreeding (e.g. parent-child)
+#' # Remove pedigrees with linear inbreeding
 #' p3 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
 #'               maxLinearInb = 0)
 #' stopifnot(length(p3) == 7)
@@ -75,12 +74,12 @@ buildPeds = function(ids, sex, age = NULL,
   # Convert age vector into matrix with all ordered pairs (works with NULL)
   if(!is.null(age) && (length(age) != N || !is.numeric(age)))
     stop2("`ids` and `age` must have the same length\nids: ", ids, "\nage: ", age)
-  ageMat = which(outer(age, age, `<`), arr.ind = TRUE)
+  ageMat = which(outer(age, age, function(x,y) x != y & x <= y), arr.ind = TRUE)
 
   if(verbose) {
     .knownPO = toString(vapply(knownPO, function(p) paste(origIds[p], collapse = "-"), FUN.VALUE="")) %e% "-"
     .notPO = toString(vapply(notPO, function(p) paste(origIds[p], collapse = "-"), FUN.VALUE="")) %e% "-"
-    .age = toString(paste(origIds[ageMat[, 1]], origIds[ageMat[, 2]], sep = "<")) %e% "-"
+    .age = toString(paste(origIds[ageMat[, 1]], origIds[ageMat[, 2]], sep = "\U2264")) %e% "-"
 
     print(glue::glue("
       Pedigree parameters:

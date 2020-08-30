@@ -23,8 +23,9 @@ buildPeds(
 \item{sex}{A vector of the same length as \code{ids}, with entries 1 (male) or 2
 (female).}
 
-\item{age}{A numeric vector of the same length as \code{ids}. If \code{age[i] < age[j]}, individual \code{i} will not be an ancestor of individual \code{j}. The
-numbers themselves are irrelevant, only the partial ordering is used.}
+\item{age}{A numeric vector of the same length as \code{ids}. If \code{age[i]} is less
+or equal to \code{age[j]}, individual \code{i} will not be an ancestor of individual
+\code{j}. The numbers themselves are irrelevant, only the partial ordering.}
 
 \item{knownPO}{A list of pairs of ID labels: The known parent-offspring
 pairs.}
@@ -40,13 +41,12 @@ parent-offspring.}
 \item{connected}{A logical. If TRUE (default), only connected pedigrees are
 returned.}
 
-\item{maxLinearInb}{A nonnegative integer, or \code{Inf} (default). If this
-is a finite number, it disallows mating between pedigree members X and Y if
-X is a linear descendant of Y separated by more than the given number. For
-example, setting \code{maxLinearInb = 0} forbids mating between
-parent-child, grandparent-grandchild, a.s.o. If \code{maxLinearInb = 1}
-then parent-child matings are allowed, but not grandparent-grandchild or
-higher.}
+\item{maxLinearInb}{A nonnegative integer, or \code{Inf} (default). If this is a
+finite number, it disallows mating between pedigree members X and Y if X is
+a linear descendant of Y separated by more than the given number. For
+example, \code{maxLinearInb = 1} allows parent-child matings, but not
+grandparent-grandchild or more distant. Setting \code{maxLinearInb = 0}
+disallows all inbreeding of this type.}
 
 \item{sexSymmetry}{A logical. If TRUE (default), pedigrees which are equal
 except for the gender distribution of the \emph{added} parents, are regarded as
@@ -73,7 +73,7 @@ p2 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
 stopifnot(length(p2) == 26)
 # plotPeds(p2)
 
-# Remove pedigrees with linear inbreeding (e.g. parent-child)
+# Remove pedigrees with linear inbreeding
 p3 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
               maxLinearInb = 0)
 stopifnot(length(p3) == 7)
