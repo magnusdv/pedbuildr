@@ -16,12 +16,12 @@
 #'
 #' @examples
 #' a = adjMatrix(c(1,0,0,0), sex=c(1,1))
-#' addMissingParents(a)
+#' pedbuildr:::addMissingParents(a)
 #'
 #' b = adjMatrix(rbind(rep(1,4), 0,0,0), sex=c(1,1,1,1))
-#' addMissingParents(b)
+#' pedbuildr:::addMissingParents(b)
 #'
-#' @export
+#' @noRd
 addMissingParents = function(a, maxLinearInb = Inf, sexSymmetry = FALSE) {
   sex = attr(a, "sex")
   n = ncol(a)

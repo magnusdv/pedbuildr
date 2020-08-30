@@ -30,12 +30,12 @@
 #' @examples
 #' # An adjacency matrix corresponding to a family trio
 #' # Member order: Father - mother - son
-#' adjMatrix(c(0,0,0,0,0,0,1,1,0), sex = c(1,2,1))
+#' pedbuildr:::adjMatrix(c(0,0,0,0,0,0,1,1,0), sex = c(1,2,1))
 #'
 #' #' # An empty adjacency matrix for 3 male individuals
-#' adjMatrix(sex = c(1,1,1))
+#' pedbuildr:::adjMatrix(sex = c(1,1,1))
 #'
-#' @export
+#' @noRd
 adjMatrix = function(adj, sex, validate = TRUE) {
   sex = as.integer(sex)
 
