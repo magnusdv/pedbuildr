@@ -4,8 +4,12 @@
 #' @param sex A vector of the same length as `ids`, with entries 1 (male) or 2
 #'   (female).
 #' @param age A numeric vector of the same length as `ids`. If `age[i]` is less
-#'   or equal to `age[j]`, individual `i` will not be an ancestor of individual
-#'   `j`. The numbers themselves are irrelevant, only the partial ordering.
+#'   than `age[j]`, individual `i` will not be an ancestor of individual `j`.
+#'   The numbers themselves are irrelevant, only the partial ordering. Note that
+#'   no interpretation is made about individuals of equal age.
+#'
+#'   Alternatively, for finer control, age information may be entered as a
+#'   character vector of inequalities, e.g., `age = c("1>2", "1>3")`.
 #' @param knownPO A list of pairs of ID labels: The known parent-offspring
 #'   pairs.
 #' @param allKnown A logical. If TRUE, no other pairs than `knownPO` will be
@@ -68,26 +72,38 @@ buildPeds = function(ids, sex, age = NULL,
     sex = sex[order(ids)]
   }
 
-  if(allKnown && is.null(knownPO))
-    stop2("`knownPO` cannot be NULL when `allKnown = TRUE`")
+  if(allKnown) {
+    if(is.null(knownPO))
+      stop2("`knownPO` cannot be NULL when `allKnown = TRUE`")
+    if(!is.null(notPO))
+      stop2("`notPO` must be NULL when `allKnown = TRUE`")
+  }
+
+  # Check that equally aged individuals are not PO
+  for(p in knownPO) {
+    if(isTRUE(age[p[1]] == age[p[2]]))
+      stop2("Parent and offspring cannot have the same age: ", p)
+  }
 
   # Convert age vector into matrix with all ordered pairs (works with NULL)
-  if(!is.null(age) && (length(age) != N || !is.numeric(age)))
-    stop2("`ids` and `age` must have the same length\nids: ", ids, "\nage: ", age)
-  ageMat = which(outer(age, age, function(x,y) x != y & x <= y), arr.ind = TRUE)
+  if(is.numeric(age))
+    age = convertNumAge(age, origIds)
+  ageMat = parseAge(age, origIds)
 
   if(verbose) {
-    .knownPO = toString(vapply(knownPO, function(p) paste(origIds[p], collapse = "-"), FUN.VALUE="")) %e% "-"
-    .notPO = toString(vapply(notPO, function(p) paste(origIds[p], collapse = "-"), FUN.VALUE="")) %e% "-"
-    .age = toString(paste(origIds[ageMat[, 1]], origIds[ageMat[, 2]], sep = "\U2264")) %e% "-"
+    .knownPO = vapply(knownPO, function(p) paste(origIds[p], collapse = "-"), FUN.VALUE="")
+    .notPO = vapply(notPO, function(p) paste(origIds[p], collapse = "-"), FUN.VALUE="")
+    .age = paste(origIds[ageMat[,2]], origIds[ageMat[,1]], sep = ">")
+
+    toStr = function(...) toString(...) %e% "-"
 
     print(glue::glue("
       Pedigree parameters:
         ID labels: {toString(origIds)}
         Sex: {toString(sex)}
-        Age info: {.age}
-        Known PO: {.knownPO}
-        Known non-PO: {.notPO}
+        Age info: {toStr(.age)}
+        Known PO: {toStr(.knownPO)}
+        Known non-PO: {toStr(.notPO)}
         Connected only: {connected}
         Symmetry filter: {sexSymmetry}
         Linear inbreeding: {maxLinearInb}"
@@ -129,11 +145,8 @@ buildPeds = function(ids, sex, age = NULL,
 # Auxiliary function for listing all possible PO sets
 #' @importFrom utils combn
 listPOsets = function(knownPO = NULL, allKnown = FALSE, notPO = NULL, n) {
-  if(allKnown) {
-    if(!is.null(notPO))
-      stop2("When `allKnown`is TRUE, `notPO` must be NULL")
+  if(allKnown)
     return(if(is.null(knownPO)) list() else list(knownPO))
-  }
 
   knownPO = lapply(knownPO, .mysortInt)
   notPO = lapply(notPO, .mysortInt)
@@ -269,3 +282,46 @@ ageViolation = function(adj, ageData) {
   }
   return(FALSE)
 }
+
+
+# Convert numeric age vector to string inequalities: "A>B,C,D", B>C"
+convertNumAge = function(a, labs = seq_along(a)) {
+  if(!is.numeric(a))
+    stop2("`age` is not numeric")
+  if(length(a) != length(labs))
+    stop2("When `age` is numeric, it must have the same length as the number of individuals")
+
+  s = lapply(seq_along(a), function(i) {
+    younger = a[i] > a
+    younger = younger & !is.na(younger)
+    if(any(younger))
+      sprintf("%s>%s", labs[i], labs[younger])
+  })
+
+  unlist(s)
+}
+
+# Convert vector to string inequalities: "A>B,C,D", B>C" to matrix
+#' @importFrom stats setNames
+parseAge = function(a, labs) {
+  if(is.null(a) || all(is.na(a)))
+    return(NULL)
+
+  if(!all(grepl(">", a)))
+    stop2("The character '>' missing from some age comparisons: ", a)
+
+  lst = lapply(strsplit(a, ">"), function(par) {
+    par1 = lapply(strsplit(par, ","), function(p) match(trimws(p), labs))
+    setNames(par1, c("o", "y"))
+  })
+
+  # Bind to a single matrix
+  # Note column order: y - o. (This is the natural choice in `directedAdjs`)
+  do.call(rbind, lapply(lst, function(l) {
+    cbind(younger = l$y,
+          older = rep(l$o, each = length(l$y)))
+  }))
+}
+
+
+

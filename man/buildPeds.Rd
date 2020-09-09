@@ -24,8 +24,12 @@ buildPeds(
 (female).}
 
 \item{age}{A numeric vector of the same length as \code{ids}. If \code{age[i]} is less
-or equal to \code{age[j]}, individual \code{i} will not be an ancestor of individual
-\code{j}. The numbers themselves are irrelevant, only the partial ordering.}
+than \code{age[j]}, individual \code{i} will not be an ancestor of individual \code{j}.
+The numbers themselves are irrelevant, only the partial ordering. Note that
+no interpretation is made about individuals of equal age.
+
+Alternatively, for finer control, age information may be entered as a
+character vector of inequalities, e.g., \code{age = c("1>2", "1>3")}.}
 
 \item{knownPO}{A list of pairs of ID labels: The known parent-offspring
 pairs.}

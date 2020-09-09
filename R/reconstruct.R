@@ -116,11 +116,18 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
 
   # Change to numeric ids
   if(!is.null(knownPO))
-    knownPO = lapply(knownPO, function(p) match(p, ids))
+    knownPO = lapply(knownPO, function(p) sort(match(p, ids)))
   if(!is.null(notPO))
-    notPO = lapply(notPO, function(p) match(p, ids))
-  if(!is.null(names(age)))
-    age = as.numeric(age[ids])
+    notPO = lapply(notPO, function(p) sort(match(p, ids)))
+
+  # If age is named, convert to full vector
+  if(is.numeric(age) && !is.null(names(age))) {
+    if(!all(names(age) %in% ids))
+      stop2("Unknown name in `age`: ", setdiff(names(age), ids))
+    age.full = rep(NA_real_, length(ids))
+    age.full[match(names(age), ids)] = age
+    age = age.full
+  }
   rownames(alleleMatrix) = seq_along(ids)
 
   kappa = NULL
