@@ -252,7 +252,7 @@ print.pedrec = function(x, ...) {
   print(glue::glue("
     Pedigree reconstruction result.
     Input: {length(x$labels)} individuals typed with {ncol(x$alleleMatrix)/2} markers.
-    Ouput: {length(x$pedlist)} pedigrees sorted by likelihood."
+    Ouput: {length(x$pedlist)} pedigrees sorted by likelihood ({length(x$errPeds)} failed)."
   ))
 }
 
