@@ -81,12 +81,6 @@ buildPeds = function(ids, sex, age = NULL, knownPO = NULL, allKnown = FALSE,
       stop2("`notPO` must be NULL when `allKnown = TRUE`")
   }
 
-  # Check that equally aged individuals are not PO
-  for(p in knownPO) {
-    if(isTRUE(age[p[1]] == age[p[2]]))
-      stop2("Parent and offspring cannot have the same age: ", p)
-  }
-
   # Convert age vector into matrix with all ordered pairs (works with NULL)
   if(is.numeric(age))
     age = convertNumAge(age, origIds)
