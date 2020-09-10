@@ -1,12 +1,16 @@
-bp = function(ids, sex = rep(1, length(ids)), verbose = TRUE, ...) {
-  buildPeds(ids, sex, verbose = verbose, ...)
+bp = function(ids, sex = rep(1, length(ids)), verb = TRUE, ...) {
+  buildPeds(ids, sex, verbose = verb, ...)
 }
 
 test_that("buildPeds cathces errors", {
-  expect_error(bp(1:3, sex = 1:2),
+  expect_error(bp(1:3, sex = 1:2, verb = F),
                "`ids` and `sex` must have the same length")
-  expect_error(bp(1:3, knownPO = list(1:2), age = c(1,1,NA)),
-               "Parent and offspring cannot have the same age")
+  expect_error(bp(1:3, sex = 1:3, verb = F),
+               "Illegal elements found in `sex`")
+  expect_error(bp(1:2, age = "a>b", verb = F),
+               "Unknown ID label in `age`")
+  expect_error(bp(1:2, age = "1", verb = F),
+               "Character '>' missing in `age` entry")
 })
 
 test_that("buildPeds() parses age correctly", {

@@ -313,20 +313,27 @@ parseAge = function(a, labs) {
   if(is.null(a) || all(is.na(a)))
     return(NULL)
 
-  if(!all(grepl(">", a)))
-    stop2("The character '>' missing from some age comparisons: ", a)
+  if(!all(good <- grepl(">", a)))
+    stop2("Character '>' missing in `age` entry: ", a[!good])
 
   lst = lapply(strsplit(a, ">"), function(par) {
-    par1 = lapply(strsplit(par, ","), function(p) match(trimws(p), labs))
+    par1 = lapply(strsplit(par, ","), trimws)
     setNames(par1, c("o", "y"))
   })
 
   # Bind to a single matrix
   # Note column order: y - o. (This is the natural choice in `directedAdjs`)
-  do.call(rbind, lapply(lst, function(l) {
+  res = do.call(rbind, lapply(lst, function(l) {
     cbind(younger = l$y,
           older = rep(l$o, each = length(l$y)))
   }))
+
+  if(!all(res %in% labs))
+    stop2("Unknown ID label in `age`: ", sort(setdiff(res, labs)))
+
+  # Convert to internal ordering
+  cbind(younger = match(res[, "younger"], labs),
+        older = match(res[, "older"], labs))
 }
 
 
