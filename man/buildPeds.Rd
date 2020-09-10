@@ -11,6 +11,7 @@ buildPeds(
   knownPO = NULL,
   allKnown = FALSE,
   notPO = NULL,
+  noChildren = NULL,
   connected = TRUE,
   maxLinearInb = Inf,
   sexSymmetry = TRUE,
@@ -31,16 +32,20 @@ no interpretation is made about individuals of equal age.
 Alternatively, for finer control, age information may be entered as a
 character vector of inequalities, e.g., \code{age = c("1>2", "1>3")}.}
 
-\item{knownPO}{A list of pairs of ID labels: The known parent-offspring
-pairs.}
+\item{knownPO}{A list of vectors of length 2, containing the ID labels of
+pairs known to be parent-offspring. By default, both directions are
+considered; use \code{age} to force a specific direction.}
 
 \item{allKnown}{A logical. If TRUE, no other pairs than \code{knownPO} will be
 assigned as parent-offspring. If FALSE (default), all pairwise combinations
 of ids - except those in \code{notPO} - will be treated as potential
 parent-offspring pairs.}
 
-\item{notPO}{A list of pairs of ID labels: Pairs known not to be
-parent-offspring.}
+\item{notPO}{A list of vectors of length 2, containing the ID labels of pairs
+known \emph{not} to be parent-offspring.}
+
+\item{noChildren}{A vector of ID labels, indicating individuals without
+children of their own.}
 
 \item{connected}{A logical. If TRUE (default), only connected pedigrees are
 returned.}

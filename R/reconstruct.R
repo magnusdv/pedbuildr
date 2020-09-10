@@ -77,8 +77,9 @@
 reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
                        pedlist = NULL, inferPO = FALSE, sex = NULL,
                        age = NULL, knownPO = NULL, allKnown = FALSE,
-                       notPO = NULL, connected = TRUE, maxLinearInb = Inf,
-                       sexSymmetry = TRUE, sortResults = TRUE,
+                       notPO = NULL, noChildren = NULL, connected = TRUE,
+                       maxLinearInb = Inf, sexSymmetry = TRUE,
+                       sortResults = TRUE,
                        founderInb = 0, pairwise = NULL, genderSym = NULL,
                        verbose = TRUE) {
   if(!is.null(pairwise)) {

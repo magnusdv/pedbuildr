@@ -10,14 +10,17 @@
 #'
 #'   Alternatively, for finer control, age information may be entered as a
 #'   character vector of inequalities, e.g., `age = c("1>2", "1>3")`.
-#' @param knownPO A list of pairs of ID labels: The known parent-offspring
-#'   pairs.
+#' @param knownPO A list of vectors of length 2, containing the ID labels of
+#'   pairs known to be parent-offspring. By default, both directions are
+#'   considered; use `age` to force a specific direction.
 #' @param allKnown A logical. If TRUE, no other pairs than `knownPO` will be
 #'   assigned as parent-offspring. If FALSE (default), all pairwise combinations
 #'   of ids - except those in `notPO` - will be treated as potential
 #'   parent-offspring pairs.
-#' @param notPO A list of pairs of ID labels: Pairs known not to be
-#'   parent-offspring.
+#' @param notPO A list of vectors of length 2, containing the ID labels of pairs
+#'   known *not* to be parent-offspring.
+#' @param noChildren A vector of ID labels, indicating individuals without
+#'   children of their own.
 #' @param connected A logical. If TRUE (default), only connected pedigrees are
 #'   returned.
 #' @param maxLinearInb A nonnegative integer, or `Inf` (default). If this is a
@@ -54,10 +57,9 @@
 #' # plotPeds(p3)
 #'
 #' @export
-buildPeds = function(ids, sex, age = NULL,
-                     knownPO = NULL, allKnown = FALSE, notPO = NULL,
-                     connected = TRUE, maxLinearInb = Inf,
-                     sexSymmetry = TRUE, verbose = FALSE) {
+buildPeds = function(ids, sex, age = NULL, knownPO = NULL, allKnown = FALSE,
+                     notPO = NULL, noChildren = NULL, connected = TRUE,
+                     maxLinearInb = Inf, sexSymmetry = TRUE, verbose = FALSE) {
   origIds = ids
   ids = seq_along(ids)
   N = length(ids)
@@ -90,6 +92,11 @@ buildPeds = function(ids, sex, age = NULL,
     age = convertNumAge(age, origIds)
   ageMat = parseAge(age, origIds)
 
+  # Check noChildren, and convert to internal
+  if(!all(noChildren %in% origIds))
+    stop2("Unknown label in `noChildren`: ", setdiff(noChildren, origIds))
+  noChildrenInt = match(noChildren, origIds)
+
   if(verbose) {
     .knownPO = vapply(knownPO, function(p) paste(origIds[p], collapse = "-"), FUN.VALUE="")
     .notPO = vapply(notPO, function(p) paste(origIds[p], collapse = "-"), FUN.VALUE="")
@@ -104,6 +111,7 @@ buildPeds = function(ids, sex, age = NULL,
         Age info: {toStr(.age)}
         Known PO: {toStr(.knownPO)}
         Known non-PO: {toStr(.notPO)}
+        No children: {toStr(noChildren)}
         Connected only: {connected}
         Symmetry filter: {sexSymmetry}
         Linear inbreeding: {maxLinearInb}"
@@ -120,7 +128,8 @@ buildPeds = function(ids, sex, age = NULL,
   if(verbose) cat("  Undirected adjacency matrices:", length(UA), "\n")
 
   # For each undirAdj, build list of directed adjacency matrices
-  DA = lapply(UA, function(ua) directedAdjs(ua, sex, ageMat = ageMat, verbose = FALSE))
+  DA = lapply(UA, function(ua)
+    directedAdjs(ua, sex, ageMat = ageMat, noChildren = noChildrenInt, verbose = FALSE))
   DA = unlist(DA, recursive = FALSE)
   if(verbose) cat("  Directed adjacency matrices:", length(DA), "\n")
 
@@ -182,7 +191,7 @@ po2adj = function(po, n) {
 }
 
 
-directedAdjs = function(undirAdj, sex, ageMat, verbose = TRUE) {
+directedAdjs = function(undirAdj, sex, ageMat, noChildren, verbose = TRUE) {
 
   # Environment for holding the identified pedigrees
   storage = new.env()
@@ -196,6 +205,9 @@ directedAdjs = function(undirAdj, sex, ageMat, verbose = TRUE) {
 
   # Apply age info
   undirAdj[ageMat] = FALSE
+
+  # Apply age info
+  undirAdj[noChildren, ] = FALSE
 
   # Start with an individual of max degree
   id = which.max(colSums(undirAdj))
