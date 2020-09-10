@@ -157,7 +157,8 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
     }
 
     pedlist = buildPeds(ids = ids, sex = sex, age = age,
-                        knownPO = knownPO, allKnown = allKnown, notPO = notPO,
+                        knownPO = knownPO, allKnown = allKnown,
+                        notPO = notPO, noChildren = noChildren,
                         connected = connected, maxLinearInb = maxLinearInb,
                         sexSymmetry = sexSymmetry, verbose = verbose)
   }
