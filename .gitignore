@@ -3,3 +3,5 @@
 .RData
 CRAN-RELEASE
 cran-comments.md
+notes-private
+Rprof.out
