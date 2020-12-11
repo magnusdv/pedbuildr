@@ -15,10 +15,10 @@
 #' @return A list of adjMatrix objects where all columns sum to either 0 or 2.
 #'
 #' @examples
-#' a = adjMatrix(c(1,0,0,0), sex=c(1,1))
+#' a = adjMatrix(c(0,0,1,0), sex=c(1,1))
 #' pedbuildr:::addMissingParents(a)
 #'
-#' b = adjMatrix(rbind(rep(1,4), 0,0,0), sex=c(1,1,1,1))
+#' b = adjMatrix(rbind(c(0,1,1,1), 0,0,0), sex=c(1,1,1,1))
 #' pedbuildr:::addMissingParents(b)
 #'
 #' @noRd

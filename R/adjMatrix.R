@@ -10,22 +10,21 @@
 #' The adjacency matrix of a graph G is a square logical matrix with TRUE in
 #' entry `(i,j)` if and only if there is an edge from node `i` to node `j`.
 #'
-#' Since sex is not encoded in the adjacency matrix itself, we add the vector
-#' of genders as an attribute `sex`.
-#'
+#' Since sex is not encoded in the adjacency matrix itself, we add the sex
+#' information as an attribute `sex`. This is an integer vector with elements 1
+#' (male) and 2 (female).
 #'
 #' @param adj A square matrix, converted internally to be of "logical" type. If
 #'   `adj` is a vector it is recycled and converted to matrix, using `sex` to
 #'   deduce the dimensions. If missing, a matrix with all elements FALSE is
 #'   returned.
-#' @param sex A gender vector, i.e. a vector where all elements are 1 (male) or
-#'   2 (female).
+#' @param sex A vector of length `ncol(adj)` indicating the sex of each
+#'   individual. All elements should be either 1 (male) or 2 (female).
 #' @param validate A logical indicating if the validity of the created object
 #'   should be checked.
 #'
 #' @return An object of class `adjMatrix`. This is a square logical matrix, with
-#'   an attribute `sex` which is an integer vector of gender codes (1 = male; 2
-#'   = female).
+#'   an attribute `sex` which is an integer vector with elements 1 or 2.
 #'
 #' @examples
 #' # An adjacency matrix corresponding to a family trio
@@ -80,6 +79,9 @@ validateAdjMatrix = function(adj) {
 
   if(nrow(adj) != length(sex))
     stop2("Length of `sex` attribute must equal the number of columns")
+
+  if(any(diag(adj)))
+    stop2("Individual is its own parent: ", which(diag(adj)))
 
   # Number of fathers for each indiv
   nFathers = colSums(adj[sex == 1, , drop = FALSE])
