@@ -1,6 +1,6 @@
 #' @importFrom graphics par plot text title
 #' @export
-plotPeds = function(pedlist,  titles = NULL, nrow = NA, ...) {
+plotPeds = function(pedlist, titles = NULL, nrow = NA, ...) {
 
   L = length(pedlist)
   if(is.na(nrow))
@@ -25,12 +25,11 @@ plotPeds = function(pedlist,  titles = NULL, nrow = NA, ...) {
     }
 
     labs = labels(ped)
-    origs = labs[!startsWith(labs, "p")]
+    origs = labs[!grepl("^e[1-9]", labs)]
 
-    labs[!labs %in% origs] = ""
     mar = if(is.null(tit)) c(1.5,1.5,1.5,1.5) else c(1.5,1.5,3,1.5)
 
     plot(ped, hatched = origs, col = list(red = origs),
-         margin = mar, labs = labs, title = tit, ...)
+         margin = mar, labs = origs, title = tit, ...)
   }
 }

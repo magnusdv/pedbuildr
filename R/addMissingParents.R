@@ -94,7 +94,7 @@ addMissingParents = function(a, maxLinearInb = Inf, sexSymmetry = FALSE) {
     adjExp = cbind(adjExp, matrix(0L, ncol = newpars, nrow = nrow(adjExp)))
 
     # Check linear inbreeding
-    if(checkInb && linearInbreeding(adjExp, descList))
+    if(checkInb && linearInb(adjExp, descList = descList))
       next
 
     # Create adjMatrix object
@@ -110,25 +110,6 @@ addMissingParents = function(a, maxLinearInb = Inf, sexSymmetry = FALSE) {
   res[!unlist(lapply(res, is.null))]
 }
 
-linearInbreeding = function(adj, descList = NULL, dist = 1) {
-  n = dim(adj)[1]
-  idvec = seq_len(n)
-
-  if(is.null(descList)) {
-    descList = lapply(idvec, function(id)
-      dagDescendants(adj, i = id, minDist = dist))
-  }
-
-  hasMultipleKids = idvec[.rowSums(adj, n, n) > 1]
-  for(i in hasMultipleKids) {
-    kids = idvec[adj[i, ] == 1]
-    for(k in kids)
-      if(any(kids %in% descList[[k]]))
-        return(TRUE)
-  }
-
-  FALSE
-}
 
 
 # Remove parents of original founders, unless these parents have other children

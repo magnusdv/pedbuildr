@@ -4,16 +4,7 @@ stop2 = function(...) {
   do.call(stop, a)
 }
 
-stopifnot2 = function(...) {
-  exprs = list(...)
 
-  for (i in seq_along(exprs)) {
-    expri = .subset2(exprs, i)
-    if (length(expri) != 1L || is.na(expri) || !expri) {
-      full_call = match.call()
-      call = deparse(full_call[[i + 1]])
-      stop(sQuote(call), " is not TRUE", call. = FALSE, domain = NA)
-    }
   }
 }
 
@@ -26,9 +17,6 @@ stopifnot2 = function(...) {
   if(x == "") y else x
 }
 
-as_int = function(m) {
-  structure(as.integer(m), dim = dim(m))
-}
 
 indent = function(depth) {
   strrep(" ", 2 * (depth - 1))
@@ -65,6 +53,42 @@ indent = function(depth) {
   sort.int(v, method = "shell")
 }
 
-.mysetdiff = function(x, y)
-  unique.default(x[match(x, y, 0L) == 0L])
+.mysetdiff = function(x, y, makeUnique = TRUE) {
+  if(is.null(y)) {
+    if(makeUnique)
+      unique.default(x)
+    else
+      x
+  }
+  else{
+    if(makeUnique)
+      unique.default(x[match(x, y, 0L) == 0L])
+    else
+      x[match(x, y, 0L) == 0L]
+  }
+}
+
+# Stripped version of expand.grid
+fast.grid = function(argslist, as.list = FALSE) {
+  nargs = length(argslist)
+  orep = nr = prod(lengths(argslist))
+  if (nargs == 0L || nr == 0L)
+    return(matrix(ncol = 0, nrow = 0))
+
+  rep.fac = 1L
+  res = NULL
+  for (x in argslist) {
+    nx = length(x)
+    orep = orep/nx
+    res = c(res, x[rep.int(rep.int(seq_len(nx), rep.int(rep.fac, nx)), orep)])  #this is res[, i]
+    rep.fac = rep.fac * nx
+  }
+
+  dim(res) = c(nr, nargs)
+  if (as.list)
+    res = lapply(seq_len(nr), function(r) res[r, ])
+
+  res
+}
+
 

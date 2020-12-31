@@ -63,16 +63,8 @@ buildPeds = function(ids, sex, age = NULL, knownPO = NULL, allKnown = FALSE,
   origIds = ids
   ids = seq_along(ids)
   N = length(ids)
-  if(!setequal(ids, 1:N))
-    stop2("`ids` must be an integer vector of the form `1:N`")
   if(length(sex) != N)
     stop2("`ids` and `sex` must have the same length\nids: ", ids, "\nsex: ", sex)
-
-  # Sort by ids
-  if(!identical(ids, 1:N)) {
-    ids = ids[order(ids)]
-    sex = sex[order(ids)]
-  }
 
   if(allKnown) {
     if(is.null(knownPO))
@@ -115,7 +107,7 @@ buildPeds = function(ids, sex, age = NULL, knownPO = NULL, allKnown = FALSE,
   if(verbose) cat("\nBuilding pedigree list:\n")
 
   # List possible sets of parent-offspring
-  POsets = listPOsets(knownPO = knownPO, allKnown = allKnown, notPO = notPO, N)
+  POsets = listPOsets(N, knownPO = knownPO, allKnown = allKnown, notPO = notPO)
 
   # Convert POlists to undirected adjacency matrices
   UA = lapply(POsets, function(po) po2adj(po, N))
@@ -135,19 +127,19 @@ buildPeds = function(ids, sex, age = NULL, knownPO = NULL, allKnown = FALSE,
 
   # If `connected = TRUE`, remove disconnected matrices
   if(connected) {
-    DA_EXT = DA_EXT[sapply(DA_EXT, isConnected)]
+    DA_EXT[!sapply(DA_EXT, isConnected)] = NULL
     if(verbose) cat("  Connected solutions:", length(DA_EXT), "\n")
   }
 
   # Convert to list of pedigrees
-  peds = lapply(DA_EXT, function(a) adj2ped(a, origSize = N))
+  peds = lapply(DA_EXT, function(a) adj2ped(a, origN = N))
 
   invisible(peds)
 }
 
 # Auxiliary function for listing all possible PO sets
 #' @importFrom utils combn
-listPOsets = function(knownPO = NULL, allKnown = FALSE, notPO = NULL, n) {
+listPOsets = function(N, knownPO = NULL, allKnown = FALSE, notPO = NULL) {
   if(allKnown)
     return(if(is.null(knownPO)) list() else list(knownPO))
 
@@ -161,26 +153,33 @@ listPOsets = function(knownPO = NULL, allKnown = FALSE, notPO = NULL, n) {
     stop2("`knownPO` and `notPO` must be disjoint: ", err)
 
   # Potential extra parent-offspring: All pairs except "knownPO" and "notPO"
-  allPO = combn(n, 2, simplify = FALSE)
+  allPO = combn(N, 2, simplify = FALSE)
   allPOchar = sapply(allPO, paste, collapse = "-")
   potentialPO = allPO[!allPOchar %in% c(knownPOchar, notPOchar)]
 
   if(length(potentialPO) == 0)
     return(list(knownPO))
 
-  # Loop over all subsets of potentialPO and add to knownPO
-  subs = expand.grid(rep(list(c(FALSE, TRUE)), length(potentialPO)))
-  totalPO = apply(subs, 1, function(s) c(knownPO, potentialPO[s]))
+  if(length(potentialPO) > 22)
+    stop2("Problem is too complex; number of potential PO relations = ", length(potentialPO))
 
-  totalPO
+  # Loop over all subsets of potentialPO and add to knownPO
+  subs = fast.grid(rep(list(c(FALSE, TRUE)), length(potentialPO)))
+  lapply(1:nrow(subs), function(i) c(knownPO, potentialPO[subs[i, ]]))
 }
 
 
 # Convert list of PO pairs to undirected (symmetric) adjacency matrix
-po2adj = function(po, n) {
-  m = matrix(FALSE, ncol = n, nrow = n)
-  for(e in po)
-    m[e[1], e[2]] = m[e[2], e[1]] = TRUE
+po2adj = function(po, N) {
+  unl = unlist(po, use.names = FALSE)
+  NR = max(unl, N)
+  m = logical(NR*NR)
+  even = seq_along(po) * 2
+  unlEven = unl[even]
+  unlOdd = unl[even - 1]
+  m[NR * (unlEven - 1) + unlOdd] = TRUE
+  m[NR * (unlOdd - 1) + unlEven] = TRUE
+  dim(m) = c(NR, NR)
   m
 }
 
@@ -224,14 +223,16 @@ addEdge = function(adj, id, father, mother, remaining, storage, verbose = TRUE, 
     cat(sprintf("%sDepth %d. ID = %d, father = %d, mother = %d, ",
                 indent(depth), depth, id, father, mother))
 
+  parents = c(father, mother)
+
   SEX = attr(adj, 'sex')
   rownum = seq_len(dim(remaining)[1])
 
   # parents of id are f and m
-  adj[c(father, mother), id] = TRUE
+  adj[parents, id] = TRUE
 
   # id is not parent of f,m
-  remaining[id, c(father, mother)] =  FALSE
+  remaining[id, parents] =  FALSE
 
   # remaining adjacent are kids of id
   kids = rownum[remaining[id, ]]
@@ -245,8 +246,8 @@ addEdge = function(adj, id, father, mother, remaining, storage, verbose = TRUE, 
     remaining[SEX == SEX[id], kids] = FALSE
     remaining[id, kids] = TRUE # restore these
 
-    # no kids are parent of c(id,f,m) # utvid til alle ancs!!!
-    remaining[kids, c(id, father, mother)] = FALSE
+    # no kids are parent of c(id,f,m) # TODO: utvid til alle ancs!!!
+    remaining[kids, c(id, parents)] = FALSE
   }
 
   # Remove from "remaining" edges involving id
@@ -309,7 +310,7 @@ convertNumAge = function(a, labs = seq_along(a)) {
 
 # Convert vector to string inequalities: "A>B,C,D", B>C" to matrix
 #' @importFrom stats setNames
-parseAge = function(a, labs) {
+parseAge = function(a, labs, output = c("matrix", "list")) {
   if(is.null(a) || all(is.na(a)))
     return(NULL)
 
@@ -332,8 +333,17 @@ parseAge = function(a, labs) {
     stop2("Unknown ID label in `age`: ", sort(setdiff(res, labs)))
 
   # Convert to internal ordering
-  cbind(younger = match(res[, "younger"], labs),
+  out = cbind(younger = match(res[, "younger"], labs),
         older = match(res[, "older"], labs))
+
+  if(match.arg(output) == "list") {
+    y = unname(out[, "younger"])
+    o = unname(out[, "older"])
+    out = lapply(seq_along(labs), function(i)
+      list(younger = y[o == i], older = o[y == i]))
+  }
+
+  out
 }
 
 

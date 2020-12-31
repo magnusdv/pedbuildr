@@ -26,22 +26,6 @@ hasCycle = function(m, maxlen = NA) {
 }
 
 
-pedmatrixAncestors = function(m, i) {
-  anc = integer(0)
-  newanc = i
-  while(TRUE) {
-    newanc = which(m[, newanc, drop=F] == 1, arr.ind = TRUE)[, 1]
-    if(length(newanc) == 0 || all(newanc %in% anc))
-      break
-    anc = c(anc, newanc)
-
-    if(i %in% newanc)
-      break
-  }
-  anc
-  #sort.default(unique.default(anc))
-}
-
 # All descendants of a node (or set of nodes) in a DAG
 dagDescendants = function(adj, i, minDist = 1, maxDist = Inf) {
   desc = if(minDist == 0) i else integer(0)
@@ -64,7 +48,7 @@ dagDescendants = function(adj, i, minDist = 1, maxDist = Inf) {
   as.integer(desc)
 }
 
-
+# Check connectedness of a directed adjacency matrix
 isConnected = function(adj) {
   n = dim(adj)[1]
 
@@ -72,7 +56,7 @@ isConnected = function(adj) {
   if(n == 1)
     return(TRUE)
 
-  # Adj of underlying (undirected) graph
+  # Adj of undirected graph
   a = adj | t.default(adj)
 
   # Count in+out edges for each node
@@ -80,25 +64,26 @@ isConnected = function(adj) {
   if(any(edgs == 0))
     return(FALSE)
 
+  nseq = seq_len(n)
+  getNeigh = function(ids) {
+    nids = length(ids)
+    if(nids == 1)
+      return(nseq[a[, ids]])
+    nseq[.rowSums(a[, ids], n, nids) > 0]
+  }
+
   # Start at node with few edges
   comp = integer()
   new = which.min(edgs)
   while(length(new) > 0) {
     comp = c(comp, new)
-    neigh = which(a[new, , drop = F], arr.ind = T)[, 2]
-    new = .mysetdiff(neigh, comp)
+    neigh = getNeigh(new) # which(a[new, , drop = F], arr.ind = T)[, 2]
+    new = .mysetdiff(neigh, comp, makeUnique = FALSE)
   }
 
   # Connected iff all are included
-  length(comp) == nrow(adj)
+  length(comp) == n
 }
 
-rmat = function(N = 5) {
-  m = matrix(0, ncol=N, nrow=N)
-  for(i in which(sample(c(T, F), N, replace = T)))
-    m[sample.int(N, size=2), i] = 1
-  diag(m) = 0
-  m
-}
 
 
