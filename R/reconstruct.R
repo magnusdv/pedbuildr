@@ -17,7 +17,6 @@
 #'   inbreeding level in all founders
 #' @param sortResults A logical. If TRUE, the output is sorted so that the most
 #'   likely pedigree comes first.
-#' @param pairwise,genderSym Deprecated.
 #' @param verbose A logical; verbose output or not
 #' @inheritParams buildPeds
 #'
@@ -33,8 +32,6 @@
 #'   * `alleleMatrix`: A matrix of marker alleles
 #'
 #'   * `loci`: A list of marker locus attributes
-#'
-#'   * `labels`: A character vector of ID labels
 #'
 #' @examples
 #'
@@ -69,27 +66,21 @@
 #'
 #' # Reconstruct and plot
 #' res3 = reconstruct(y, connected = FALSE)
+#' res3
 #' plot(res3)
 #'
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom forrel showInTriangle
 #' @export
-reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
+reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NULL,
                        pedlist = NULL, inferPO = FALSE, sex = NULL,
                        age = NULL, knownPO = NULL, allKnown = FALSE,
                        notPO = NULL, noChildren = NULL, connected = TRUE,
                        maxLinearInb = Inf, sexSymmetry = TRUE,
-                       sortResults = TRUE,
-                       founderInb = 0, pairwise = NULL, genderSym = NULL,
+                       sortResults = TRUE, founderInb = 0,
                        verbose = TRUE) {
-  if(!is.null(pairwise)) {
-    message("Argument `pairwise` has been renamed to `inferPO` and will be removed in a future version")
-    inferPO = pairwise
-  }
-  if(!is.null(genderSym)) {
-    message("Argument `genderSym` has been renamed to `sexSymmetry` and will be removed in a future version")
-    sexSymmetry = genderSym
-  }
+
+
   st = Sys.time()
 
   if(!missing(x)) {
@@ -112,24 +103,8 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
   else {
     ids = rownames(alleleMatrix)
     if(is.null(ids))
-      ids = as.character(1:nrow(alleleMatrix))
+      ids = rownames(alleleMatrix) = as.character(1:nrow(alleleMatrix))
   }
-
-  # Change to numeric ids
-  if(!is.null(knownPO))
-    knownPO = lapply(knownPO, function(p) sort(match(p, ids)))
-  if(!is.null(notPO))
-    notPO = lapply(notPO, function(p) sort(match(p, ids)))
-
-  # If age is named, convert to full vector
-  if(is.numeric(age) && !is.null(names(age))) {
-    if(!all(names(age) %in% ids))
-      stop2("Unknown name in `age`: ", setdiff(names(age), ids))
-    age.full = rep(NA_real_, length(ids))
-    age.full[match(names(age), ids)] = age
-    age = age.full
-  }
-  rownames(alleleMatrix) = seq_along(ids)
 
   kappa = NULL
 
@@ -156,7 +131,7 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
       }
     }
 
-    pedlist = buildPeds(ids = ids, sex = sex, age = age,
+    pedlist = buildPeds(labs = ids, sex = sex, extra = extra, age = age,
                         knownPO = knownPO, allKnown = allKnown,
                         notPO = notPO, noChildren = noChildren,
                         connected = connected, maxLinearInb = maxLinearInb,
@@ -183,16 +158,14 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
     ped = pedlist[[i]]
 
     # Attach marker data
-    if(is.ped(ped)) {
-      x = setMarkers(ped, alleleMatrix = alleleMatrix, locusAttributes = loci)
-      if(founderInb > 0) founderInbreeding(x, founders(x)) = founderInb
-    }
-    else {
-      x = lapply(ped, function(comp) {
-        y = setMarkers(comp, alleleMatrix = alleleMatrix, locusAttributes = loci)
-        if(founderInb > 0) founderInbreeding(y, founders(y)) = founderInb
-        y
-      })
+    x = setMarkers(ped, alleleMatrix = alleleMatrix, locusAttributes = loci)
+
+    # Founder inbreeding
+    if(founderInb > 0) {
+      if(is.pedList(x))
+        x = lapply(x, function(comp) `founderInbreeding<-`(comp, founders(comp), value = founderInb))
+      else
+        founderInbreeding(x, founders(x)) = founderInb
     }
 
     # Compute loglikelihood
@@ -230,7 +203,6 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
                  kappa = kappa,
                  alleleMatrix = alleleMatrix,
                  loci = loci,
-                 labels = ids,
                  errPeds = errPeds,
                  errIdx = errIdx),
             class = "pedrec")
@@ -243,24 +215,23 @@ reconstruct = function(x, ids, alleleMatrix = NULL, loci = NULL,
                  logliks = x$logliks[i],
                  kappa = x$kappa,
                  alleleMatrix = x$alleleMatrix,
-                 loci = x$loci,
-                 labels = x$labels),
+                 loci = x$loci),
             class = "pedrec")
 }
 
 #' @export
 `[[.pedrec` = function(x, i) {
   y = x$pedlist[[i]]
-  y = setMarkers(y, alleleMatrix = x$alleleMatrix, locusAttributes = x$loci)
-  relabel(y, new = x$labels, old = seq_along(x$labels))
+  setMarkers(y, alleleMatrix = x$alleleMatrix, locusAttributes = x$loci)
 }
 
 #' @importFrom glue glue
 #' @export
 print.pedrec = function(x, ...) {
+  am = x$alleleMatrix
   print(glue::glue("
     Pedigree reconstruction result.
-    Input: {length(x$labels)} individuals typed with {ncol(x$alleleMatrix)/2} markers.
+    Input: {nrow(am)} individuals typed with {ncol(am)/2} markers.
     Ouput: {length(x$pedlist)} pedigrees sorted by likelihood ({length(x$errPeds)} failed)."
   ))
 }
@@ -268,8 +239,9 @@ print.pedrec = function(x, ...) {
 
 #' @importFrom graphics par plot text title
 #' @export
-plot.pedrec = function(x, top = NULL, nrow = NA, titles = "LR", labs = x$labels,
-                       hatched = x$labels, col = list(red = x$labels), ...) {
+plot.pedrec = function(x, top = NULL, nrow = NA, titles = "LR",
+                       labs = rownames(x$alleleMatrix),
+                       hatched = labs, col = list(red = labs), ...) {
 
   if(!is.null(top))
     x = x[seq_len(top)]
@@ -292,9 +264,7 @@ plot.pedrec = function(x, top = NULL, nrow = NA, titles = "LR", labs = x$labels,
     }
   }
 
-  labs = x$labels
-
-  for(i in seq_along(x$pedlist)) {
+  for(i in seq_len(L)) {
     ped = x$pedlist[[i]]
 
     # Title
@@ -305,13 +275,11 @@ plot.pedrec = function(x, top = NULL, nrow = NA, titles = "LR", labs = x$labels,
 
     if(is.pedList(ped)) {
       plot(-1:1,-1:1, type="n", axes = F, xlab="", ylab="")
-      mess ="Disconnected pedigree.\n\nPlot separately with\n`pedtools::plotPedList()`."
+      mess = sprintf("Nr %d: disconnected.\n\nPlot separately with\n`plotPedList()`.", i)
       text(0, 0, mess, cex = 1.3)
       title(tit, line= -2)
       next
     }
-
-    ped = relabel(ped, old = seq_along(labs), labs)
 
     plot(ped, labs = labs, hatched = hatched, col = col,
          margin = mar, title = tit, ...)

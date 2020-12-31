@@ -1,22 +1,42 @@
-#' Build all possible pedigrees
+#' Build a list of pedigrees
 #'
-#' @param ids A vector of ID labels.
-#' @param sex A vector of the same length as `ids`, with entries 1 (male) or 2
+#' Build all pedigrees between a set of individuals, subject to given
+#' restrictions.
+#'
+#' The parameter `extra` controls which of two algorithms are used to create the
+#' pedigree list.
+#'
+#' If `extra` is a nonnegative integer, it determines the number of extra
+#' individuals allowed in the iterative pedigree construction. These extras
+#' start off with undetermined sex, meaning that both males and females are
+#' used. It should be noted that the final pedigrees may contain additional
+#' extras, since missing parents are added at the end.
+#'
+#' If `extra` is the word "parents", the algorithm is not iterative. It first
+#' generates all directed acyclic graphs between the original individuals. Then
+#' their parents are added and merged in all possible ways. This option has the
+#' advantage of not requiring an explicit/ad hoc number of "extras", but works
+#' best in smaller cases.
+#'
+#' @param labs A character vector of ID labels.
+#' @param sex A vector of the same length as `labs`, with entries 1 (male) or 2
 #'   (female).
-#' @param age A numeric vector of the same length as `ids`. If `age[i]` is less
-#'   than `age[j]`, individual `i` will not be an ancestor of individual `j`.
-#'   The numbers themselves are irrelevant, only the partial ordering. Note that
-#'   no interpretation is made about individuals of equal age.
+#' @param extra Either the word "parents", or a nonnegative integer. See
+#'   details.
+#' @param age A numeric or character vector. If numeric, and `age[i] < age[j]`,
+#'   then individual `i` will not be an ancestor of individual `j`. The numbers
+#'   themselves are irrelevant, only the partial ordering. Note that no
+#'   interpretation is made about individuals of equal age.
 #'
-#'   Alternatively, for finer control, age information may be entered as a
-#'   character vector of inequalities, e.g., `age = c("1>2", "1>3")`.
+#'   Alternatively `age` may be a character vector of inequalities, e.g., `age =
+#'   c("1>2", "1>3")`. This syntax allows finer control than the numeric
+#'   version.
 #' @param knownPO A list of vectors of length 2, containing the ID labels of
 #'   pairs known to be parent-offspring. By default, both directions are
 #'   considered; use `age` to force a specific direction.
 #' @param allKnown A logical. If TRUE, no other pairs than `knownPO` will be
-#'   assigned as parent-offspring. If FALSE (default), all pairwise combinations
-#'   of ids - except those in `notPO` - will be treated as potential
-#'   parent-offspring pairs.
+#'   assigned as parent-offspring. If FALSE (default), all pairs except those in
+#'   `notPO` are treated as potential parent-offspring.
 #' @param notPO A list of vectors of length 2, containing the ID labels of pairs
 #'   known *not* to be parent-offspring.
 #' @param noChildren A vector of ID labels, indicating individuals without
@@ -33,46 +53,38 @@
 #'   except for the gender distribution of the *added* parents, are regarded as
 #'   equivalent, and only one of each equivalence class is returned. Example:
 #'   paternal vs. maternal half sibs.
-#'
 #' @param verbose A logical.
 #'
-#' @return A list of pedigrees.
+#' @return A list of pedigrees. Each element is a `ped` object or a list of such.
 #'
 #' @examples
-#' p = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)))
-#' stopifnot(length(p) == 25)
-#' # plotPeds(p)
 #'
-#' # By default, one pedigree was removed above.
-#' # Keep all gender combinations (in this case paternal/maternal half sibs):
-#' p2 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
-#'               sexSymmetry = FALSE)
-#' stopifnot(length(p2) == 26)
-#' # plotPeds(p2)
+#' # Showing off a few of the options
+#' plist = buildPeds(1:3, sex = c(1,2,1), extra = 1, knownPO = list(1:2),
+#'              age = "1>2", maxLinearInb = 0)
+#' stopifnot(length(plist) == 12)
+#' # plotPeds(plist)
 #'
-#' # Remove pedigrees with linear inbreeding
-#' p3 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
-#'               maxLinearInb = 0)
-#' stopifnot(length(p3) == 7)
-#' # plotPeds(p3)
+#'
+#' # Slightly different output with `extra = "parents"`
+#' plist2 = buildPeds(1:3, sex = c(1,2,1), extra = "parents", knownPO = list(1:2),
+#'                    age = "1>2", maxLinearInb = 0)
+#' stopifnot(length(plist2) == 8)
+#' # plotPeds(plist2)
+#'
 #'
 #' @export
-buildPeds = function(ids, sex, age = NULL, knownPO = NULL, allKnown = FALSE,
+buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, allKnown = FALSE,
                      notPO = NULL, noChildren = NULL, connected = TRUE,
-                     maxLinearInb = Inf, sexSymmetry = TRUE, verbose = FALSE) {
-  origIds = ids
-  ids = seq_along(ids)
-  N = length(ids)
-  if(!setequal(ids, 1:N))
-    stop2("`ids` must be an integer vector of the form `1:N`")
-  if(length(sex) != N)
-    stop2("`ids` and `sex` must have the same length\nids: ", ids, "\nsex: ", sex)
+                     maxLinearInb = Inf, sexSymmetry = TRUE, verbose = TRUE) {
+  N = length(labs)
+  ids = seq_along(labs)
 
-  # Sort by ids
-  if(!identical(ids, 1:N)) {
-    ids = ids[order(ids)]
-    sex = sex[order(ids)]
-  }
+  if(length(sex) != N)
+    stop2("`labs` and `sex` must have the same length\nlabs: ", labs, "\nsex: ", sex)
+
+  if(!(identical(extra, "parents") || isCount(extra, minimum = 0)))
+     stop2('`extra` must be either the word "parents" or a nonnegative integer: ', extra)
 
   if(allKnown) {
     if(is.null(knownPO))
@@ -81,27 +93,35 @@ buildPeds = function(ids, sex, age = NULL, knownPO = NULL, allKnown = FALSE,
       stop2("`notPO` must be NULL when `allKnown = TRUE`")
   }
 
+  checkLabs = c(unlist(knownPO), unlist(notPO), noChildren)
+  if(!all(checkLabs %in% labs))
+    stop2("Unknown pedigree member: ", setdiff(labs, checkLabs))
+
+  knownPO_int = lapply(knownPO, function(p) match(p, labs))
+  notPO_int = lapply(notPO, function(p) match(p, labs))
+  noChildren_int = match(noChildren, labs)
+
   # Convert age vector into matrix with all ordered pairs (works with NULL)
   if(is.numeric(age))
-    age = convertNumAge(age, origIds)
-  ageMat = parseAge(age, origIds)
+    age = convertNumAge(age, labs)
+  ageMat = parseAge(age, labs)
 
   # Check noChildren, and convert to internal
-  if(!all(noChildren %in% origIds))
-    stop2("Unknown label in `noChildren`: ", setdiff(noChildren, origIds))
-  noChildrenInt = match(noChildren, origIds)
+  if(!all(noChildren %in% labs))
+    stop2("Unknown label in `noChildren`: ", setdiff(noChildren, labs))
 
   if(verbose) {
-    .knownPO = vapply(knownPO, function(p) paste(origIds[p], collapse = "-"), FUN.VALUE="")
-    .notPO = vapply(notPO, function(p) paste(origIds[p], collapse = "-"), FUN.VALUE="")
-    .age = paste(origIds[ageMat[,2]], origIds[ageMat[,1]], sep = ">")
+    .knownPO = sapply(knownPO, paste, collapse = "-")
+    .notPO = sapply(notPO, paste, collapse = "-")
+    .age = paste(labs[ageMat[,2]], labs[ageMat[,1]], sep = ">")
 
     toStr = function(...) toString(...) %e% "-"
 
     print(glue::glue("
       Pedigree parameters:
-        ID labels: {toString(origIds)}
+        ID labels: {toString(labs)}
         Sex: {toString(sex)}
+        Extra: {extra}
         Age info: {toStr(.age)}
         Known PO: {toStr(.knownPO)}
         Known non-PO: {toStr(.notPO)}
@@ -112,194 +132,44 @@ buildPeds = function(ids, sex, age = NULL, knownPO = NULL, allKnown = FALSE,
     ))
   }
 
-  if(verbose) cat("\nBuilding pedigree list:\n")
-
-  # List possible sets of parent-offspring
-  POsets = listPOsets(knownPO = knownPO, allKnown = allKnown, notPO = notPO, N)
-
-  # Convert POlists to undirected adjacency matrices
-  UA = lapply(POsets, function(po) po2adj(po, N))
-  if(verbose) cat("  Undirected adjacency matrices:", length(UA), "\n")
-
-  # For each undirAdj, build list of directed adjacency matrices
-  DA = lapply(UA, function(ua)
-    directedAdjs(ua, sex, ageMat = ageMat, noChildren = noChildrenInt, verbose = FALSE))
-  DA = unlist(DA, recursive = FALSE)
-  if(verbose) cat("  Directed adjacency matrices:", length(DA), "\n")
-
-  # Extend each matrix by adding parents in all possible ways
-  DA_EXT = lapply(DA, function(da)
-    addMissingParents(da, maxLinearInb = maxLinearInb, sexSymmetry = sexSymmetry))
-  DA_EXT = unlist(DA_EXT, recursive = FALSE)
-  if(verbose) cat("  After adding parents:", length(DA_EXT), "\n")
-
-  # If `connected = TRUE`, remove disconnected matrices
-  if(connected) {
-    DA_EXT = DA_EXT[sapply(DA_EXT, isConnected)]
-    if(verbose) cat("  Connected solutions:", length(DA_EXT), "\n")
+  if(extra == "parents") {
+    buildPedsParents(labs = labs, sex = sex, ageMat = ageMat, knownPO = knownPO_int,
+                     allKnown = allKnown, notPO = notPO_int, noChildren = noChildren_int, connected = connected,
+                     maxLinearInb = maxLinearInb, sexSymmetry = sexSymmetry, verbose = verbose)
   }
-
-  # Convert to list of pedigrees
-  peds = lapply(DA_EXT, function(a) adj2ped(a, origSize = N))
-
-  invisible(peds)
-}
-
-# Auxiliary function for listing all possible PO sets
-#' @importFrom utils combn
-listPOsets = function(knownPO = NULL, allKnown = FALSE, notPO = NULL, n) {
-  if(allKnown)
-    return(if(is.null(knownPO)) list() else list(knownPO))
-
-  knownPO = lapply(knownPO, .mysortInt)
-  notPO = lapply(notPO, .mysortInt)
-
-  # Check for illegal overlaps
-  knownPOchar = sapply(knownPO, paste, collapse="-")
-  notPOchar = sapply(notPO, paste, collapse = "-")
-  if(length(err <- intersect(knownPOchar, notPOchar)))
-    stop2("`knownPO` and `notPO` must be disjoint: ", err)
-
-  # Potential extra parent-offspring: All pairs except "knownPO" and "notPO"
-  allPO = combn(n, 2, simplify = FALSE)
-  allPOchar = sapply(allPO, paste, collapse = "-")
-  potentialPO = allPO[!allPOchar %in% c(knownPOchar, notPOchar)]
-
-  if(length(potentialPO) == 0)
-    return(list(knownPO))
-
-  # Loop over all subsets of potentialPO and add to knownPO
-  subs = expand.grid(rep(list(c(FALSE, TRUE)), length(potentialPO)))
-  totalPO = apply(subs, 1, function(s) c(knownPO, potentialPO[s]))
-
-  totalPO
-}
-
-
-# Convert list of PO pairs to undirected (symmetric) adjacency matrix
-po2adj = function(po, n) {
-  m = matrix(FALSE, ncol = n, nrow = n)
-  for(e in po)
-    m[e[1], e[2]] = m[e[2], e[1]] = TRUE
-  m
-}
-
-
-directedAdjs = function(undirAdj, sex, ageMat, noChildren, verbose = TRUE) {
-
-  # Environment for holding the identified pedigrees
-  storage = new.env()
-  storage$dirAdjs = list()
-  storage$target = sum(undirAdj)/2 # the target number of edges
-  storage$ageData = lapply(unique.default(ageMat[, 1]), function(i)
-    list(id = i, older = as.numeric(ageMat[ageMat[,1] == i, 2])))
-
-  # Empty (directed) adjacency matrix
-  adj = adjMatrix(sex = sex)
-
-  # Apply age info
-  undirAdj[ageMat] = FALSE
-
-  # Apply age info
-  undirAdj[noChildren, ] = FALSE
-
-  # Start with an individual of max degree
-  id = which.max(colSums(undirAdj))
-
-  # Potential fathers and mothers
-  rownum = seq_along(sex)
-  PF = rownum[undirAdj[, id] & sex == 1]
-  PM = rownum[undirAdj[, id] & sex == 2]
-
-  # Add edges recursively
-  for(f in c(0, PF)) for(m in c(0, PM)) {
-    addEdge(adj, id, f, m, remaining = undirAdj, storage = storage, verbose = verbose)
-  }
-
-  storage$dirAdjs
-}
-
-addEdge = function(adj, id, father, mother, remaining, storage, verbose = TRUE, depth = 1) {
-  if(verbose)
-    cat(sprintf("%sDepth %d. ID = %d, father = %d, mother = %d, ",
-                indent(depth), depth, id, father, mother))
-
-  SEX = attr(adj, 'sex')
-  rownum = seq_len(dim(remaining)[1])
-
-  # parents of id are f and m
-  adj[c(father, mother), id] = TRUE
-
-  # id is not parent of f,m
-  remaining[id, c(father, mother)] =  FALSE
-
-  # remaining adjacent are kids of id
-  kids = rownum[remaining[id, ]]
-  if(verbose)
-    cat("kids =", toString(kids), "\n")
-
-  if(length(kids)) {
-    adj[id, kids] = TRUE
-
-    # no-one else with same sex as id is parent of kids
-    remaining[SEX == SEX[id], kids] = FALSE
-    remaining[id, kids] = TRUE # restore these
-
-    # no kids are parent of c(id,f,m) # utvid til alle ancs!!!
-    remaining[kids, c(id, father, mother)] = FALSE
-  }
-
-  # Remove from "remaining" edges involving id
-  remaining[id, ] = remaining[, id] = FALSE
-
-  # No remaining edges?
-  if(!any(remaining)) {
-
-    if(sum(adj) == storage$target &&           # correct number of edges
-       !hasCycle(adj) &&                       # no cycles
-       !ageViolation(adj, storage$ageData)     # no older descendants
-      ) {
-      if(verbose) cat(indent(depth+1), "Adj matrix found\n")
-      storage$dirAdjs = c(storage$dirAdjs, list(adj))
-    }
-    else {
-      if(verbose) cat(indent(depth+1), "No solution here\n")
-    }
-    # Solution of not - go to next (in the outside loop)
-    return()
-  }
-
-  # Remaining edges? If so - continue
-  id = which.max(colSums(remaining))
-  PF = rownum[remaining[, id] & SEX == 1]
-  PM = rownum[remaining[, id] & SEX == 2]
-
-  for(f in c(0, PF)) for(m in c(0, PM)) {
-    addEdge(adj, id, f, m, remaining, storage, verbose = verbose, depth = depth + 1)
+  else {
+    buildPedsExtra(labs = labs, sex = sex, extra = extra, ageMat = ageMat, knownPO = knownPO_int,
+                   allKnown = allKnown, notPO = notPO_int, noChildren = noChildren_int, connected = connected,
+                   maxLinearInb = maxLinearInb, sexSymmetry = sexSymmetry, verbose = verbose)
   }
 }
 
-# Check if any individual has descendants who are supposed to be older
-ageViolation = function(adj, ageData) {
-  # ageData: List of lists: list(id = 1, older = 2:4)
-  for(dat in ageData) {
-    if(any(dat$older %in% dagDescendants(adj, dat$id, minDist = 2)))
-      return(TRUE)
-  }
-  return(FALSE)
-}
 
 
 # Convert numeric age vector to string inequalities: "A>B,C,D", B>C"
-convertNumAge = function(a, labs = seq_along(a)) {
-  if(!is.numeric(a))
+convertNumAge = function(age, labs) {
+  if(!is.numeric(age))
     stop2("`age` is not numeric")
-  if(length(a) != length(labs))
-    stop2("When `age` is numeric, it must have the same length as the number of individuals")
 
-  s = lapply(seq_along(a), function(i) {
-    younger = a[i] > a
+  N = length(labs)
+
+  # If age is named, convert to full vector
+  if(!is.null(nms <- names(age))) {
+    if(!all(nms %in% labs))
+      stop2("Unknown name in `age`: ", setdiff(nms, labs))
+    age.full = rep(NA_real_, N)
+    names(age.full) = labs
+    age.full[nms] = age
+    age = age.full
+  }
+
+  if(length(age) != N)
+    stop2("When `age` is an unnamed numeric, its length must match `labs`")
+
+  s = lapply(seq_len(N), function(i) {
+    younger = age < age[i]
     younger = younger & !is.na(younger)
+
     if(any(younger))
       sprintf("%s>%s", labs[i], labs[younger])
   })
@@ -308,8 +178,7 @@ convertNumAge = function(a, labs = seq_along(a)) {
 }
 
 # Convert vector to string inequalities: "A>B,C,D", B>C" to matrix
-#' @importFrom stats setNames
-parseAge = function(a, labs) {
+parseAge = function(a, labs, output = c("matrix", "list")) {
   if(is.null(a) || all(is.na(a)))
     return(NULL)
 
@@ -318,7 +187,8 @@ parseAge = function(a, labs) {
 
   lst = lapply(strsplit(a, ">"), function(par) {
     par1 = lapply(strsplit(par, ","), trimws)
-    setNames(par1, c("o", "y"))
+    names(par1) = c("o", "y")
+    par1
   })
 
   # Bind to a single matrix
@@ -335,6 +205,4 @@ parseAge = function(a, labs) {
   cbind(younger = match(res[, "younger"], labs),
         older = match(res[, "older"], labs))
 }
-
-
 

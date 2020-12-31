@@ -7,6 +7,7 @@
 reconstruct(
   x,
   ids,
+  extra = "parents",
   alleleMatrix = NULL,
   loci = NULL,
   pedlist = NULL,
@@ -22,8 +23,6 @@ reconstruct(
   sexSymmetry = TRUE,
   sortResults = TRUE,
   founderInb = 0,
-  pairwise = NULL,
-  genderSym = NULL,
   verbose = TRUE
 )
 }
@@ -32,6 +31,9 @@ reconstruct(
 
 \item{ids}{A vector of ID labels from \code{x}. By default, the genotyped members
 of \code{x} are used.}
+
+\item{extra}{Either the word "parents", or a nonnegative integer. See
+details.}
 
 \item{alleleMatrix}{A matrix with two columns for each marker.}
 
@@ -45,25 +47,24 @@ estimation is done, in order to infer certain parent-child pairs, as well
 as certain \emph{non}-parent-child pairs. When this option is used, arguments to
 \code{knownPO} and \code{notPO} are ignored.}
 
-\item{sex}{A vector of the same length as \code{ids}, with entries 1 (male) or 2
+\item{sex}{A vector of the same length as \code{labs}, with entries 1 (male) or 2
 (female).}
 
-\item{age}{A numeric vector of the same length as \code{ids}. If \code{age[i]} is less
-than \code{age[j]}, individual \code{i} will not be an ancestor of individual \code{j}.
-The numbers themselves are irrelevant, only the partial ordering. Note that
-no interpretation is made about individuals of equal age.
+\item{age}{A numeric or character vector. If numeric, and \code{age[i] < age[j]},
+then individual \code{i} will not be an ancestor of individual \code{j}. The numbers
+themselves are irrelevant, only the partial ordering. Note that no
+interpretation is made about individuals of equal age.
 
-Alternatively, for finer control, age information may be entered as a
-character vector of inequalities, e.g., \code{age = c("1>2", "1>3")}.}
+Alternatively \code{age} may be a character vector of inequalities, e.g., \code{age = c("1>2", "1>3")}. This syntax allows finer control than the numeric
+version.}
 
 \item{knownPO}{A list of vectors of length 2, containing the ID labels of
 pairs known to be parent-offspring. By default, both directions are
 considered; use \code{age} to force a specific direction.}
 
 \item{allKnown}{A logical. If TRUE, no other pairs than \code{knownPO} will be
-assigned as parent-offspring. If FALSE (default), all pairwise combinations
-of ids - except those in \code{notPO} - will be treated as potential
-parent-offspring pairs.}
+assigned as parent-offspring. If FALSE (default), all pairs except those in
+\code{notPO} are treated as potential parent-offspring.}
 
 \item{notPO}{A list of vectors of length 2, containing the ID labels of pairs
 known \emph{not} to be parent-offspring.}
@@ -92,8 +93,6 @@ likely pedigree comes first.}
 \item{founderInb}{A number in the interval \verb{[0,1]}, used as background
 inbreeding level in all founders}
 
-\item{pairwise, genderSym}{Deprecated.}
-
 \item{verbose}{A logical; verbose output or not}
 }
 \value{
@@ -106,7 +105,6 @@ list is sorted so that the most likely pedigrees come first
 \item \code{logliks}: A numerical vector containing the pedigree log-likelihoods
 \item \code{alleleMatrix}: A matrix of marker alleles
 \item \code{loci}: A list of marker locus attributes
-\item \code{labels}: A character vector of ID labels
 }
 }
 \description{
@@ -145,6 +143,7 @@ y = markerSim(y, N = 50, ids = ids, seed = 123, verbose = FALSE)
 
 # Reconstruct and plot
 res3 = reconstruct(y, connected = FALSE)
+res3
 plot(res3)
 
 }
