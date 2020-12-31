@@ -133,3 +133,46 @@ removeFounderParents = function(adj, fou) {
 
   adj
 }
+
+
+# Input: adj matrix with the original indivs
+# Ouput: adj matrix extended with missing parents - only when 1 is missing
+# All the added parents are unrelated to all other indivs
+addMissingParents1 = function(a) {
+  n = dim(a)[1]
+  sex = attr(a, "sex")
+
+  isMale = sex == 1
+  nMale = sum(isMale)
+
+  # identify those missing (exactly) 1 parent
+  missfa = .colSums(a[isMale, , drop = F], nMale, n) == 0
+  missmo = .colSums(a[!isMale, , drop = F], n - nMale, n) == 0
+
+  miss1 = which(xor(missfa, missmo))
+  Nmiss = length(miss1)
+  if(Nmiss == 0)
+    return(a)
+
+  Ntot = n + Nmiss
+
+  # Add matrix block at the bottom
+  bottom = rep(FALSE, n * Nmiss)
+  dim(bottom) = c(Nmiss, n)
+  bottom[cbind(seq_along(miss1), miss1)] = TRUE
+  adjExp = rbind(a, bottom)
+
+  # Add block to the right
+  adjExp = c(adjExp, rep(FALSE, Ntot * Nmiss))
+  dim(adjExp) = c(Ntot, Ntot)
+
+  # Expand sex vector
+  addedSex = rep(1L, Nmiss)
+  addedSex[missmo[miss1]] = 2L
+  sexExp = c(sex, addedSex)
+
+  # Return as adjMatrix object
+  newAdjMatrix(adjExp, sexExp, connected = attr(a, "connected"))
+}
+
+

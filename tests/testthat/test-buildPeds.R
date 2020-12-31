@@ -4,7 +4,7 @@ bp = function(ids, sex = rep(1, length(ids)), verb = TRUE, ...) {
 
 test_that("buildPeds cathces errors", {
   expect_error(bp(1:3, sex = 1:2, verb = F),
-               "`ids` and `sex` must have the same length")
+               "`labs` and `sex` must have the same length")
   expect_error(bp(1:3, sex = 1:3, verb = F),
                "Illegal elements found in `sex`")
   expect_error(bp(1:2, age = "a>b", verb = F),

@@ -2,11 +2,12 @@
 % Please edit documentation in R/buildPeds.R
 \name{buildPeds}
 \alias{buildPeds}
-\title{Build all possible pedigrees}
+\title{Build a list of pedigrees}
 \usage{
 buildPeds(
-  ids,
+  labs,
   sex,
+  extra = "parents",
   age = NULL,
   knownPO = NULL,
   allKnown = FALSE,
@@ -15,31 +16,33 @@ buildPeds(
   connected = TRUE,
   maxLinearInb = Inf,
   sexSymmetry = TRUE,
-  verbose = FALSE
+  verbose = TRUE
 )
 }
 \arguments{
-\item{ids}{A vector of ID labels.}
+\item{labs}{A character vector of ID labels.}
 
-\item{sex}{A vector of the same length as \code{ids}, with entries 1 (male) or 2
+\item{sex}{A vector of the same length as \code{labs}, with entries 1 (male) or 2
 (female).}
 
-\item{age}{A numeric vector of the same length as \code{ids}. If \code{age[i]} is less
-than \code{age[j]}, individual \code{i} will not be an ancestor of individual \code{j}.
-The numbers themselves are irrelevant, only the partial ordering. Note that
-no interpretation is made about individuals of equal age.
+\item{extra}{Either the word "parents", or a nonnegative integer. See
+details.}
 
-Alternatively, for finer control, age information may be entered as a
-character vector of inequalities, e.g., \code{age = c("1>2", "1>3")}.}
+\item{age}{A numeric or character vector. If numeric, and \code{age[i] < age[j]},
+then individual \code{i} will not be an ancestor of individual \code{j}. The numbers
+themselves are irrelevant, only the partial ordering. Note that no
+interpretation is made about individuals of equal age.
+
+Alternatively \code{age} may be a character vector of inequalities, e.g., \code{age = c("1>2", "1>3")}. This syntax allows finer control than the numeric
+version.}
 
 \item{knownPO}{A list of vectors of length 2, containing the ID labels of
 pairs known to be parent-offspring. By default, both directions are
 considered; use \code{age} to force a specific direction.}
 
 \item{allKnown}{A logical. If TRUE, no other pairs than \code{knownPO} will be
-assigned as parent-offspring. If FALSE (default), all pairwise combinations
-of ids - except those in \code{notPO} - will be treated as potential
-parent-offspring pairs.}
+assigned as parent-offspring. If FALSE (default), all pairs except those in
+\code{notPO} are treated as potential parent-offspring.}
 
 \item{notPO}{A list of vectors of length 2, containing the ID labels of pairs
 known \emph{not} to be parent-offspring.}
@@ -65,27 +68,42 @@ paternal vs. maternal half sibs.}
 \item{verbose}{A logical.}
 }
 \value{
-A list of pedigrees.
+A list of pedigrees. Each element is a \code{ped} object or a list of such.
 }
 \description{
-Build all possible pedigrees
+Build all pedigrees between a set of individuals, subject to given
+restrictions.
+}
+\details{
+The parameter \code{extra} controls which of two algorithms are used to create the
+pedigree list.
+
+If \code{extra} is a nonnegative integer, it determines the number of extra
+individuals allowed in the iterative pedigree construction. These extras
+start off with undetermined sex, meaning that both males and females are
+used. It should be noted that the final pedigrees may contain additional
+extras, since missing parents are added at the end.
+
+If \code{extra} is the word "parents", the algorithm is not iterative. It first
+generates all directed acyclic graphs between the original individuals. Then
+their parents are added and merged in all possible ways. This option has the
+advantage of not requiring an explicit/ad hoc number of "extras", but works
+best in smaller cases.
 }
 \examples{
-p = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)))
-stopifnot(length(p) == 25)
-# plotPeds(p)
 
-# By default, one pedigree was removed above.
-# Keep all gender combinations (in this case paternal/maternal half sibs):
-p2 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
-              sexSymmetry = FALSE)
-stopifnot(length(p2) == 26)
-# plotPeds(p2)
+# Showing off a few of the options
+plist = buildPeds(1:3, sex = c(1,2,1), extra = 1, knownPO = list(1:2),
+             age = "1>2", maxLinearInb = 0)
+stopifnot(length(plist) == 12)
+# plotPeds(plist)
 
-# Remove pedigrees with linear inbreeding
-p3 = buildPeds(1:3, sex = c(1,2,1), knownPO = list(c(1,3), c(2,3)),
-              maxLinearInb = 0)
-stopifnot(length(p3) == 7)
-# plotPeds(p3)
+
+# Slightly different output with `extra = "parents"`
+plist2 = buildPeds(1:3, sex = c(1,2,1), extra = "parents", knownPO = list(1:2),
+                   age = "1>2", maxLinearInb = 0)
+stopifnot(length(plist2) == 8)
+# plotPeds(plist2)
+
 
 }

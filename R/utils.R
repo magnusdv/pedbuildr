@@ -4,10 +4,29 @@ stop2 = function(...) {
   do.call(stop, a)
 }
 
-
-  }
+isCount = function(x, minimum = 1, maximum = NA) {
+    isTRUE(length(x) == 1 &&
+             (is.integer(x) || (is.numeric(x) && x == as.integer(x))) &&
+             x >= minimum && (is.na(maximum) || x <= maximum))
 }
 
+powerset = function(x, force = NULL) {
+
+  if(!is.null(force)) {
+    y = .mysetdiff(x, force, makeUnique = FALSE)
+    return(lapply(powerset(y), function(u) c(force, u)))
+  }
+
+  n = length(x)
+  if(n == 0)
+    return(list(x[0]))
+  if(n == 1)
+    return(list(x[0], x))
+  if(n == 2)
+    return(list(x[0], x[1], x[2], x))
+
+  unlist(lapply(0:length(x), fast.combn, x = x), recursive = FALSE)
+}
 
 `%||%` = function(x, y) {
   if(is.null(x)) y else x
@@ -21,6 +40,10 @@ stop2 = function(...) {
 indent = function(depth) {
   strrep(" ", 2 * (depth - 1))
 }
+
+ftime = function(st, digits = 3)
+  format(Sys.time() - st, digits = digits)
+
 
 # Equivalent to t.default(combn(x, 2)), but ~5 times faster.
 .comb2 = function(x) {
@@ -89,6 +112,44 @@ fast.grid = function(argslist, as.list = FALSE) {
     res = lapply(seq_len(nr), function(r) res[r, ])
 
   res
+}
+
+
+# Stripped version of utils::combn(x, m, FUN = NULL, simplify = FALSE)
+# In particular: Never converts x to 1:x
+fast.combn = function(x, m) {
+  n = length(x)
+  if (n < m)
+    stop2("n < m")
+  m <- as.integer(m)
+  e <- 0
+  h <- m
+  a <- seq_len(m)
+
+  out <- vector("list", choose(n, m))
+  out[[1L]] <- x[a]
+
+  if(m == 0)
+    return(out)
+
+  i <- 2L
+  nmmp1 <- n - m + 1L
+  while (a[1L] != nmmp1) {
+    if (e < n - h) {
+      h <- 1L
+      e <- a[m]
+      j <- 1L
+    }
+    else {
+      e <- a[m - h]
+      h <- h + 1L
+      j <- 1L:h
+    }
+    a[m - h + j] <- e + j
+    out[[i]] <- x[a]
+    i <- i + 1L
+  }
+  out
 }
 
 
