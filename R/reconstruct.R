@@ -33,8 +33,6 @@
 #'
 #'   * `loci`: A list of marker locus attributes
 #'
-#'   * `labels`: A character vector of ID labels
-#'
 #' @examples
 #'
 #' # Load `forrel` (for simulation)
@@ -68,6 +66,7 @@
 #'
 #' # Reconstruct and plot
 #' res3 = reconstruct(y, connected = FALSE)
+#' res3
 #' plot(res3)
 #'
 #' @importFrom utils setTxtProgressBar txtProgressBar
@@ -159,16 +158,14 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
     ped = pedlist[[i]]
 
     # Attach marker data
-    if(is.ped(ped)) {
-      x = setMarkers(ped, alleleMatrix = alleleMatrix, locusAttributes = loci)
-      if(founderInb > 0) founderInbreeding(x, founders(x)) = founderInb
-    }
-    else {
-      x = lapply(ped, function(comp) {
-        y = setMarkers(comp, alleleMatrix = alleleMatrix, locusAttributes = loci)
-        if(founderInb > 0) founderInbreeding(y, founders(y)) = founderInb
-        y
-      })
+    x = setMarkers(ped, alleleMatrix = alleleMatrix, locusAttributes = loci)
+
+    # Founder inbreeding
+    if(founderInb > 0) {
+      if(is.pedList(x))
+        x = lapply(x, function(comp) `founderInbreeding<-`(comp, founders(comp), value = founderInb))
+      else
+        founderInbreeding(x, founders(x)) = founderInb
     }
 
     # Compute loglikelihood
@@ -225,9 +222,7 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
 #' @export
 `[[.pedrec` = function(x, i) {
   y = x$pedlist[[i]]
-  y = setMarkers(y, alleleMatrix = x$alleleMatrix, locusAttributes = x$loci)
-  #relabel(y, new = x$labels, old = seq_along(x$labels))
-  y
+  setMarkers(y, alleleMatrix = x$alleleMatrix, locusAttributes = x$loci)
 }
 
 #' @importFrom glue glue

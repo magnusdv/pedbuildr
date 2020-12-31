@@ -105,7 +105,6 @@ list is sorted so that the most likely pedigrees come first
 \item \code{logliks}: A numerical vector containing the pedigree log-likelihoods
 \item \code{alleleMatrix}: A matrix of marker alleles
 \item \code{loci}: A list of marker locus attributes
-\item \code{labels}: A character vector of ID labels
 }
 }
 \description{
@@ -144,6 +143,7 @@ y = markerSim(y, N = 50, ids = ids, seed = 123, verbose = FALSE)
 
 # Reconstruct and plot
 res3 = reconstruct(y, connected = FALSE)
+res3
 plot(res3)
 
 }
