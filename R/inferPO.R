@@ -1,7 +1,7 @@
 # Estimate pairwise IBD coefficients and return
 # list of certain parent-child and *not* parent-child.
 
-#' @importFrom forrel IBDestimate
+#' @importFrom forrel ibdEstimate
 inferPO = function(alleleMatrix, loci, list = FALSE) {
   ids = rownames(alleleMatrix)
   if(is.null(ids))
@@ -11,7 +11,7 @@ inferPO = function(alleleMatrix, loci, list = FALSE) {
     setMarkers(singleton(i, sex = 0), alleleMatrix = alleleMatrix, locusAttributes = loci))
 
   pairs = .comb2(ids)
-  kappa = forrel::IBDestimate(slist, pairs)
+  kappa = ibdEstimate(slist, pairs)
 
   PO = kappa[kappa$k0 < 0.01 & kappa$k2 < 0.5, , drop = F]
   notPO = kappa[kappa$N != 0 & kappa$k0 > 0.5, , drop = F]
