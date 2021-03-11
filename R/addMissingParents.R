@@ -27,8 +27,8 @@ addMissingParents = function(a, maxLinearInb = Inf, sexSymmetry = FALSE) {
   n = ncol(a)
   idvec = seq_len(n)
 
-  missingFa = idvec[colSums(a[sex == 1, , drop = F]) == 0]
-  missingMo = idvec[colSums(a[sex == 2, , drop = F]) == 0]
+  missingFa = idvec[colSums(a[sex == 1, , drop = FALSE]) == 0]
+  missingMo = idvec[colSums(a[sex == 2, , drop = FALSE]) == 0]
 
   nMissFa = length(missingFa)
   nMissMo = length(missingMo)
@@ -99,7 +99,7 @@ addMissingParents = function(a, maxLinearInb = Inf, sexSymmetry = FALSE) {
 
     # Create adjMatrix object
     sexExp = c(sex, rep(1L, newfa), rep(2L, newmo))
-    A = adjMatrix(adjExp, sexExp, validate = F)
+    A = adjMatrix(adjExp, sexExp, validate = FALSE)
 
     # Remove superfluous added parents
     A = removeFounderParents(A, fou)
@@ -146,8 +146,8 @@ addMissingParents1 = function(a) {
   nMale = sum(isMale)
 
   # identify those missing (exactly) 1 parent
-  missfa = .colSums(a[isMale, , drop = F], nMale, n) == 0
-  missmo = .colSums(a[!isMale, , drop = F], n - nMale, n) == 0
+  missfa = .colSums(a[isMale, , drop = FALSE], nMale, n) == 0
+  missmo = .colSums(a[!isMale, , drop = FALSE], n - nMale, n) == 0
 
   miss1 = which(xor(missfa, missmo))
   Nmiss = length(miss1)

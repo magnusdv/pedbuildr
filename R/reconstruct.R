@@ -1,8 +1,23 @@
 #' Pedigree reconstruction
 #'
-#' Reconstruct the most likely pedigree from genotype data
+#' Reconstruct the most likely pedigree from genotype data.
 #'
-#' @param x A `ped` object or a list of such.
+#' The parameter `extra` controls which of two algorithms are used to create the
+#' pedigree list.
+#'
+#' If `extra` is a nonnegative integer, it determines the number of extra
+#' individuals allowed in the iterative pedigree construction. These extras
+#' start off with undetermined sex, meaning that both males and females are
+#' used. It should be noted that the final pedigrees may contain additional
+#' extras, since missing parents are added at the end.
+#'
+#' If `extra` is the word "parents", the algorithm is not iterative. It first
+#' generates all directed acyclic graphs between the original individuals. Then
+#' their parents are added and merged in all possible ways. This option has the
+#' advantage of not requiring an explicit/ad hoc number of "extras", but works
+#' best in smaller cases.
+#'
+#' @param x A `pedtools::ped` object or a list of such.
 #' @param ids A vector of ID labels from `x`. By default, the genotyped members
 #'   of `x` are used.
 #' @param alleleMatrix A matrix with two columns for each marker.
@@ -14,24 +29,31 @@
 #'   as certain *non*-parent-child pairs. When this option is used, arguments to
 #'   `knownPO` and `notPO` are ignored.
 #' @param founderInb A number in the interval `[0,1]`, used as background
-#'   inbreeding level in all founders
+#'   inbreeding level in all founders.
 #' @param sortResults A logical. If TRUE, the output is sorted so that the most
 #'   likely pedigree comes first.
-#' @param verbose A logical; verbose output or not
+#' @param verbose A logical.
 #' @inheritParams buildPeds
 #'
 #' @return An object of class `pedrec`, which is essentially list with the
 #'   following entries:
 #'
 #'   * `pedlist`: A list of pedigrees, either built by [buildPeds()] or as
-#'   supplied in the input argument `pedlist`. If `sortResults = TRUE`, the
-#'   list is sorted so that the most likely pedigrees come first
+#'   supplied in the input argument `pedlist`. If `sortResults = TRUE`, the list
+#'   is sorted so that the most likely pedigrees come first
 #'
-#'   * `logliks`: A numerical vector containing the pedigree log-likelihoods
+#'   * `logliks`: A numerical vector of pedigree log-likelihoods
+#'
+#'   * `kappa`: A data frame with pairwise estimates (if `inferPO = TRUE`)
 #'
 #'   * `alleleMatrix`: A matrix of marker alleles
 #'
 #'   * `loci`: A list of marker locus attributes
+#'
+#'   * `errPeds`: A list of pedigrees for which the likelihood calculation
+#'   failed
+#'
+#'   * `errIdx`: The indices of pedigrees in `errPeds` as elements of `pedlist`
 #'
 #' @examples
 #' #-----------------

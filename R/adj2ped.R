@@ -32,7 +32,7 @@ adj2ped = function(adj, labs = NULL) {
   if(isTRUE(attr(adj, "connected")))
     return(newPed(labs, fid, mid, sex, ""))
 
-  p = ped(id = nseq, fid = fid, mid = mid, sex = sex, reorder = F, validate = F)
+  p = ped(id = nseq, fid = fid, mid = mid, sex = sex, reorder = FALSE, validate = FALSE)
   relabelFast(p, labs)
 }
 

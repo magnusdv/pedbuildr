@@ -4,13 +4,11 @@ Version: 0.2.0
 Authors@R: person("Magnus Dehli", family = "Vigeland", role = c("aut", "cre"), 
     email = "m.d.vigeland@medisin.uio.no", 
     comment = c(ORCID = "0000-0002-9134-4962"))
-Description: Reconstruct small and medium-sized pedigrees from genotype data. The 
-    optimisation works by generating a list of all possible pedigrees subject to 
-    various restrictions, and comparing the likelihoods of these. Tailor-made plots
+Description: Reconstruct pedigrees from genotype data, by optimising the likelihood 
+    over all possible pedigrees subject to given restrictions. Tailor-made plots
     facilitate evaluation of the output. This package is part of the 'ped suite'
-    ecosystem for pedigree analysis in R. In particular, it imports 'pedprobr'
-    for calculating pedigree likelihoods and 'forrel' for estimating pairwise
-    relatedness.
+    ecosystem for pedigree analysis. In particular, it imports 'pedprobr' for 
+    calculating pedigree likelihoods and 'forrel' for estimating pairwise relatedness.
 Encoding: UTF-8
 Language: en-GB
 LazyData: true

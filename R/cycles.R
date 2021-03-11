@@ -37,7 +37,7 @@ dagDescendants = function(adj, i, minDist = 1, maxDist = Inf) {
     dist = dist + 1
 
     # Next generation: All offspring of current
-    current = which(adj[current, , drop = F], arr.ind = T)[, 2]
+    current = which(adj[current, , drop = FALSE], arr.ind = TRUE)[, 2]
 
     # Add to storage if appropriate
     if(dist >= minDist)

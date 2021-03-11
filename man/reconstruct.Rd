@@ -28,7 +28,7 @@ reconstruct(
 )
 }
 \arguments{
-\item{x}{A \code{ped} object or a list of such.}
+\item{x}{A \code{pedtools::ped} object or a list of such.}
 
 \item{ids}{A vector of ID labels from \code{x}. By default, the genotyped members
 of \code{x} are used.}
@@ -93,24 +93,44 @@ paternal vs. maternal half sibs.}
 likely pedigree comes first.}
 
 \item{founderInb}{A number in the interval \verb{[0,1]}, used as background
-inbreeding level in all founders}
+inbreeding level in all founders.}
 
-\item{verbose}{A logical; verbose output or not}
+\item{verbose}{A logical.}
 }
 \value{
 An object of class \code{pedrec}, which is essentially list with the
 following entries:
 \itemize{
 \item \code{pedlist}: A list of pedigrees, either built by \code{\link[=buildPeds]{buildPeds()}} or as
-supplied in the input argument \code{pedlist}. If \code{sortResults = TRUE}, the
-list is sorted so that the most likely pedigrees come first
-\item \code{logliks}: A numerical vector containing the pedigree log-likelihoods
+supplied in the input argument \code{pedlist}. If \code{sortResults = TRUE}, the list
+is sorted so that the most likely pedigrees come first
+\item \code{logliks}: A numerical vector of pedigree log-likelihoods
+\item \code{kappa}: A data frame with pairwise estimates (if \code{inferPO = TRUE})
 \item \code{alleleMatrix}: A matrix of marker alleles
 \item \code{loci}: A list of marker locus attributes
+\item \code{errPeds}: A list of pedigrees for which the likelihood calculation
+failed
+\item \code{errIdx}: The indices of pedigrees in \code{errPeds} as elements of \code{pedlist}
 }
 }
 \description{
-Reconstruct the most likely pedigree from genotype data
+Reconstruct the most likely pedigree from genotype data.
+}
+\details{
+The parameter \code{extra} controls which of two algorithms are used to create the
+pedigree list.
+
+If \code{extra} is a nonnegative integer, it determines the number of extra
+individuals allowed in the iterative pedigree construction. These extras
+start off with undetermined sex, meaning that both males and females are
+used. It should be noted that the final pedigrees may contain additional
+extras, since missing parents are added at the end.
+
+If \code{extra} is the word "parents", the algorithm is not iterative. It first
+generates all directed acyclic graphs between the original individuals. Then
+their parents are added and merged in all possible ways. This option has the
+advantage of not requiring an explicit/ad hoc number of "extras", but works
+best in smaller cases.
 }
 \examples{
 #-----------------

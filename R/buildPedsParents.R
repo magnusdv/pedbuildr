@@ -6,7 +6,6 @@ buildPedsParents = function(labs, sex, ageMat = NULL, knownPO = NULL, allKnown =
                      notPO = NULL, noChildren = NULL, connected = TRUE,
                      maxLinearInb = Inf, sexSymmetry = TRUE, verbose = FALSE) {
 
-  st = Sys.time()
   N = length(labs)
 
   if(verbose) cat("\nBuilding pedigree list:\n")

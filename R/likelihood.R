@@ -19,9 +19,9 @@ loglikTotal = function(x) {
 tryBreakLoops = function(x) {
   if(is.pedList(x))
     y = lapply(x, function(comp)
-      breakLoops(comp, verbose = F, errorIfFail = F))
+      breakLoops(comp, verbose = FALSE, errorIfFail = FALSE))
   else
-    y = breakLoops(x, verbose = F, errorIfFail = F)
+    y = breakLoops(x, verbose = FALSE, errorIfFail = FALSE)
 
   # In unsuccessful: Return NULL
   if(hasUnbrokenLoops(y))

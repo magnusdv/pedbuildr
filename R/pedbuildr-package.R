@@ -1,8 +1,7 @@
 #' pedbuildr: Pedigree reconstruction
 #'
-#' Reconstruct small/medium-sized pedigrees from genotype data. The optimisation
-#' works by generating a list of all possible pedigrees subject to various
-#' restrictions, and comparing the likelihoods of these. Tailor-made plots
+#' Reconstruct pedigrees from genotype data, by optimising the likelihood over
+#' all possible pedigrees subject to given restrictions. Tailor-made plots
 #' facilitate evaluation of the output. This package is part of the 'ped suite'
 #' ecosystem for pedigree analysis in R. In particular, it imports 'pedprobr'
 #' for calculating pedigree likelihoods and 'forrel' for estimating pairwise
