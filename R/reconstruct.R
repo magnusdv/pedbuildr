@@ -34,35 +34,41 @@
 #'   * `loci`: A list of marker locus attributes
 #'
 #' @examples
+#' #-----------------
+#' # Example 1: Trio
+#' #-----------------
 #'
-#' # Load `forrel` (for simulation)
-#' library(forrel)
+#' data(trioData)
 #'
-#' ### Example 1: Family trio
-#' x = nuclearPed()
-#' x = markerSim(x, N = 50, alleles = 1:3, seed = 123, verbose = FALSE)
+#' x = as.ped(trioData, locusAttributes = "snp-12")
+#' summary(x)
 #'
-#' # Reconstruct
-#' res = reconstruct(x, inferPO = TRUE)
+#' res = reconstruct(x, inferPO = TRUE, age = "1 > 2", linearInb = FALSE)
 #'
 #' # Plot most likely pedigrees
 #' plot(res, top = 6)
 #'
-#' # Alternative workflow: Extract data manually...
-#' m    = getAlleles(x)
+#'
+#' ### Alternative workflow: Extract data manually...
+#' als  = getAlleles(x)
 #' loci = getLocusAttributes(x)
 #' sex  = getSex(x)
 #'
 #' # ...and then reconstruct
-#' res2 = reconstruct(alleleMatrix = m, loci = loci, sex = sex,
-#'                   inferPO = TRUE)
+#' res2 = reconstruct(alleleMatrix = als, loci = loci, sex = sex,
+#'                    inferPO = TRUE, age = "1 > 2", linearInb = FALSE)
 #'
 #' stopifnot(identical(res, res2))
 #'
-#' ### Example 2: Full siblings
+#' #--------------------
+#' # Example 2: Siblings
+#' #--------------------
+#'
 #' ids = c("s1", "s2")
 #' y = nuclearPed(children = ids)
-#' y = markerSim(y, N = 50, ids = ids, seed = 123, verbose = FALSE)
+#'
+#' # Simulate data
+#' y = forrel::markerSim(y, N = 50, ids = ids, seed = 123)
 #'
 #' # Reconstruct and plot
 #' res3 = reconstruct(y, connected = FALSE)
@@ -117,7 +123,7 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
       if(length(knownPO) > 0 | length(knownPO) > 0)
         stop2("`knownPO` and `notPO` must be NULL when `inferPO = TRUE`")
 
-      POresult = inferPO(alleleMatrix, loci, list = TRUE)
+      POresult = inferPO(alleleMatrix, loci, list = TRUE, verbose = FALSE)
       knownPO = POresult$PO
       notPO = POresult$notPO
       kappa = POresult$kappa

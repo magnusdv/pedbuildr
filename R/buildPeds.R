@@ -64,14 +64,12 @@
 #' plist = buildPeds(1:3, sex = c(1,2,1), extra = 1, knownPO = list(1:2),
 #'                   age = "1 > 2", linearInb = FALSE)
 #' stopifnot(length(plist) == 12)
-#' # plotPeds(plist)
 #'
 #'
 #' # Slightly different output with `extra = "parents"`
 #' plist2 = buildPeds(1:3, sex = c(1,2,1), extra = "parents", knownPO = list(1:2),
 #'                    age = "1 > 2", linearInb = FALSE)
 #' stopifnot(length(plist2) == 8)
-#' # plotPeds(plist2)
 #'
 #'
 #' @export

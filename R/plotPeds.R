@@ -1,5 +1,4 @@
 #' @importFrom graphics par plot text title
-#' @export
 plotPeds = function(pedlist, titles = NULL, nrow = NA, ...) {
 
   L = length(pedlist)

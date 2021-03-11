@@ -2,7 +2,7 @@
 # list of certain parent-child and *not* parent-child.
 
 #' @importFrom forrel ibdEstimate
-inferPO = function(alleleMatrix, loci, list = FALSE) {
+inferPO = function(alleleMatrix, loci, list = FALSE, verbose = TRUE) {
   ids = rownames(alleleMatrix)
   if(is.null(ids))
     ids = idsnum = 1:nrow(alleleMatrix)
@@ -11,7 +11,7 @@ inferPO = function(alleleMatrix, loci, list = FALSE) {
     setMarkers(singleton(i, sex = 0), alleleMatrix = alleleMatrix, locusAttributes = loci))
 
   pairs = .comb2(ids)
-  kappa = ibdEstimate(slist, pairs)
+  kappa = ibdEstimate(slist, pairs, verbose = verbose)
 
   PO = kappa[kappa$k0 < 0.01 & kappa$k2 < 0.5, ]
   notPO = kappa[kappa$N != 0 & kappa$k0 > 0.5, ]

@@ -5,6 +5,11 @@
 \alias{pedbuildr}
 \title{pedbuildr: Pedigree reconstruction}
 \description{
-Reconstruct the most likely pedigree, given marker data for up to 10
-individuals.
+Reconstruct small/medium-sized pedigrees from genotype data. The optimisation
+works by generating a list of all possible pedigrees subject to various
+restrictions, and comparing the likelihoods of these. Tailor-made plots
+facilitate evaluation of the output. This package is part of the 'ped suite'
+ecosystem for pedigree analysis in R. In particular, it imports 'pedprobr'
+for calculating pedigree likelihoods and 'forrel' for estimating pairwise
+relatedness.
 }
