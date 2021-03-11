@@ -10,6 +10,20 @@ isCount = function(x, minimum = 1, maximum = NA) {
              x >= minimum && (is.na(maximum) || x <= maximum))
 }
 
+# Sample from Dirichlet distribution with mean p (where b controls variance)
+#' @importFrom stats rgamma
+rdirich = function(n, p, b = 1) {
+  if(!is.numeric(b) || length(b) != 1 || b <= 0)
+    stop("`b` must be a positive integer")
+
+  alpha = p * b
+  s = vapply(alpha, function(a) rgamma(n, a, 1), numeric(n))
+  if (n == 1)
+    dim(s) = c(1, length(alpha))
+
+  s/rowSums(s)
+}
+
 powerset = function(x, force = NULL) {
 
   if(!is.null(force)) {
