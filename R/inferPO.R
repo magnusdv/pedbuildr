@@ -13,8 +13,8 @@ inferPO = function(alleleMatrix, loci, list = FALSE) {
   pairs = .comb2(ids)
   kappa = ibdEstimate(slist, pairs)
 
-  PO = kappa[kappa$k0 < 0.01 & kappa$k2 < 0.5, , drop = F]
-  notPO = kappa[kappa$N != 0 & kappa$k0 > 0.5, , drop = F]
+  PO = kappa[kappa$k0 < 0.01 & kappa$k2 < 0.5, ]
+  notPO = kappa[kappa$N != 0 & kappa$k0 > 0.5, ]
 
   if(list) {
     PO = lapply(seq_len(nrow(PO)), function(r) PO[r, 1:2])
