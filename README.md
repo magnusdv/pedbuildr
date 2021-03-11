@@ -3,17 +3,12 @@
 
 # pedbuildr
 
-The goal of pedbuildr is to reconstruct small/medium-sized pedigrees
-from genotype data. The most important functions of the package are
-
-  - `buildPeds()` : generates all pedigrees containing a given set of
-    members
-  - `reconstruct()`: finds the most likely pedigree given the available
-    genotype data
+The goal of **pedbuildr** is to reconstruct small/medium-sized pedigrees
+from genotype data.
 
 ## Installation
 
-The development version of pedbuildr is available from GitHub:
+The development version of **pedbuildr** is available from GitHub:
 
 ``` r
 remotes::install_github("magnusdv/pedbuildr")
@@ -26,176 +21,161 @@ library(pedbuildr)
 #> Loading required package: pedtools
 ```
 
-# Building pedigree lists
+## A reconstruction example
 
-Suppose we want to find all pedigrees linking 3 individuals: two males
-and one female, labelled `1`, `2` and `3` respectively. Using the
-default restriction to connected pedigrees, `buildPeds()` identifies 105
-such pedigrees:
+To get started, we demonstrate how to reconstruct the pedigree
+connecting three individuals from their genotypes at 100 SNP markers.
+The (simulated) genotypes are contained in the dataset `trioData`
+built-in to **pedbuildr**. Here are the first few columns:
 
 ``` r
-plist = buildPeds(ids = 1:3, sex = c(1, 1, 2))
-length(plist)
-#> [1] 105
+trioData[, 1:10]
+#>   id fid mid sex <1> <2> <3> <4> <5> <6>
+#> 1  1   0   0   1 1/2 1/2 1/1 1/2 1/2 1/2
+#> 2  2   0   0   1 1/1 1/2 1/2 2/2 1/2 2/2
+#> 3  3   0   0   1 1/1 1/2 1/2 2/2 1/1 1/2
 ```
 
-Here are some of them:
+The first thing to do is to convert the data into pedigree object, using
+the `as.ped()` function from **pedtools**.
 
 ``` r
-plotPeds(plist[c(1, 20, 50, 105)])
+x = as.ped(trioData, locusAttributes = "snp-12")
+summary(x)
+#> List of 3 singletons.
+#> Labels: 1 (male), 2 (male), 3 (male).
+#> 100 attached markers.
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
+The `locusAttributes` argument tells R that all the markers are
+diallelic with alleles 1 and 2. By default, the alleles have equal
+frequencies.
 
-The function `plotPeds()` is a thin wrapper around
-`pedtools::plot.ped()`, and highlights the original individuals in each
-pedigree.
-
-## Restricting the pedigree search
-
-With more than a handful individuals, the number of pedigrees quickly
-becomes uncontrollably large. Hence it becomes vital to impose
-restrictions on the pedigree space.
-
-#### Linear inbreeding
-
-As a further restriction, one may disallow certain types of inbreeding.
-Many of the pedigrees found above contain matings between
-parent-offspring, or even grandparent-grandchild. In many practical
-cases these may be irrelevant. To skip pedigrees with such features, we
-add `maxLinearInb = 0`.
+To reconstruct the pedigree, simply run `reconstruct()`:
 
 ``` r
-plist2 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInb = 0)
-length(plist2)
-#> [1] 50
-```
-
-If we set `maxLinearInb = 1` instead, then parent-child mating is
-allowed, but not grandparent-grandchild or higher separations.
-
-#### Known parent-child pairs
-
-Known parent-child pairs are conveyed to `buildPeds()` using the
-`knownPO` parameter. For instance, in our running example suppose we
-know that 2 and 3 form a parent-child pair (in some order).
-
-``` r
-plist3 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInb = 0, 
-                   knownPO = list(2:3))
-length(plist3)
-#> [1] 19
-```
-
-Here is a selection of these pedigrees:
-
-``` r
-plotPeds(plist3[c(2, 3, 9, 18)])
-```
-
-<img src="man/figures/README-unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
-
-#### Further restrictions on parent-child pairs
-
-We may also know that certain pairs are *not* parent-child; this can be
-imposed by using the `notPO` parameter. Another option is to set
-`allKnown = TRUE`, meaning that `knownPO` should be taken as the
-complete list of parent-child pairs among the input individuals. We add
-this to our running example:
-
-``` r
-plist4 = buildPeds(ids = 1:3, sex = c(1, 1, 2), maxLinearInb = 0, 
-                   knownPO = list(2:3), allKnown = TRUE)
-length(plist4)
-#> [1] 8
-```
-
-Here are the remaining pedigrees:
-
-``` r
-plotPeds(plist4)
-```
-
-<img src="man/figures/README-unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
-
-# Pedigree reconstruction
-
-The aim of this section is to show how to perform pedigree
-reconstruction. We start with the “true” pedigree and simulate some
-marker data for it. We will then try to reconstruct it from the marker
-data.
-
-## Example
-
-Suppose the true relationship between individuals `1`, `2` and `3` is as
-follows:
-
-<img src="man/figures/README-unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
-
-The pedigree is created with the following code.
-
-``` r
-x = nuclearPed(fa = "fa", mother = "mo", children = 1:2)
-x = addDaughter(x, parent = 2, id = 3)
-
-# Plot
-plot(x, hatched = 1:3, labs = 1:3, col = list(red = 1:3))
-```
-
-We simulate genotypes for 10 markers, each with 4 alleles. The
-simulation is done with the `markerSim()` function from the `forrel`
-package.
-
-``` r
-x = forrel::markerSim(x, N = 10, ids = 1:3, alleles = 1:4, verbose = F, seed = 123)
-x
-#>    id fid  mid sex <1> <2> <3> <4> <5>
-#>    fa   *    *   1 -/- -/- -/- -/- -/-
-#>    mo   *    *   2 -/- -/- -/- -/- -/-
-#>     1  fa   mo   1 1/3 1/3 1/4 1/3 4/4
-#>     2  fa   mo   1 1/1 1/3 4/4 4/4 3/4
-#>  NN_1   *    *   2 -/- -/- -/- -/- -/-
-#>     3   2 NN_1   2 1/2 1/3 2/4 1/4 3/4
-#> Only 5 (out of 10) markers are shown.
-```
-
-Now we try to reconstruct the pedigree from the data, using the
-`reconstruct()` function. When we feed `x` into this function, it will
-extract the allele matrix, marker attributes and gender data, but strip
-the pedigree information. It then calls `buildPeds()` to generate a list
-of candidate pedigrees. Finally, it computes the likelihood of each
-alternative, and sort them in descending probability.
-
-``` r
-result = reconstruct(x)
+res = reconstruct(x)
 #> Pedigree parameters:
 #>   ID labels: 1, 2, 3
-#>   Sex: 1, 1, 2
+#>   Sex: 1, 1, 1
+#>   Extra: parents
 #>   Age info: -
 #>   Known PO: -
 #>   Known non-PO: -
+#>   No children: -
 #>   Connected only: TRUE
 #>   Symmetry filter: TRUE
-#>   Linear inbreeding: Inf
+#>   Linear inbreeding: TRUE
 #> 
 #> Building pedigree list:
 #>   Undirected adjacency matrices: 8 
-#>   Directed adjacency matrices: 22 
-#>   After adding parents: 124 
-#>   Connected solutions: 105 
+#>   Directed adjacency matrices: 16 
+#>   After adding parents: 114 
+#>   Connected solutions: 95 
 #> 
-#> Computing the likelihood of 105 pedigrees.
+#> Computing the likelihood of 95 pedigrees.
 #> Sorting by descending likelihood.
-#> Total time used:  1.22 secs
+#> Total time used:  6.04 secs
 ```
 
-Here are the top results:
+The most likely pedigrees are plotted as follows.
 
 ``` r
-plot(result, top = 6)
+plot(res, top = 6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-13-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-reconstruct-trio-1.png" style="display: block; margin: auto;" />
 
-The correct pedigree was the most likely one, but only just so\! With
-more markers the difference would have been bigger.
+## Further options
+
+*A priori* there are infinitely many possible pedigrees connecting a set
+of individuals. (For example, two individuals may be *k*’th cousins for
+any *k* = 1,2,… .) In order to obtain a manageable search space,
+`reconstruct()` offers a range of restriction parameters:
+
+-   `extra`: The number of extra individuals allowed to connect the
+    original individuals. (See further explanations below.)
+-   `age`: A character vector describing age inequalities. For example,
+    `age = c("A > B,C", "B > D")` excludes B and C as ancestors of A,
+    and D as an ancestor of B (but no assumption is made for C vs. D).
+-   `inferPO`: If TRUE, an initial stage of pairwise IBD estimation is
+    done, in order to infer certain parent-child pairs, as well as
+    certain non-parent-child pairs.
+-   `knownPO`: Known parent–offspring pairs.
+-   `notPO`: Pairs known not to be parent–offspring.
+-   `allKnown`: If TRUE, then `knownPO` is the complete list of
+    parent–offspring pairs.
+-   `noChildren`: Individuals known to have no children.
+-   `linearInb`: The allowed level of inbreeding between linear
+    descendants. For example, `linearInb = 1` allows mating between
+    parent–child, but not grandparent–grandchild. Set to FALSE to
+    disallow all inbreeding of this type.
+-   `connected`: If TRUE (default), only connected pedigrees are
+    considered.
+-   `sexSymmetry`: If TRUE (default) pedigrees are considered equal if
+    they differ only in the sexes of the added parents, e.g., paternal
+    versus maternal half-siblings.
+
+Let us re-run the reconstruction of `trioData` adding a few of these
+restrictions. We allow 3 extra individuals and indicate that individual
+1 is older than the others. Furthermore, we ask the program to infer
+parent-child relationships automatically, and disallow linear
+inbreeding.
+
+``` r
+res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE, linearInb = FALSE)
+#> Pairwise estimation:
+#>   PO: 2-3 
+#>   non-PO: 1-3 
+#> 
+#> Pedigree parameters:
+#>   ID labels: 1, 2, 3
+#>   Sex: 1, 1, 1
+#>   Extra: 3
+#>   Age info: 1>2, 1>3
+#>   Known PO: 2-3
+#>   Known non-PO: 1-3
+#>   No children: -
+#>   Connected only: TRUE
+#>   Symmetry filter: TRUE
+#>   Linear inbreeding: FALSE
+#> 
+#> Building pedigree list:
+#>   First 2: 2 candidates (0 secs)
+#>   All 3 + 0 extra: 1 solutions | 3 candidates (0 secs)
+#>   All 3 + 1 extra: 9 solutions | 30 candidates | 21 duplicates removed (0.0156 secs)
+#>   All 3 + 2 extra: 35 solutions | 266 candidates | 501 duplicates removed (0.217 secs)
+#>   All 3 + 3 extra: 183 solutions | 183 candidates | 459 duplicates removed (0.932 secs)
+#> Total solutions: 228 
+#> Converting to ped
+#> Total time: 0.991 secs
+#> Computing the likelihood of 228 pedigrees.
+#> Sorting by descending likelihood.
+#> Total time used:  29.8 secs
+```
+
+The most likely results this time are shown below:
+
+``` r
+plot(res2, top = 6)
+```
+
+<img src="man/figures/README-reconstruct-trio-2-1.png" style="display: block; margin: auto;" />
+
+We see that the same pedigree “wins”, but some esoteric alternatives
+have appeared among the runners-up.
+
+## More about `extra`
+
+Arguably the most important parameter to `reconstruct()` is `extra`,
+which controls the size of the pedigrees to consider. It can be either a
+nonnegative integer, or the word “parents”. If an integer, it sets the
+maximum number of extra members used to connect the original
+individuals. (The final pedigrees may contain further extras still,
+since missing parents are added at the end.)
+
+If `extra = "parents"`, a special algorithm is invoked. First all
+directed acyclic graphs between the original individuals are generated,
+and then parents are added in all possible ways. This is (currently) the
+default behaviour, since it avoids setting an *ad hoc* number of
+“extras”. However, it only works well in relatively small cases.
