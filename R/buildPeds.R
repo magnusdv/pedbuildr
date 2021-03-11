@@ -43,40 +43,47 @@
 #'   children of their own.
 #' @param connected A logical. If TRUE (default), only connected pedigrees are
 #'   returned.
-#' @param maxLinearInb A nonnegative integer, or `Inf` (default). If this is a
-#'   finite number, it disallows mating between pedigree members X and Y if X is
-#'   a linear descendant of Y separated by more than the given number. For
-#'   example, `maxLinearInb = 1` allows parent-child matings, but not
-#'   grandparent-grandchild or more distant. Setting `maxLinearInb = 0`
-#'   disallows all inbreeding of this type.
+#' @param linearInb Either TRUE (allow any linear inbreeding), FALSE (disallow
+#'   linear inbreeding) or a nonnegative integer indicating the maximum
+#'   separation linearly related spouses. For example, `linearInb = 1` allows
+#'   mating between parent and child, but not between grandparent and grandchild
+#'   (or more distant).
+#' @param maxLinearInb Deprecated; replaced by `linearInb`.
 #' @param sexSymmetry A logical. If TRUE (default), pedigrees which are equal
 #'   except for the gender distribution of the *added* parents, are regarded as
 #'   equivalent, and only one of each equivalence class is returned. Example:
 #'   paternal vs. maternal half sibs.
 #' @param verbose A logical.
 #'
-#' @return A list of pedigrees. Each element is a `ped` object or a list of such.
+#' @return A list of pedigrees. Each element is a `ped` object or a list of
+#'   such.
 #'
 #' @examples
 #'
 #' # Showing off a few of the options
 #' plist = buildPeds(1:3, sex = c(1,2,1), extra = 1, knownPO = list(1:2),
-#'              age = "1>2", maxLinearInb = 0)
+#'                   age = "1 > 2", linearInb = FALSE)
 #' stopifnot(length(plist) == 12)
 #' # plotPeds(plist)
 #'
 #'
 #' # Slightly different output with `extra = "parents"`
 #' plist2 = buildPeds(1:3, sex = c(1,2,1), extra = "parents", knownPO = list(1:2),
-#'                    age = "1>2", maxLinearInb = 0)
+#'                    age = "1 > 2", linearInb = FALSE)
 #' stopifnot(length(plist2) == 8)
 #' # plotPeds(plist2)
 #'
 #'
 #' @export
 buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, allKnown = FALSE,
-                     notPO = NULL, noChildren = NULL, connected = TRUE,
-                     maxLinearInb = Inf, sexSymmetry = TRUE, verbose = TRUE) {
+                     notPO = NULL, noChildren = NULL, connected = TRUE, linearInb = TRUE,
+                     maxLinearInb = NULL, sexSymmetry = TRUE, verbose = TRUE) {
+
+  if(!is.null(maxLinearInb)) {
+    warning("The argument `maxLinearInb` has been replaced with `linearInb`. Use this in new code.")
+    linearInb = maxLinearInb
+  }
+
   N = length(labs)
   ids = seq_along(labs)
 
@@ -110,6 +117,9 @@ buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, a
   if(!all(noChildren %in% labs))
     stop2("Unknown label in `noChildren`: ", setdiff(noChildren, labs))
 
+  # Convert `linearInb` to `maxLinearInb`
+  maxLinearInb = if(isTRUE(linearInb)) Inf else if(isFALSE(linearInb)) 0 else linearInb
+
   if(verbose) {
     .knownPO = sapply(knownPO, paste, collapse = "-")
     .notPO = sapply(notPO, paste, collapse = "-")
@@ -128,19 +138,21 @@ buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, a
         No children: {toStr(noChildren)}
         Connected only: {connected}
         Symmetry filter: {sexSymmetry}
-        Linear inbreeding: {maxLinearInb}"
+        Linear inbreeding: {linearInb}"
     ))
   }
 
   if(extra == "parents") {
     buildPedsParents(labs = labs, sex = sex, ageMat = ageMat, knownPO = knownPO_int,
-                     allKnown = allKnown, notPO = notPO_int, noChildren = noChildren_int, connected = connected,
-                     maxLinearInb = maxLinearInb, sexSymmetry = sexSymmetry, verbose = verbose)
+                     allKnown = allKnown, notPO = notPO_int, noChildren = noChildren_int,
+                     connected = connected, maxLinearInb = maxLinearInb,
+                     sexSymmetry = sexSymmetry, verbose = verbose)
   }
   else {
     buildPedsExtra(labs = labs, sex = sex, extra = extra, ageMat = ageMat, knownPO = knownPO_int,
-                   allKnown = allKnown, notPO = notPO_int, noChildren = noChildren_int, connected = connected,
-                   maxLinearInb = maxLinearInb, sexSymmetry = sexSymmetry, verbose = verbose)
+                   allKnown = allKnown, notPO = notPO_int, noChildren = noChildren_int,
+                   connected = connected, maxLinearInb = maxLinearInb,
+                   sexSymmetry = sexSymmetry, verbose = verbose)
   }
 }
 

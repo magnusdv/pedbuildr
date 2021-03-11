@@ -14,7 +14,8 @@ buildPeds(
   notPO = NULL,
   noChildren = NULL,
   connected = TRUE,
-  maxLinearInb = Inf,
+  linearInb = TRUE,
+  maxLinearInb = NULL,
   sexSymmetry = TRUE,
   verbose = TRUE
 )
@@ -53,12 +54,13 @@ children of their own.}
 \item{connected}{A logical. If TRUE (default), only connected pedigrees are
 returned.}
 
-\item{maxLinearInb}{A nonnegative integer, or \code{Inf} (default). If this is a
-finite number, it disallows mating between pedigree members X and Y if X is
-a linear descendant of Y separated by more than the given number. For
-example, \code{maxLinearInb = 1} allows parent-child matings, but not
-grandparent-grandchild or more distant. Setting \code{maxLinearInb = 0}
-disallows all inbreeding of this type.}
+\item{linearInb}{Either TRUE (allow any linear inbreeding), FALSE (disallow
+linear inbreeding) or a nonnegative integer indicating the maximum
+separation linearly related spouses. For example, \code{linearInb = 1} allows
+mating between parent and child, but not between grandparent and grandchild
+(or more distant).}
+
+\item{maxLinearInb}{Deprecated; replaced by \code{linearInb}.}
 
 \item{sexSymmetry}{A logical. If TRUE (default), pedigrees which are equal
 except for the gender distribution of the \emph{added} parents, are regarded as
@@ -68,7 +70,8 @@ paternal vs. maternal half sibs.}
 \item{verbose}{A logical.}
 }
 \value{
-A list of pedigrees. Each element is a \code{ped} object or a list of such.
+A list of pedigrees. Each element is a \code{ped} object or a list of
+such.
 }
 \description{
 Build all pedigrees between a set of individuals, subject to given
@@ -94,14 +97,14 @@ best in smaller cases.
 
 # Showing off a few of the options
 plist = buildPeds(1:3, sex = c(1,2,1), extra = 1, knownPO = list(1:2),
-             age = "1>2", maxLinearInb = 0)
+                  age = "1 > 2", linearInb = FALSE)
 stopifnot(length(plist) == 12)
 # plotPeds(plist)
 
 
 # Slightly different output with `extra = "parents"`
 plist2 = buildPeds(1:3, sex = c(1,2,1), extra = "parents", knownPO = list(1:2),
-                   age = "1>2", maxLinearInb = 0)
+                   age = "1 > 2", linearInb = FALSE)
 stopifnot(length(plist2) == 8)
 # plotPeds(plist2)
 

@@ -76,7 +76,7 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
                        pedlist = NULL, inferPO = FALSE, sex = NULL,
                        age = NULL, knownPO = NULL, allKnown = FALSE,
                        notPO = NULL, noChildren = NULL, connected = TRUE,
-                       maxLinearInb = Inf, sexSymmetry = TRUE,
+                       linearInb = TRUE, maxLinearInb = NULL, sexSymmetry = TRUE,
                        sortResults = TRUE, founderInb = 0,
                        verbose = TRUE) {
 
@@ -134,7 +134,7 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
     pedlist = buildPeds(labs = ids, sex = sex, extra = extra, age = age,
                         knownPO = knownPO, allKnown = allKnown,
                         notPO = notPO, noChildren = noChildren,
-                        connected = connected, maxLinearInb = maxLinearInb,
+                        connected = connected, linearInb = linearInb, maxLinearInb = maxLinearInb,
                         sexSymmetry = sexSymmetry, verbose = verbose)
   }
 

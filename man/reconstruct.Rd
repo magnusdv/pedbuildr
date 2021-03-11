@@ -19,7 +19,8 @@ reconstruct(
   notPO = NULL,
   noChildren = NULL,
   connected = TRUE,
-  maxLinearInb = Inf,
+  linearInb = TRUE,
+  maxLinearInb = NULL,
   sexSymmetry = TRUE,
   sortResults = TRUE,
   founderInb = 0,
@@ -75,12 +76,13 @@ children of their own.}
 \item{connected}{A logical. If TRUE (default), only connected pedigrees are
 returned.}
 
-\item{maxLinearInb}{A nonnegative integer, or \code{Inf} (default). If this is a
-finite number, it disallows mating between pedigree members X and Y if X is
-a linear descendant of Y separated by more than the given number. For
-example, \code{maxLinearInb = 1} allows parent-child matings, but not
-grandparent-grandchild or more distant. Setting \code{maxLinearInb = 0}
-disallows all inbreeding of this type.}
+\item{linearInb}{Either TRUE (allow any linear inbreeding), FALSE (disallow
+linear inbreeding) or a nonnegative integer indicating the maximum
+separation linearly related spouses. For example, \code{linearInb = 1} allows
+mating between parent and child, but not between grandparent and grandchild
+(or more distant).}
+
+\item{maxLinearInb}{Deprecated; replaced by \code{linearInb}.}
 
 \item{sexSymmetry}{A logical. If TRUE (default), pedigrees which are equal
 except for the gender distribution of the \emph{added} parents, are regarded as
