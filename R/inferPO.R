@@ -2,6 +2,7 @@
 # list of certain parent-child and *not* parent-child.
 
 #' @importFrom utils packageVersion
+#' @importFrom forrel ibdEstimate
 inferPO = function(alleleMatrix, loci, list = FALSE, verbose = TRUE) {
   ids = rownames(alleleMatrix)
   if(is.null(ids))
@@ -12,16 +13,9 @@ inferPO = function(alleleMatrix, loci, list = FALSE, verbose = TRUE) {
 
   pairs = .comb2(ids)
 
-  if(packageVersion("forrel") <= "1.2") {
-    kappa = forrel::IBDestimate(slist, pairs)
-    PO = kappa[kappa$k0 < 0.01 & kappa$k2 < 0.5, , drop = FALSE]
-    notPO = kappa[kappa$N != 0 & kappa$k0 > 0.5, , drop = FALSE]
-  }
-  else {
-    kappa = forrel::ibdEstimate(slist, pairs, verbose = verbose)
-    PO = kappa[kappa$k0 < 0.01 & kappa$k2 < 0.5, ]
-    notPO = kappa[kappa$N != 0 & kappa$k0 > 0.5, ]
-  }
+  kappa = ibdEstimate(slist, pairs, verbose = verbose) # requires forrel 1.3
+  PO = kappa[kappa$k0 < 0.01 & kappa$k2 < 0.5, ]
+  notPO = kappa[kappa$N != 0 & kappa$k0 > 0.5, ]
 
   if(list) {
     PO = lapply(seq_len(nrow(PO)), function(r) PO[r, 1:2])
