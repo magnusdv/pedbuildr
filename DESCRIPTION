@@ -15,7 +15,7 @@ LazyData: true
 License: GPL-3
 Depends: 
     R (>= 3.5.0),
-    pedtools (>= 0.9.5)
+    pedtools (>= 0.9.6)
 Imports: 
     pedprobr,
     forrel (>= 1.3.0),
