@@ -72,11 +72,11 @@ buildPedsExtra = function(labs, sex, extra = 0, ageMat = NULL, knownPO = NULL, a
   }
 
   if(verbose)
-    cat("Total solutions:", length(ALLSOLS), "\nConverting to ped\n")
+    cat("  Total solutions:", length(ALLSOLS), "\n  Converting to ped\n")
 
   peds = lapply(ALLSOLS, function(a) adj2ped(addMissingParents1(a), labs))
   if(verbose)
-    cat("Total time:", ftime(st))
+    cat("  Time used:", ftime(st), "\n")
 
   invisible(peds)
 }
