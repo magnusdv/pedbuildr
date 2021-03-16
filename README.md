@@ -3,30 +3,57 @@
 
 # pedbuildr
 
-The goal of **pedbuildr** is to reconstruct small/medium-sized pedigrees
-from genotype data.
+<!-- badges: start -->
+
+[![CRAN
+status](https://www.r-pkg.org/badges/version/pedbuildr)](https://CRAN.R-project.org/package=pedbuildr)
+[![](https://cranlogs.r-pkg.org/badges/grand-total/pedbuildr?color=yellow)](https://cran.r-project.org/package=pedbuildr)
+[![](https://cranlogs.r-pkg.org/badges/last-month/pedbuildr?color=yellow)](https://cran.r-project.org/package=pedbuildr)
+<!-- badges: end -->
+
+The goal of **pedbuildr** is to reconstruct pedigrees from genotype
+data. This is done by optimising the likelihood over all possible
+pedigrees subject to given restrictions. As part of the **ped suite**
+ecosystem of R packages for pedigree analysis, it uses on
+[pedtools](https://CRAN.R-project.org/package=pedtools) for handling
+pedigrees, and imports
+[pedprobr](https://CRAN.R-project.org/package=pedprobr) for calculating
+pedigree likelihoods.
+
+See also the `ibdEstimate()` function of
+[forrel](https://CRAN.R-project.org/package=forrel), which does pairwise
+relatedness estimation.
 
 ## Installation
 
-The development version of **pedbuildr** is available from GitHub:
+The **pedbuildr** package can be installed from CRAN as follows:
 
 ``` r
-remotes::install_github("magnusdv/pedbuildr")
+install.packages("pedbuildr")
 ```
 
-Load the package into R as follows:
+Alternatively, the latest development version is available from GitHub.
+
+``` r
+# install.packages("devtools")
+devtools::install_github("magnusdv/pedbuildr")
+```
+
+## A reconstruction example
+
+The built-in dataset `trioData` contains simulated genotypes for three
+individuals at 100 SNP markers. As a simple demonstration we will try to
+reconstruct the pedigree connecting these individuals.
+
+To get started, load **pedbuildr**.
 
 ``` r
 library(pedbuildr)
 #> Loading required package: pedtools
 ```
 
-## A reconstruction example
-
-To get started, we demonstrate how to reconstruct the pedigree
-connecting three individuals from their genotypes at 100 SNP markers.
-The (simulated) genotypes are contained in the dataset `trioData`
-built-in to **pedbuildr**. Here are the first few columns:
+The `trioData` is a data frame in so-called *ped format*. Here are the
+first few columns:
 
 ``` r
 trioData[, 1:10]
@@ -36,8 +63,8 @@ trioData[, 1:10]
 #> 3  3   0   0   1 1/1 1/2 1/2 2/2 1/1 1/2
 ```
 
-The first thing to do is to convert the data into pedigree object, using
-the `as.ped()` function from **pedtools**.
+We convert the data into a pedigree object, using the `as.ped()`
+function from **pedtools**.
 
 ``` r
 x = as.ped(trioData, locusAttributes = "snp-12")
@@ -75,10 +102,11 @@ res = reconstruct(x)
 #> 
 #> Computing the likelihood of 95 pedigrees.
 #> Sorting by descending likelihood.
-#> Total time used:  6.04 secs
+#> Total time used:  6.07 secs
 ```
 
-The most likely pedigrees are plotted as follows.
+A tailor-made `plot` function makes it easy to visualise the most likely
+pedigrees:
 
 ``` r
 plot(res, top = 6)
@@ -95,9 +123,10 @@ any *k* = 1,2,… .) In order to obtain a manageable search space,
 
 -   `extra`: The number of extra individuals allowed to connect the
     original individuals. (See further explanations below.)
--   `age`: A character vector describing age inequalities. For example,
-    `age = c("A > B,C", "B > D")` excludes B and C as ancestors of A,
-    and D as an ancestor of B (but no assumption is made for C vs. D).
+-   `age`: A numerical age vector, or a character vector describing age
+    inequalities. For example, `age = c("A > B,C", "B > D")` excludes B
+    and C as ancestors of A, and D as an ancestor of B (but no
+    assumption is made for C vs. D).
 -   `inferPO`: If TRUE, an initial stage of pairwise IBD estimation is
     done, in order to infer certain parent-child pairs, as well as
     certain non-parent-child pairs.
@@ -141,17 +170,18 @@ res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE, linearInb = FA
 #>   Linear inbreeding: FALSE
 #> 
 #> Building pedigree list:
-#>   First 2: 2 candidates (0 secs)
-#>   All 3 + 0 extra: 1 solutions | 3 candidates (0 secs)
-#>   All 3 + 1 extra: 9 solutions | 30 candidates | 21 duplicates removed (0.0156 secs)
-#>   All 3 + 2 extra: 35 solutions | 266 candidates | 501 duplicates removed (0.217 secs)
-#>   All 3 + 3 extra: 183 solutions | 183 candidates | 459 duplicates removed (0.932 secs)
-#> Total solutions: 228 
-#> Converting to ped
-#> Total time: 0.991 secs
+#>   First 2: 2 candidates (0.002 secs)
+#>   All 3 + 0 extra: 1 solutions | 3 candidates (0.003 secs)
+#>   All 3 + 1 extra: 9 solutions | 30 candidates | 21 duplicates removed (0.017 secs)
+#>   All 3 + 2 extra: 35 solutions | 266 candidates | 501 duplicates removed (0.218 secs)
+#>   All 3 + 3 extra: 183 solutions | 183 candidates | 459 duplicates removed (0.877 secs)
+#>   Total solutions: 228 
+#>   Converting to ped
+#>   Time used: 0.918 secs 
+#> 
 #> Computing the likelihood of 228 pedigrees.
 #> Sorting by descending likelihood.
-#> Total time used:  29.8 secs
+#> Total time used:  23.3 secs
 ```
 
 The most likely results this time are shown below:

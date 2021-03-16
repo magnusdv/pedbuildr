@@ -14,27 +14,43 @@ knitr::opts_chunk$set(
 ```
 # pedbuildr
 
-The goal of **pedbuildr** is to reconstruct small/medium-sized pedigrees from genotype data. 
+<!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/pedbuildr)](https://CRAN.R-project.org/package=pedbuildr)
+[![](https://cranlogs.r-pkg.org/badges/grand-total/pedbuildr?color=yellow)](https://cran.r-project.org/package=pedbuildr)
+[![](https://cranlogs.r-pkg.org/badges/last-month/pedbuildr?color=yellow)](https://cran.r-project.org/package=pedbuildr)
+<!-- badges: end -->
+
+The goal of **pedbuildr** is to reconstruct pedigrees from genotype data. This is done by optimising the likelihood over all possible pedigrees subject to given restrictions. As part of the **ped suite** ecosystem of R packages for pedigree analysis, it uses on [pedtools](https://CRAN.R-project.org/package=pedtools) for handling pedigrees, and imports [pedprobr](https://CRAN.R-project.org/package=pedprobr) for calculating pedigree likelihoods.
+
+See also the `ibdEstimate()` function of [forrel](https://CRAN.R-project.org/package=forrel), which does pairwise relatedness estimation.
 
 ## Installation
-The development version of **pedbuildr** is available from GitHub:
+The **pedbuildr** package can be installed from CRAN as follows:
 ```{r, eval = FALSE}
-remotes::install_github("magnusdv/pedbuildr")
+install.packages("pedbuildr")
 ```
 
-Load the package into R as follows:
+Alternatively, the latest development version is available from GitHub.
+```{r, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("magnusdv/pedbuildr")
+```
+
+## A reconstruction example
+The built-in dataset `trioData` contains simulated genotypes for three individuals at 100 SNP markers. As a simple demonstration we will try to reconstruct the pedigree connecting these individuals. 
+
+To get started, load **pedbuildr**.
 ```{r}
 library(pedbuildr)
 ```
 
-## A reconstruction example
-To get started, we demonstrate how to reconstruct the pedigree connecting three individuals from their genotypes at 100 SNP markers. The (simulated) genotypes are contained in the dataset `trioData` built-in to **pedbuildr**. Here are the first few columns:
+The `trioData` is a data frame in so-called *ped format*. Here are the first few columns:
 
 ```{r}
 trioData[, 1:10]
 ```
 
-The first thing to do is to convert the data into pedigree object, using the `as.ped()` function from **pedtools**.
+We convert the data into a pedigree object, using the `as.ped()` function from **pedtools**.
 ```{r}
 x = as.ped(trioData, locusAttributes = "snp-12")
 summary(x)
@@ -46,7 +62,7 @@ To reconstruct the pedigree, simply run `reconstruct()`:
 res = reconstruct(x)
 ```
 
-The most likely pedigrees are plotted as follows.
+A tailor-made `plot` function makes it easy to visualise the most likely pedigrees:
 ```{r reconstruct-trio, fig.height = 4, fig.width = 8}
 plot(res, top = 6)
 ```
@@ -55,8 +71,7 @@ plot(res, top = 6)
 *A priori* there are infinitely many possible pedigrees connecting a set of individuals. (For example, two individuals may be *k*'th cousins for any *k* = 1,2,... .) In order to obtain a manageable search space, `reconstruct()` offers a range of restriction parameters:
 
 * `extra`: The number of extra individuals allowed to connect the original individuals. (See further explanations below.)
-* `age`: A character vector describing age inequalities. For example, `age = c("A > B,C", "B > D")` excludes B and C as ancestors of A,
-and D as an ancestor of B (but no assumption is made for C vs. D).
+* `age`: A numerical age vector, or a character vector describing age inequalities. For example, `age = c("A > B,C", "B > D")` excludes B and C as ancestors of A, and D as an ancestor of B (but no assumption is made for C vs. D).
 * `inferPO`: If TRUE, an initial stage of pairwise IBD estimation is done, in order to infer certain parent-child pairs, as well as certain non-parent-child pairs. 
 * `knownPO`: Known parent–offspring pairs.
 * `notPO`: Pairs known not to be parent–offspring.
@@ -73,7 +88,7 @@ Let us re-run the reconstruction of `trioData` adding a few of these restriction
 res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE, linearInb = FALSE)
 ```
 The most likely results this time are shown below:
-```{r reconstruct-trio-2, fig.height = 4, fig.width = 8}
+```{r reconstruct-trio-2, fig.height = 4.3, fig.width = 8}
 plot(res2, top = 6)
 ```
 
