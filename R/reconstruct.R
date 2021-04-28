@@ -132,7 +132,14 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
     ids = rownames(alleleMatrix)
     if(is.null(ids))
       ids = rownames(alleleMatrix) = as.character(1:nrow(alleleMatrix))
+
+    loci = pedtools:::checkLocusAttribs(loci)
   }
+
+  ### Prep: allele lumping + prepare fast marker creation
+  data = prepareData(alleleMatrix, loci)
+  loci = data$loci
+  amatList = data$amatList
 
   kappa = NULL
 

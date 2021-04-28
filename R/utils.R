@@ -105,6 +105,11 @@ ftime = function(st, digits = 3)
   }
 }
 
+# Fast intersection. NB: assumes no duplicates!
+.myintersect = function (x, y) {
+  y[match(x, y, 0L)]
+}
+
 # Stripped version of expand.grid
 fast.grid = function(argslist, as.list = FALSE) {
   nargs = length(argslist)
