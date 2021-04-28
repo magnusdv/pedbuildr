@@ -26,7 +26,7 @@ buildPedsExtra = function(labs, sex, extra = 0, ageMat = NULL, knownPO = NULL, a
 
   # Initial step: Create adjacency matrix for the first indiv.
   a1 = adjMatrix(sex = sex[1], connected = TRUE)
-  attr(a1, "anc") = list(1L)
+  attr(a1, "anc") = list(1L) # list of ancestors (inclusive) for each indiv
 
   Mlist = list(a1)
 
