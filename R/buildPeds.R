@@ -94,7 +94,7 @@ buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, a
 
   checkLabs = c(unlist(knownPO), unlist(notPO), noChildren)
   if(!all(checkLabs %in% labs))
-    stop2("Unknown pedigree member: ", setdiff(labs, checkLabs))
+    stop2("Unknown pedigree member: ", setdiff(checkLabs, labs))
 
   knownPO_int = lapply(knownPO, function(p) match(p, labs))
   notPO_int = lapply(notPO, function(p) match(p, labs))
