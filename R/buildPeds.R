@@ -48,7 +48,6 @@
 #'   separation linearly related spouses. For example, `linearInb = 1` allows
 #'   mating between parent and child, but not between grandparent and grandchild
 #'   (or more distant).
-#' @param maxLinearInb Deprecated; replaced by `linearInb`.
 #' @param sexSymmetry A logical. If TRUE (default), pedigrees which are equal
 #'   except for the gender distribution of the *added* parents, are regarded as
 #'   equivalent, and only one of each equivalence class is returned. Example:
@@ -75,12 +74,7 @@
 #' @export
 buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, allKnown = FALSE,
                      notPO = NULL, noChildren = NULL, connected = TRUE, linearInb = TRUE,
-                     maxLinearInb = NULL, sexSymmetry = TRUE, verbose = TRUE) {
-
-  if(!is.null(maxLinearInb)) {
-    warning("The argument `maxLinearInb` has been replaced with `linearInb`. Use this in new code.")
-    linearInb = maxLinearInb
-  }
+                     sexSymmetry = TRUE, verbose = TRUE) {
 
   N = length(labs)
   ids = seq_along(labs)

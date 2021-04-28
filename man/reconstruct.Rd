@@ -20,7 +20,6 @@ reconstruct(
   noChildren = NULL,
   connected = TRUE,
   linearInb = TRUE,
-  maxLinearInb = NULL,
   sexSymmetry = TRUE,
   sortResults = TRUE,
   founderInb = 0,
@@ -82,8 +81,6 @@ linear inbreeding) or a nonnegative integer indicating the maximum
 separation linearly related spouses. For example, \code{linearInb = 1} allows
 mating between parent and child, but not between grandparent and grandchild
 (or more distant).}
-
-\item{maxLinearInb}{Deprecated; replaced by \code{linearInb}.}
 
 \item{sexSymmetry}{A logical. If TRUE (default), pedigrees which are equal
 except for the gender distribution of the \emph{added} parents, are regarded as
