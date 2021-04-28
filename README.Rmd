@@ -77,8 +77,7 @@ plot(res, top = 6)
 * `notPO`: Pairs known not to be parent–offspring.
 * `allKnown`: If TRUE, then `knownPO` is the complete list of parent–offspring pairs.
 * `noChildren`: Individuals known to have no children.
-* `linearInb`: The allowed level of inbreeding between linear descendants. For example, `linearInb = 1` allows mating between
-parent–child, but not grandparent–grandchild. Set to FALSE to disallow all inbreeding of this type.
+* `linearInb`: The allowed level of inbreeding between linear descendants. For example, `linearInb = 1` allows mating between parent–child, but not grandparent–grandchild. Set to FALSE to disallow all inbreeding of this type.
 * `connected`: If TRUE (default), only connected pedigrees are considered.
 * `sexSymmetry`: If TRUE (default) pedigrees are considered equal if they differ only in the
 sexes of the added parents, e.g., paternal versus maternal half-siblings.
