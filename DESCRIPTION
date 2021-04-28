@@ -1,6 +1,6 @@
 Package: pedbuildr
 Title: Pedigree Reconstruction
-Version: 0.2.1
+Version: 0.2.1.9000
 Authors@R: person("Magnus Dehli", family = "Vigeland", role = c("aut", "cre"), 
     email = "m.d.vigeland@medisin.uio.no", 
     comment = c(ORCID = "0000-0002-9134-4962"))
@@ -17,6 +17,7 @@ Depends:
     R (>= 3.5.0),
     pedtools (>= 0.9.6)
 Imports: 
+    pedmut,
     pedprobr,
     forrel (>= 1.3.0),
     glue
