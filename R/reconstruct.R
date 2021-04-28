@@ -30,8 +30,10 @@
 #'   `knownPO` and `notPO` are ignored.
 #' @param founderInb A number in the interval `[0,1]`, used as background
 #'   inbreeding level in all founders.
-#' @param sortResults A logical. If TRUE, the output is sorted so that the most
-#'   likely pedigree comes first.
+#' @param sortResults A logical. If TRUE (default), the output is sorted so that
+#'   the most likely pedigree comes first.
+#' @param numCores A positive integer. The number of cores used in
+#'   parallelisation. Default: 1.
 #' @param verbose A logical.
 #' @inheritParams buildPeds
 #'
@@ -99,13 +101,15 @@
 #'
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom forrel showInTriangle
+#' @importFrom parallel makeCluster stopCluster detectCores parLapply
+#'   clusterEvalQ clusterExport
 #' @export
 reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NULL,
                        pedlist = NULL, inferPO = FALSE, sex = NULL,
                        age = NULL, knownPO = NULL, allKnown = FALSE,
                        notPO = NULL, noChildren = NULL, connected = TRUE,
                        linearInb = TRUE, maxLinearInb = NULL, sexSymmetry = TRUE,
-                       sortResults = TRUE, founderInb = 0,
+                       sortResults = TRUE, founderInb = 0, numCores = 1,
                        verbose = TRUE) {
 
 
@@ -180,20 +184,10 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
   if(verbose)
     cat("\nComputing the likelihood of", npeds, "pedigrees.\n")
 
-  # Progress bar
-  if(progbar <- verbose && interactive())
-    pb = txtProgressBar(min = 0, max = npeds, style = 3)
-
-  # Compute likelihoods
-  logliks = vapply(seq_len(npeds), function(i) {
-
-    # Update progressbar
-    if(progbar) setTxtProgressBar(pb, i)
-
-    ped = pedlist[[i]]
-
+  # loglik calculator
+  loglikFUN = function(ped, amatList, loci) {
     # Attach marker data
-    x = setMarkers(ped, alleleMatrix = alleleMatrix, locusAttributes = loci)
+    x = setMarkersFAST(ped, amatList, loci)
 
     # Founder inbreeding
     if(founderInb > 0) {
@@ -202,11 +196,38 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
       else
         founderInbreeding(x, founders(x)) = founderInb
     }
-
     # Compute loglikelihood
-    tryCatch(loglikTotal(x), error = function(e) NA_real_)
-  },
-  FUN.VALUE = 0)
+    tryCatch(loglikTotal(x), error = function(e) {message(e); NA_real_})
+  }
+
+
+  # Parallelise
+  if(numCores > 1) {
+    cl = makeCluster(numCores)
+    on.exit(stopCluster(cl))
+    clusterEvalQ(cl, library(pedbuildr))
+    clusterExport(cl, c("loglikFUN", "setMarkersFAST", ".myintersect"), envir = environment())
+
+    if(verbose) message("Using ", length(cl), " cores")
+
+    # Loop through pedigrees
+    loglikList = parLapply(cl, pedlist, function(ped) loglikFUN(ped, amatList, loci))
+  }
+  else {
+    # Setup progress bar
+    if(progbar <- verbose && interactive())
+      pb = txtProgressBar(min = 0, max = npeds, style = 3)
+
+    loglikList = lapply(seq_len(npeds), function(i) {
+      if(progbar) setTxtProgressBar(pb, i)
+      loglikFUN(pedlist[[i]], amatList, loci)
+    })
+
+    # Close progress bar
+    if(progbar) close(pb)
+  }
+
+  logliks = unlist(loglikList)
 
   # Deal with failed likelihoods
   errs = is.na(logliks)
@@ -215,10 +236,6 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
   if(any(errs)) {
     pedlist = pedlist[!errs]
     logliks = logliks[!errs]
-  }
-
-  if(progbar) {
-    close(pb) # Close progress bar
   }
 
   if(sortResults) {

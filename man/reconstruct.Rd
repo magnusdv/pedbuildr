@@ -24,6 +24,7 @@ reconstruct(
   sexSymmetry = TRUE,
   sortResults = TRUE,
   founderInb = 0,
+  numCores = 1,
   verbose = TRUE
 )
 }
@@ -89,11 +90,14 @@ except for the gender distribution of the \emph{added} parents, are regarded as
 equivalent, and only one of each equivalence class is returned. Example:
 paternal vs. maternal half sibs.}
 
-\item{sortResults}{A logical. If TRUE, the output is sorted so that the most
-likely pedigree comes first.}
+\item{sortResults}{A logical. If TRUE (default), the output is sorted so that
+the most likely pedigree comes first.}
 
 \item{founderInb}{A number in the interval \verb{[0,1]}, used as background
 inbreeding level in all founders.}
+
+\item{numCores}{A positive integer. The number of cores used in
+parallelisation. Default: 1.}
 
 \item{verbose}{A logical.}
 }
