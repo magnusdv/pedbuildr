@@ -137,8 +137,17 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
     if(is.null(ids))
       ids = rownames(alleleMatrix) = as.character(1:nrow(alleleMatrix))
 
+    # Clean up unknown alleles (NA in `getAlleles()`)
+    NAstrings = c("", "0", "-", "NA")
+    alleleMatrix[alleleMatrix %in% NAstrings] = NA_character_
+
     loci = pedtools:::checkLocusAttribs(loci)
   }
+
+  # Remove untyped rows of allele matrix
+  typed = rowSums(is.na(alleleMatrix)) < ncol(alleleMatrix)
+  if(sum(typed) < length(ids))
+    alleleMatrix = alleleMatrix[typed, , drop = FALSE]
 
   ### Prep: allele lumping + prepare fast marker creation
   data = prepareData(alleleMatrix, loci)
@@ -253,6 +262,7 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
   structure(list(pedlist = pedlist,
                  logliks = logliks,
                  kappa = kappa,
+                 labs = ids,
                  alleleMatrix = alleleMatrix,
                  loci = loci,
                  errPeds = errPeds,
@@ -266,6 +276,7 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
   structure(list(pedlist = x$pedlist[i],
                  logliks = x$logliks[i],
                  kappa = x$kappa,
+                 labs = x$labs,
                  alleleMatrix = x$alleleMatrix,
                  loci = x$loci),
             class = "pedrec")
@@ -281,9 +292,11 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
 #' @export
 print.pedrec = function(x, ...) {
   am = x$alleleMatrix
+  typed = if(length(x$labs) == nrow(am)) "all" else nrow(am)
+
   print(glue::glue("
     Pedigree reconstruction result.
-    Input: {nrow(am)} individuals typed with {ncol(am)/2} markers.
+    Input: {length(x$labs)} individuals; {typed} typed with {ncol(am)/2} markers.
     Ouput: {length(x$pedlist)} pedigrees sorted by likelihood ({length(x$errPeds)} failed)."
   ))
 }
@@ -292,8 +305,8 @@ print.pedrec = function(x, ...) {
 #' @importFrom graphics par plot text title
 #' @export
 plot.pedrec = function(x, top = NULL, nrow = NA, titles = "LR",
-                       labs = rownames(x$alleleMatrix),
-                       hatched = labs, col = list(red = labs), ...) {
+                       labs = x$labs, highlight = x$labs,
+                       hatched = rownames(x$alleleMatrix), ...) {
 
   if(!is.null(top))
     x = x[seq_len(top)]
@@ -315,6 +328,12 @@ plot.pedrec = function(x, top = NULL, nrow = NA, titles = "LR",
       titles = c(titles, titles2)
     }
   }
+
+  # Highlight typed members
+  if(length(highlight) > 0)
+    col = list(red = highlight)
+  else
+    col = NULL
 
   for(i in seq_len(L)) {
     ped = x$pedlist[[i]]

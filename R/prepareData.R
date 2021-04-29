@@ -29,10 +29,6 @@ prepareData = function(alleleMatrix, loci, verbose = FALSE) {
   else if(length(loci) != nMark)
     stop2("Allele matrix incompatible with list of loci")
 
-  # Missing alleles
-  NAstrings = c("", "0", "-", "NA")
-  alleleMatrix[alleleMatrix %in% NAstrings] = NA_character_
-
   # Empty list of internal 2-column allele matrices
   amatList = vector("list", nMark)
 
