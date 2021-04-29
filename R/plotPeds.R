@@ -1,5 +1,18 @@
 #' @importFrom graphics par plot text title
-plotPeds = function(pedlist, titles = NULL, nrow = NA, ...) {
+plotPeds = function(pedlist, labs = NA, highlight = NA, titles = NULL, nrow = NA, ...) {
+
+  labsAll = unlist(labels(pedlist[[1]]))
+
+  if(identical(labs, NA)) {
+    labs = labsAll[!grepl("^e[1-9]", labsAll)]
+  }
+
+  if(identical(highlight, NA)) {
+    highlight = labsAll[!grepl("^e[1-9]", labsAll)]
+  }
+
+  hatched = highlight
+  col = list(red = highlight)
 
   L = length(pedlist)
   if(is.na(nrow))
@@ -23,12 +36,9 @@ plotPeds = function(pedlist, titles = NULL, nrow = NA, ...) {
       next
     }
 
-    labs = labels(ped)
-    origs = labs[!grepl("^e[1-9]", labs)]
-
     mar = if(is.null(tit)) c(1.5,1.5,1.5,1.5) else c(1.5,1.5,3,1.5)
 
-    plot(ped, hatched = origs, col = list(red = origs),
-         margin = mar, labs = origs, title = tit, ...)
+    plot(ped, labs = labs, hatched = hatched, col = col,
+         margin = mar, title = tit, ...)
   }
 }
