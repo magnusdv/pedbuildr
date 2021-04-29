@@ -20,7 +20,8 @@ buildPedsExtra = function(labs, sex, extra = 0, ageMat = NULL, knownPO = NULL, a
   # Convert age matrix to list format (works with NULL)
   y = unname(ageMat[, "younger"])
   o = unname(ageMat[, "older"])
-  ageList = lapply(1:N, function(i) list(younger = y[o == i], older = o[y == i]))
+  ageList = lapply(1:Ntot, function(i) list(younger = y[o == i], older = o[y == i]))
+
 
   if(verbose) cat("\nBuilding pedigree list:\n")
 
@@ -167,13 +168,13 @@ addIndividual = function(a, addedSex, origN, final, connected = FALSE,
     # Potential children: Exclude ancestors
     potCh = .mysetdiff(potentialCh, parAnc, makeUnique = FALSE)
 
-    # Force known PO
-    known = .mysetdiff(knownPO, par, makeUnique = FALSE)
-    if(!all(known %in% potCh))
+    # Force known PO: If not among parents, then children
+    knownCh = .mysetdiff(knownPO, par, makeUnique = FALSE)
+    if(!all(knownCh %in% potCh))
       next
 
     # Loop over subsets of children
-    for(chs in powerset(potCh, force = known)) {
+    for(chs in powerset(potCh, force = knownCh)) {
       # message("Fa = ", fa, "; mo = ", mo, "; ch = ", toString(chs))
 
       # If final extra, skip if uninformative: a) leaf  b) founder with 1 child

@@ -72,17 +72,18 @@
 #'
 #'
 #' @export
-buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, allKnown = FALSE,
-                     notPO = NULL, noChildren = NULL, connected = TRUE, linearInb = TRUE,
-                     sexSymmetry = TRUE, verbose = TRUE) {
+buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, knownSub = NULL,
+                     allKnown = FALSE, notPO = NULL, noChildren = NULL, connected = TRUE,
+                     linearInb = TRUE, sexSymmetry = TRUE, verbose = TRUE) {
 
   N = length(labs)
-  ids = seq_along(labs)
+  labs = as.character(labs)
 
   if(length(sex) != N)
     stop2("`labs` and `sex` must have the same length\nlabs: ", labs, "\nsex: ", sex)
 
-  if(!(identical(extra, "parents") || isCount(extra, minimum = 0)))
+  extraNum = !identical(extra, "parents")
+  if(extraNum && !isCount(extra, minimum = 0))
      stop2('`extra` must be either the word "parents" or a nonnegative integer: ', extra)
 
   if(allKnown) {
@@ -92,18 +93,29 @@ buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, a
       stop2("`notPO` must be NULL when `allKnown = TRUE`")
   }
 
+  # Check that IDs used are known or allowed extras (e1, e2, ...)
   checkLabs = c(unlist(knownPO), unlist(notPO), noChildren)
   if(!all(checkLabs %in% labs))
     stop2("Unknown pedigree member: ", setdiff(checkLabs, labs))
 
+  # Convert numeric age vector to vector of inequalities
+  if(is.numeric(age))
+    age = convertNumAge(age, labs)
+
+  # Convert knownSub to knownPO + age
+  if(!is.null(knownSub)) {
+    subDat = convertKnownSub(knownSub, labs, sex)
+    knownPO = c(knownPO, subDat$knownPO)
+    age = c(age, subDat$age)
+  }
+
+  # Convert age inequalities into matrix with all ordered pairs (works with NULL)
+  ageMat = parseAge(age, labs)
+
+  # Convert to indices
   knownPO_int = lapply(knownPO, function(p) match(p, labs))
   notPO_int = lapply(notPO, function(p) match(p, labs))
   noChildren_int = match(noChildren, labs)
-
-  # Convert age vector into matrix with all ordered pairs (works with NULL)
-  if(is.numeric(age))
-    age = convertNumAge(age, labs)
-  ageMat = parseAge(age, labs)
 
   # Check noChildren, and convert to internal
   if(!all(noChildren %in% labs))
@@ -134,7 +146,7 @@ buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, a
     ))
   }
 
-  if(extra == "parents") {
+  if(identical(extra, "parents")) {
     buildPedsParents(labs = labs, sex = sex, ageMat = ageMat, knownPO = knownPO_int,
                      allKnown = allKnown, notPO = notPO_int, noChildren = noChildren_int,
                      connected = connected, maxLinearInb = maxLinearInb,
@@ -148,6 +160,28 @@ buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, a
   }
 }
 
+
+convertKnownSub = function(knownSub, labs, sex) {
+  if(!is.ped(knownSub))
+    stop2("Argument `knownSub` must be a `ped` object. Received class: ", class(knownSub))
+
+  # Overlapping individuals
+  ids = intersect(labels(knownSub), labs)
+  if(length(ids) < 2)
+    stop2("`knownSub` must contain at least two of the indicated individuals")
+
+  names(sex) = labs
+  if(!all(getSex(knownSub, ids) == sex[ids]))
+    stop2("Member of `knownSub` has wrong sex: ", ids[getSex(knownSub, ids) != sex[ids]])
+
+  pomat = which(ped2adj(knownSub)[ids, ids], arr.ind = T)
+  pomat[] = ids[pomat]
+
+  knownPO = lapply(seq_len(nrow(pomat)), function(i) unname(pomat[i, ]))
+  age = paste(pomat[, 1], pomat[, 2], sep = ">")
+
+  list(knownPO = knownPO, age = age)
+}
 
 
 # Convert numeric age vector to string inequalities: "A>B,C,D", B>C"
@@ -181,7 +215,7 @@ convertNumAge = function(age, labs) {
   unlist(s)
 }
 
-# Convert vector to string inequalities: "A>B,C,D", B>C" to matrix
+# Convert vector to string inequalities: "A>B,C,D", B>C" to internal matrix
 parseAge = function(a, labs, output = c("matrix", "list")) {
   if(is.null(a) || all(is.na(a)))
     return(NULL)
@@ -207,6 +241,6 @@ parseAge = function(a, labs, output = c("matrix", "list")) {
 
   # Convert to internal ordering
   cbind(younger = match(res[, "younger"], labs),
-        older = match(res[, "older"], labs))
+        older   = match(res[, "older"],   labs))
 }
 

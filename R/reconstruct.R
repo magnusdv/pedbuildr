@@ -106,7 +106,7 @@
 #' @export
 reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NULL,
                        pedlist = NULL, inferPO = FALSE, sex = NULL,
-                       age = NULL, knownPO = NULL, allKnown = FALSE,
+                       age = NULL, knownPO = NULL, knownSub = NULL, allKnown = FALSE,
                        notPO = NULL, noChildren = NULL, connected = TRUE,
                        linearInb = TRUE, sexSymmetry = TRUE,
                        sortResults = TRUE, founderInb = 0, numCores = 1,
@@ -180,7 +180,7 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
     }
 
     pedlist = buildPeds(labs = ids, sex = sex, extra = extra, age = age,
-                        knownPO = knownPO, allKnown = allKnown,
+                        knownPO = knownPO, knownSub = knownSub, allKnown = allKnown,
                         notPO = notPO, noChildren = noChildren,
                         connected = connected, linearInb = linearInb,
                         sexSymmetry = sexSymmetry, verbose = verbose)
@@ -193,7 +193,8 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
   if(verbose)
     cat("\nComputing the likelihood of", npeds, "pedigrees.\n")
 
-  # loglik calculator
+
+  # Main loglik function
   loglikFUN = function(ped, amatList, loci) {
     # Attach marker data
     x = setMarkersFAST(ped, amatList, loci)
@@ -205,8 +206,8 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
       else
         founderInbreeding(x, founders(x)) = founderInb
     }
-    # Compute loglikelihood
-    tryCatch(loglikTotal(x), error = function(e) {message(e); NA_real_})
+    # Compute loglik
+    tryCatch(loglikTotal(x), error = function(e) {NA_real_})
   }
 
 
