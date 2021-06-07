@@ -45,7 +45,7 @@ relabelFast = function(x, newlabs) {
       comp$ID = newlabs[as.integer(comp$ID)]
       comp
     })
-    class(y) = "pedList"
+    class(y) = c("pedList", "list")
     return(y)
   }
 
@@ -58,7 +58,7 @@ relabelFast = function(x, newlabs) {
 relabelAddedParents = function(x, origN) {
   if(is.pedList(x)) {
     y = lapply(x, relabelAddedParents, origN)
-    class(y) = "pedList"
+    class(y) = c("pedList", "list")
     return(y)
   }
 
