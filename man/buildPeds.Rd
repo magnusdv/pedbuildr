@@ -41,6 +41,8 @@ version.}
 pairs known to be parent-offspring. By default, both directions are
 considered; use \code{age} to force a specific direction.}
 
+\item{knownSub}{A \code{ped} object involving a subset of the \code{labs} individuals.}
+
 \item{allKnown}{A logical. If TRUE, no other pairs than \code{knownPO} will be
 assigned as parent-offspring. If FALSE (default), all pairs except those in
 \code{notPO} are treated as potential parent-offspring.}

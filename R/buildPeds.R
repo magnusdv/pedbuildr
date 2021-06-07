@@ -34,6 +34,7 @@
 #' @param knownPO A list of vectors of length 2, containing the ID labels of
 #'   pairs known to be parent-offspring. By default, both directions are
 #'   considered; use `age` to force a specific direction.
+#' @param knownSub A `ped` object involving a subset of the `labs` individuals.
 #' @param allKnown A logical. If TRUE, no other pairs than `knownPO` will be
 #'   assigned as parent-offspring. If FALSE (default), all pairs except those in
 #'   `notPO` are treated as potential parent-offspring.
