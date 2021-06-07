@@ -10,6 +10,7 @@ buildPeds(
   extra = "parents",
   age = NULL,
   knownPO = NULL,
+  knownSub = NULL,
   allKnown = FALSE,
   notPO = NULL,
   noChildren = NULL,

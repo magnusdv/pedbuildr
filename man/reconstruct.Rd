@@ -15,6 +15,7 @@ reconstruct(
   sex = NULL,
   age = NULL,
   knownPO = NULL,
+  knownSub = NULL,
   allKnown = FALSE,
   notPO = NULL,
   noChildren = NULL,
