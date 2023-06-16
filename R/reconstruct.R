@@ -338,20 +338,14 @@ plot.pedrec = function(x, top = NULL, nrow = NA, titles = "LR",
 
   for(i in seq_len(L)) {
     ped = x$pedlist[[i]]
+    if(is.pedList(ped))
+      ped = unclass(ped)
 
     # Title
     tit = if(!is.null(titles)) titles[i] else NULL
 
     # Margin
-    mar = if(is.null(tit)) c(1.5,1.5,1.5,1.5) else c(1.5,1.5,3,1.5)
-
-    if(is.pedList(ped)) {
-      plot(-1:1,-1:1, type="n", axes = F, xlab="", ylab="")
-      mess = sprintf("Nr %d: disconnected.\n\nPlot separately with\n`plotPedList()`.", i)
-      text(0, 0, mess, cex = 1.3)
-      title(tit, line= -2)
-      next
-    }
+    mar = if(is.null(tit)) c(1,2,1.5,2) else c(1,2,3,2)
 
     plot(ped, labs = labs, hatched = hatched, col = col,
          margin = mar, title = tit, ...)

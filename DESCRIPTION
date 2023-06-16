@@ -15,7 +15,7 @@ LazyData: true
 License: GPL-3
 Depends: 
     R (>= 3.5.0),
-    pedtools (>= 0.9.6)
+    pedtools (>= 2.2.0)
 Imports: 
     pedmut,
     pedprobr,
@@ -24,6 +24,6 @@ Imports:
 URL: https://github.com/magnusdv/pedbuildr
 BugReports: https://github.com/magnusdv/pedbuildr/issues
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
 Suggests: 
     testthat

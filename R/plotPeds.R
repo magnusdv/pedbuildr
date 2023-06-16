@@ -24,19 +24,13 @@ plotPeds = function(pedlist, labs = NA, highlight = NA, titles = NULL, nrow = NA
 
   for(i in seq_along(pedlist)) {
     ped = pedlist[[i]]
+    if(is.pedList(ped))
+      ped = unclass(ped)
 
     # Title
     tit = if(!is.null(titles)) titles[i] else NULL
 
-    if(is.pedList(ped)) {
-      plot(-1:1,-1:1, type="n", axes = F, xlab="", ylab="")
-      mess ="Disconnected pedigree.\n\nPlot separately with\n`pedtools::plotPedList()`."
-      text(0, 0, mess, cex = 1.3)
-      title(tit)
-      next
-    }
-
-    mar = if(is.null(tit)) c(1.5,1.5,1.5,1.5) else c(1.5,1.5,3,1.5)
+    mar = 1.5
 
     plot(ped, labs = labs, hatched = hatched, col = col,
          margin = mar, title = tit, ...)
