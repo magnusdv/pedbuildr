@@ -6,7 +6,7 @@
 \title{Reconstruction example with three individuals}
 \format{
 A data frame with 3 rows and 104 columns. The first 4 columns contain
-pedigree info:
+pedigree info in standard format:
 \itemize{
 \item \code{id}: Individual ID
 \item \code{fid}: Paternal ID, where 0 means missing father
