@@ -47,7 +47,8 @@ buildPedsParents = function(labs, sex, ageMat = NULL, knownPO = NULL, allKnown =
     }
   }
 
-  invisible(peds)
+  class(peds) = "pedCollection"
+  peds
 }
 
 # Auxiliary function for listing all possible PO sets

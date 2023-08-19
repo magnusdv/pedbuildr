@@ -89,7 +89,8 @@ buildPedsExtra = function(labs, sex, extra = 0, ageMat = NULL, knownPO = NULL, a
   if(verbose)
     cat("  Time used:", ftime(st), "\n")
 
-  invisible(peds)
+  class(peds) = "pedCollection"
+  peds
 }
 
 

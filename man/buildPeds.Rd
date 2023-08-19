@@ -6,7 +6,7 @@
 \usage{
 buildPeds(
   labs,
-  sex,
+  sex = 1,
   extra = "parents",
   age = NULL,
   knownPO = NULL,
@@ -95,17 +95,25 @@ advantage of not requiring an explicit/ad hoc number of "extras", but works
 best in smaller cases.
 }
 \examples{
+# Two individuals + 1 extra
+plist = buildPeds(1:2, extra = 1, age = "1>2")
+plot(plist)
 
-# Showing off a few of the options
-plist = buildPeds(1:3, sex = c(1,2,1), extra = 1, knownPO = list(1:2),
-                  age = "1 > 2", linearInb = FALSE)
-stopifnot(length(plist) == 12)
+# Allow disconnected
+plist2 = buildPeds(1:2, extra = 1, age = "1>2", connected = FALSE)
+plot(plist2, frames = TRUE)
 
+# Note that full sibs require 2 extras
+plist3 = buildPeds(1:2, extra = 2, age = "1>2")
+plot(plist3)
 
-# Slightly different output with `extra = "parents"`
-plist2 = buildPeds(1:3, sex = c(1,2,1), extra = "parents", knownPO = list(1:2),
-                   age = "1 > 2", linearInb = FALSE)
-stopifnot(length(plist2) == 8)
+# With 2 extras, allowing any inbreeding
+plist4 = buildPeds(1:2, extra = 2, age = "1>2", maxInbreeding = 1)
+plot(plist4)
+
+# Full sibs are also included when `extra = "parents"`
+plist5 = buildPeds(1:2, extra = "parents", age = "1>2")
+plot(plist5)
 
 
 }

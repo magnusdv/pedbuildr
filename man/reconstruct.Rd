@@ -20,8 +20,8 @@ reconstruct(
   notPO = NULL,
   noChildren = NULL,
   connected = TRUE,
-  maxInbreeding = Inf,
-  linearInb = TRUE,
+  maxInbreeding = 1/16,
+  linearInb = FALSE,
   sexSymmetry = TRUE,
   sortResults = TRUE,
   founderInb = 0,
@@ -143,11 +143,11 @@ best in smaller cases.
 # Example 1: Trio
 #-----------------
 
-# Uses built-in dataset `trioData`
+# Built-in dataset `trioData`
 x = as.ped(trioData, locusAttributes = "snp12")
 summary(x)
 
-res = reconstruct(x, inferPO = TRUE, age = "1 > 2", linearInb = FALSE)
+res = reconstruct(x, inferPO = TRUE, age = "1 > 2")
 
 # Plot most likely pedigrees
 plot(res, top = 6)
@@ -160,7 +160,7 @@ sex  = getSex(x)
 
 # ...and then reconstruct
 res2 = reconstruct(alleleMatrix = als, loci = loci, sex = sex,
-                   inferPO = TRUE, age = "1 > 2", linearInb = FALSE)
+                   inferPO = TRUE, age = "1 > 2")
 
 stopifnot(identical(res, res2))
 
