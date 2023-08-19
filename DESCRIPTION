@@ -20,7 +20,8 @@ Imports:
     forrel (>= 1.5.0),
     glue,
     pedmut,
-    pedprobr
+    pedprobr,
+    ribd
 Suggests: 
     testthat
 Encoding: UTF-8
