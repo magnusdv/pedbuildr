@@ -71,14 +71,16 @@
 #'
 #'
 #' @export
-buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, knownSub = NULL,
+buildPeds = function(labs, sex = 1, extra = "parents", age = NULL, knownPO = NULL, knownSub = NULL,
                      allKnown = FALSE, notPO = NULL, noChildren = NULL, connected = TRUE,
                      maxInbreeding = 1/16, linearInb = FALSE, sexSymmetry = TRUE, verbose = TRUE) {
 
   N = length(labs)
   labs = as.character(labs)
 
-  if(length(sex) != N)
+  if(length(sex) == 1)
+    sex = rep(sex, N)
+  else if(length(sex) != N)
     stop2("`labs` and `sex` must have the same length\nlabs: ", labs, "\nsex: ", sex)
 
   extraNum = !identical(extra, "parents")
