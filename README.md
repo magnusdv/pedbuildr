@@ -67,7 +67,7 @@ We convert the data into a pedigree object, using the `as.ped()`
 function from **pedtools**.
 
 ``` r
-x = as.ped(trioData, locusAttributes = "snp-12")
+x = as.ped(trioData, locusAttributes = "snp12")
 summary(x)
 #> List of 3 singletons.
 #> Labels: 1 (male), 2 (male), 3 (male).
@@ -92,17 +92,19 @@ res = reconstruct(x)
 #>   No children: -
 #>   Connected only: TRUE
 #>   Symmetry filter: TRUE
-#>   Linear inbreeding: TRUE
+#>   Max inbreeding: 0.0625
+#>   Linear inbreeding: FALSE
 #> 
 #> Building pedigree list:
 #>   Undirected adjacency matrices: 8 
 #>   Directed adjacency matrices: 16 
-#>   After adding parents: 114 
-#>   Connected solutions: 95 
+#>   After adding parents: 57 
+#>   Connected solutions: 44 
+#>   Excessive inbreeding: 0 
 #> 
-#> Computing the likelihood of 95 pedigrees.
+#> Computing the likelihood of 44 pedigrees.
 #> Sorting by descending likelihood.
-#> Total time used:  6.07 secs
+#> Total time used:  2.87 secs
 ```
 
 A tailor-made `plot` function makes it easy to visualise the most likely
@@ -121,29 +123,32 @@ of individuals. (For example, two individuals may be *k*’th cousins for
 any *k* = 1,2,… .) In order to obtain a manageable search space,
 `reconstruct()` offers a range of restriction parameters:
 
--   `extra`: The number of extra individuals allowed to connect the
-    original individuals. (See further explanations below.)
--   `age`: A numerical age vector, or a character vector describing age
-    inequalities. For example, `age = c("A > B,C", "B > D")` excludes B
-    and C as ancestors of A, and D as an ancestor of B (but no
-    assumption is made for C vs. D).
--   `inferPO`: If TRUE, an initial stage of pairwise IBD estimation is
-    done, in order to infer certain parent-child pairs, as well as
-    certain non-parent-child pairs.
--   `knownPO`: Known parent–offspring pairs.
--   `notPO`: Pairs known not to be parent–offspring.
--   `allKnown`: If TRUE, then `knownPO` is the complete list of
-    parent–offspring pairs.
--   `noChildren`: Individuals known to have no children.
--   `linearInb`: The allowed level of inbreeding between linear
-    descendants. For example, `linearInb = 1` allows mating between
-    parent–child, but not grandparent–grandchild. Set to FALSE to
-    disallow all inbreeding of this type.
--   `connected`: If TRUE (default), only connected pedigrees are
-    considered.
--   `sexSymmetry`: If TRUE (default) pedigrees are considered equal if
-    they differ only in the sexes of the added parents, e.g., paternal
-    versus maternal half-siblings.
+- `extra`: The number of extra individuals allowed to connect the
+  original individuals. (See further explanations below.)
+- `age`: A numerical age vector, or a character vector describing age
+  inequalities. For example, `age = c("A > B,C", "B > D")` excludes B
+  and C as ancestors of A, and D as an ancestor of B (but no assumption
+  is made for C vs. D).
+- `inferPO`: If TRUE, an initial stage of pairwise IBD estimation is
+  done, in order to infer certain parent-child pairs, as well as certain
+  non-parent-child pairs.
+- `knownPO`: Known parent–offspring pairs.
+- `notPO`: Pairs known not to be parent–offspring.
+- `allKnown`: If TRUE, then `knownPO` is the complete list of
+  parent–offspring pairs.
+- `noChildren`: Individuals known to have no children.
+- `maxInbreeding`: The highest permitted inbreeding coefficient in the
+  pedigree. By default this is set to 1/16, which is appropriate for
+  most projects involving human pedigrees.
+- `linearInb`: The allowed level of inbreeding between linear
+  descendants. For example, `linearInb = 1` allows mating between
+  parent–child, but not grandparent–grandchild. The default value
+  `FALSE` disallows all inbreeding of this type.
+- `connected`: If TRUE (default), only connected pedigrees are
+  considered.
+- `sexSymmetry`: If TRUE (default) pedigrees are considered equal if
+  they differ only in the sexes of the added parents, e.g., paternal
+  versus maternal half-siblings.
 
 Let us re-run the reconstruction of `trioData` adding a few of these
 restrictions. We allow 3 extra individuals and indicate that individual
@@ -152,7 +157,7 @@ parent-child relationships automatically, and disallow linear
 inbreeding.
 
 ``` r
-res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE, linearInb = FALSE)
+res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE)
 #> Pairwise estimation:
 #>   PO: 2-3 
 #>   non-PO: 1-3 
@@ -167,21 +172,23 @@ res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE, linearInb = FA
 #>   No children: -
 #>   Connected only: TRUE
 #>   Symmetry filter: TRUE
+#>   Max inbreeding: 0.0625
 #>   Linear inbreeding: FALSE
 #> 
 #> Building pedigree list:
-#>   First 2: 2 candidates (0.002 secs)
-#>   All 3 + 0 extra: 1 solutions | 3 candidates (0.003 secs)
-#>   All 3 + 1 extra: 9 solutions | 30 candidates | 21 duplicates removed (0.017 secs)
-#>   All 3 + 2 extra: 35 solutions | 266 candidates | 501 duplicates removed (0.218 secs)
-#>   All 3 + 3 extra: 183 solutions | 183 candidates | 459 duplicates removed (0.877 secs)
+#>   First 2: 2 candidates (0.0038 secs)
+#>   All 3 + 0 extra: 1 solutions | 3 candidates (0.00572 secs)
+#>   All 3 + 1 extra: 9 solutions | 30 candidates | 21 duplicates removed (0.0163 secs)
+#>   All 3 + 2 extra: 35 solutions | 266 candidates | 501 duplicates removed (0.349 secs)
+#>   All 3 + 3 extra: 183 solutions | 183 candidates | 459 duplicates removed (1.7 secs)
 #>   Total solutions: 228 
 #>   Converting to ped
-#>   Time used: 0.918 secs 
+#>   Excessive inbreeding: 114 
+#>   Time used: 2.33 secs 
 #> 
-#> Computing the likelihood of 228 pedigrees.
+#> Computing the likelihood of 114 pedigrees.
 #> Sorting by descending likelihood.
-#> Total time used:  23.3 secs
+#> Total time used:  22.6 secs
 ```
 
 The most likely results this time are shown below:

@@ -52,7 +52,7 @@ trioData[, 1:10]
 
 We convert the data into a pedigree object, using the `as.ped()` function from **pedtools**.
 ```{r}
-x = as.ped(trioData, locusAttributes = "snp-12")
+x = as.ped(trioData, locusAttributes = "snp12")
 summary(x)
 ```
 The `locusAttributes` argument tells R that all the markers are diallelic with alleles 1 and 2. By default, the alleles have equal frequencies.
@@ -77,14 +77,15 @@ plot(res, top = 6)
 * `notPO`: Pairs known not to be parent–offspring.
 * `allKnown`: If TRUE, then `knownPO` is the complete list of parent–offspring pairs.
 * `noChildren`: Individuals known to have no children.
-* `linearInb`: The allowed level of inbreeding between linear descendants. For example, `linearInb = 1` allows mating between parent–child, but not grandparent–grandchild. Set to FALSE to disallow all inbreeding of this type.
+* `maxInbreeding`: The highest permitted inbreeding coefficient in the pedigree. By default this is set to 1/16, which is appropriate for most projects involving human pedigrees.
+* `linearInb`: The allowed level of inbreeding between linear descendants. For example, `linearInb = 1` allows mating between parent–child, but not grandparent–grandchild. The default value `FALSE` disallows all inbreeding of this type.
 * `connected`: If TRUE (default), only connected pedigrees are considered.
 * `sexSymmetry`: If TRUE (default) pedigrees are considered equal if they differ only in the
 sexes of the added parents, e.g., paternal versus maternal half-siblings.
 
 Let us re-run the reconstruction of `trioData` adding a few of these restrictions. We allow 3 extra individuals and indicate that individual 1 is older than the others. Furthermore, we ask the program to infer parent-child relationships automatically, and disallow linear inbreeding.
 ```{r}
-res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE, linearInb = FALSE)
+res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE)
 ```
 The most likely results this time are shown below:
 ```{r reconstruct-trio-2, fig.height = 4.3, fig.width = 8}
