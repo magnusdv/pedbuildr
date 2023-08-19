@@ -11,6 +11,7 @@ isCount = function(x, minimum = 1, maximum = NA) {
 }
 
 # Sample from Dirichlet distribution with mean p (where b controls variance)
+# Unused?
 #' @importFrom stats rgamma
 rdirich = function(n, p, b = 1) {
   if(!is.numeric(b) || length(b) != 1 || b <= 0)

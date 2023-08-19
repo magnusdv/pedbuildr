@@ -62,9 +62,8 @@
 #' # Example 1: Trio
 #' #-----------------
 #'
-#' data(trioData)
-#'
-#' x = as.ped(trioData, locusAttributes = "snp-12")
+#' # Built-in dataset `trioData`
+#' x = as.ped(trioData, locusAttributes = "snp12")
 #' summary(x)
 #'
 #' res = reconstruct(x, inferPO = TRUE, age = "1 > 2", linearInb = FALSE)

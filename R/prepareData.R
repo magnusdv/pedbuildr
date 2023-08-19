@@ -33,6 +33,7 @@ prepareData = function(alleleMatrix, loci, verbose = FALSE) {
   amatList = vector("list", nMark)
 
   # Lumping starts here!
+  # TODO: Some of this is ancient. Simplify with recent pedmut changes!
   for(k in seq_along(loci)) {
 
     attrs = loci[[k]]

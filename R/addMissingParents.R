@@ -1,16 +1,15 @@
 #' Add missing parents to a pedigree adjacency matrix
 #'
 #' @param a An adjMatrix object
-#' @param maxLinearInb A nonnegative integer, or `Inf` (default). If this
-#'   is a finite number, it disallows mating between pedigree members X and Y if
-#'   X is a linear descendant of Y separated by more than the given number. For
-#'   example, setting `maxLinearInb = 0` forbids mating between
-#'   parent-child, grandparent-grandchild, a.s.o. If `maxLinearInb = 1`
-#'   then parent-child matings are allowed, but not grandparent-grandchild or
-#'   higher.
-#' @param sexSymmetry A logical. If TRUE, pedigrees which are equal except for the
-#'   gender distribution of the *added* parents, are regarded as equivalent, and
-#'   only one of each equivalence class is returned. Example: paternal vs
+#' @param maxLinearInb A nonnegative integer, or `Inf` (default). If this is a
+#'   finite number, it disallows mating between pedigree members X and Y if X is
+#'   a linear descendant of Y separated by more than the given number. For
+#'   example, setting `maxLinearInb = 0` forbids mating between parent-child,
+#'   grandparent-grandchild, a.s.o. If `maxLinearInb = 1` then parent-child
+#'   matings are allowed, but not grandparent-grandchild or higher.
+#' @param sexSymmetry A logical. If TRUE, pedigrees which are equal except for
+#'   the gender distribution of the *added* parents, are regarded as equivalent,
+#'   and only one of each equivalence class is returned. Example: paternal vs
 #'   maternal half sibs.
 #' @return A list of adjMatrix objects where all columns sum to either 0 or 2.
 #'

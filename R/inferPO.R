@@ -1,7 +1,6 @@
 # Estimate pairwise IBD coefficients and return
 # list of certain parent-child and *not* parent-child.
 
-#' @importFrom utils packageVersion
 #' @importFrom forrel ibdEstimate
 inferPO = function(alleleMatrix, loci, list = FALSE, verbose = TRUE) {
   ids = rownames(alleleMatrix)
@@ -13,7 +12,9 @@ inferPO = function(alleleMatrix, loci, list = FALSE, verbose = TRUE) {
 
   pairs = .comb2(ids)
 
-  kappa = ibdEstimate(slist, pairs, verbose = verbose) # requires forrel 1.3
+  kappa = ibdEstimate(slist, pairs, verbose = verbose)
+
+  # TODO: Let thresholds be function arguments instead of hard-coded
   PO = kappa[kappa$k0 < 0.01 & kappa$k2 < 0.5, ]
   notPO = kappa[kappa$N != 0 & kappa$k0 > 0.5, ]
 

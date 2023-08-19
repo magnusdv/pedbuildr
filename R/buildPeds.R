@@ -21,16 +21,13 @@
 #' @param labs A character vector of ID labels.
 #' @param sex A vector of the same length as `labs`, with entries 1 (male) or 2
 #'   (female).
-#' @param extra Either the word "parents", or a nonnegative integer. See
-#'   details.
+#' @param extra Either the word "parents" (default), or a non-negative integer.
+#'   See Details.
 #' @param age A numeric or character vector. If numeric, and `age[i] < age[j]`,
 #'   then individual `i` will not be an ancestor of individual `j`. The numbers
-#'   themselves are irrelevant, only the partial ordering. Note that no
-#'   interpretation is made about individuals of equal age.
-#'
-#'   Alternatively `age` may be a character vector of inequalities, e.g., `age =
-#'   c("1>2", "1>3")`. This syntax allows finer control than the numeric
-#'   version.
+#'   themselves are irrelevant, only the partial ordering. (No inference is made
+#'   about individuals of equal age.) Alternatively, for finer control, `age`
+#'   may be a character vector of inequalities, e.g., `age = c("1>2", "1>3")`.
 #' @param knownPO A list of vectors of length 2, containing the ID labels of
 #'   pairs known to be parent-offspring. By default, both directions are
 #'   considered; use `age` to force a specific direction.
@@ -55,8 +52,7 @@
 #'   paternal vs. maternal half sibs.
 #' @param verbose A logical.
 #'
-#' @return A list of pedigrees. Each element is a `ped` object or a list of
-#'   such.
+#' @return A list of (possibly disconnected) pedigrees.
 #'
 #' @examples
 #'

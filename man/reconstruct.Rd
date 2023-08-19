@@ -34,8 +34,8 @@ reconstruct(
 \item{ids}{A vector of ID labels from \code{x}. By default, the genotyped members
 of \code{x} are used.}
 
-\item{extra}{Either the word "parents", or a nonnegative integer. See
-details.}
+\item{extra}{Either the word "parents" (default), or a non-negative integer.
+See Details.}
 
 \item{alleleMatrix}{A matrix with two columns for each marker.}
 
@@ -54,11 +54,9 @@ as certain \emph{non}-parent-child pairs. When this option is used, arguments to
 
 \item{age}{A numeric or character vector. If numeric, and \code{age[i] < age[j]},
 then individual \code{i} will not be an ancestor of individual \code{j}. The numbers
-themselves are irrelevant, only the partial ordering. Note that no
-interpretation is made about individuals of equal age.
-
-Alternatively \code{age} may be a character vector of inequalities, e.g., \code{age = c("1>2", "1>3")}. This syntax allows finer control than the numeric
-version.}
+themselves are irrelevant, only the partial ordering. (No inference is made
+about individuals of equal age.) Alternatively, for finer control, \code{age}
+may be a character vector of inequalities, e.g., \code{age = c("1>2", "1>3")}.}
 
 \item{knownPO}{A list of vectors of length 2, containing the ID labels of
 pairs known to be parent-offspring. By default, both directions are
@@ -141,9 +139,8 @@ best in smaller cases.
 # Example 1: Trio
 #-----------------
 
-data(trioData)
-
-x = as.ped(trioData, locusAttributes = "snp-12")
+# Uses built-in dataset `trioData`
+x = as.ped(trioData, locusAttributes = "snp12")
 summary(x)
 
 res = reconstruct(x, inferPO = TRUE, age = "1 > 2", linearInb = FALSE)

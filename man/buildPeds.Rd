@@ -26,16 +26,14 @@ buildPeds(
 \item{sex}{A vector of the same length as \code{labs}, with entries 1 (male) or 2
 (female).}
 
-\item{extra}{Either the word "parents", or a nonnegative integer. See
-details.}
+\item{extra}{Either the word "parents" (default), or a non-negative integer.
+See Details.}
 
 \item{age}{A numeric or character vector. If numeric, and \code{age[i] < age[j]},
 then individual \code{i} will not be an ancestor of individual \code{j}. The numbers
-themselves are irrelevant, only the partial ordering. Note that no
-interpretation is made about individuals of equal age.
-
-Alternatively \code{age} may be a character vector of inequalities, e.g., \code{age = c("1>2", "1>3")}. This syntax allows finer control than the numeric
-version.}
+themselves are irrelevant, only the partial ordering. (No inference is made
+about individuals of equal age.) Alternatively, for finer control, \code{age}
+may be a character vector of inequalities, e.g., \code{age = c("1>2", "1>3")}.}
 
 \item{knownPO}{A list of vectors of length 2, containing the ID labels of
 pairs known to be parent-offspring. By default, both directions are
@@ -70,8 +68,7 @@ paternal vs. maternal half sibs.}
 \item{verbose}{A logical.}
 }
 \value{
-A list of pedigrees. Each element is a \code{ped} object or a list of
-such.
+A list of (possibly disconnected) pedigrees.
 }
 \description{
 Build all pedigrees between a set of individuals, subject to given
