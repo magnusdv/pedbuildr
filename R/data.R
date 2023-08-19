@@ -31,4 +31,15 @@
 #' @source Hawass et al. *Ancestry and pathology in King Tutankhamun's family*.
 #'   Jama (2010).
 #'
+#' @examples
+#' # Pedigree as published
+#' plot(Tutankhamun)
+#'
+#' # Simple reconstruction, assuming all directly related
+#' res = reconstruct(Tutankhamun, extra = 0, inferPO = TRUE, maxInbreeding = 1)
+#' plot(res, top = 4)
+#'
+#' # Published ped is most likely (with these assumptions)
+#' identical(res[[1]], Tutankhamun)
+#'
 "Tutankhamun"

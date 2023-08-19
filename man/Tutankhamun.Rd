@@ -24,4 +24,16 @@ Tutankhamun
 A reconstructed pedigree of the Egyptian Pharaoh Tutankhamun, with genotypes
 for 8 STR markers, as published by Hawass et al.
 }
+\examples{
+# Pedigree as published
+plot(Tutankhamun)
+
+# Simple reconstruction, assuming all directly related
+res = reconstruct(Tutankhamun, extra = 0, inferPO = TRUE, maxInbreeding = 1)
+plot(res, top = 4)
+
+# Published ped is most likely (with these assumptions)
+identical(res[[1]], Tutankhamun)
+
+}
 \keyword{datasets}
