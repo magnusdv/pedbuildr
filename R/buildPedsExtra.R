@@ -1,9 +1,10 @@
-
 # Build pedigrees between a set of individuals and a specified number of "extras".
 # Missing parents are added in a minimal way.
 # Note: knownPO, notPO, noChildren must be internal numerics
+
+#' @importFrom ribd inbreeding
 buildPedsExtra = function(labs, sex, extra = 0, ageMat = NULL, knownPO = NULL, allKnown = FALSE,
-                      notPO = NULL, noChildren = NULL, connected = TRUE,
+                      notPO = NULL, noChildren = NULL, connected = TRUE, maxInbreeding = 1,
                       maxLinearInb = Inf, sexSymmetry = TRUE, verbose = FALSE) {
 
   st = Sys.time()
@@ -76,6 +77,15 @@ buildPedsExtra = function(labs, sex, extra = 0, ageMat = NULL, knownPO = NULL, a
     cat("  Total solutions:", length(ALLSOLS), "\n  Converting to ped\n")
 
   peds = lapply(ALLSOLS, function(a) adj2ped(addMissingParents1(a), labs))
+
+  if(maxInbreeding < Inf) {
+    good = vapply(peds, function(p) all(inbreeding(p) <= maxInbreeding), FUN.VALUE = TRUE)
+    peds = peds[good]
+    if(verbose) {
+      cat("  Excessive inbreeding:", sum(!good), "\n")
+    }
+  }
+
   if(verbose)
     cat("  Time used:", ftime(st), "\n")
 

@@ -1,9 +1,10 @@
-
 # Build pedigrees between a set of individuals.
 # Missing parents are added and allowed to interact in all possible ways.
 # Note: knownPO, notPO, noChildren must be internal numerics
+
+#' @importFrom ribd inbreeding
 buildPedsParents = function(labs, sex, ageMat = NULL, knownPO = NULL, allKnown = FALSE,
-                     notPO = NULL, noChildren = NULL, connected = TRUE,
+                     notPO = NULL, noChildren = NULL, connected = TRUE, maxInbreeding = 1,
                      maxLinearInb = Inf, sexSymmetry = TRUE, verbose = FALSE) {
 
   N = length(labs)
@@ -37,6 +38,14 @@ buildPedsParents = function(labs, sex, ageMat = NULL, knownPO = NULL, allKnown =
 
   # Convert to list of pedigrees
   peds = lapply(DA_EXT, function(a) adj2ped(a, labs))
+
+  if(maxInbreeding < Inf) {
+    good = vapply(peds, function(p) all(inbreeding(p) <= maxInbreeding), FUN.VALUE = TRUE)
+    peds = peds[good]
+    if(verbose) {
+      cat("  Excessive inbreeding:", sum(!good), "\n")
+    }
+  }
 
   invisible(peds)
 }

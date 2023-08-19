@@ -15,7 +15,8 @@ buildPeds(
   notPO = NULL,
   noChildren = NULL,
   connected = TRUE,
-  linearInb = TRUE,
+  maxInbreeding = 1/16,
+  linearInb = FALSE,
   sexSymmetry = TRUE,
   verbose = TRUE
 )
@@ -54,11 +55,14 @@ children of their own.}
 \item{connected}{A logical. If TRUE (default), only connected pedigrees are
 returned.}
 
-\item{linearInb}{Either TRUE (allow any linear inbreeding), FALSE (disallow
-linear inbreeding) or a nonnegative integer indicating the maximum
-separation linearly related spouses. For example, \code{linearInb = 1} allows
-mating between parent and child, but not between grandparent and grandchild
-(or more distant).}
+\item{maxInbreeding}{A single numeric indicating the highest permitted
+inbreeding coefficient. Default: 1/16 (as with first-cousin parents.)}
+
+\item{linearInb}{A parameter controlling the maximum separation of linearly
+related spouses. Either TRUE (allow all linear inbreeding), FALSE (disallow
+all) or a non-negative integer. For example, \code{linearInb = 1} allows
+parent/child mating, but not grandparent/grandchild or more distant linear
+relatives. Default: FALSE.}
 
 \item{sexSymmetry}{A logical. If TRUE (default), pedigrees which are equal
 except for the gender distribution of the \emph{added} parents, are regarded as

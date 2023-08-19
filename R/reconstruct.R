@@ -66,7 +66,7 @@
 #' x = as.ped(trioData, locusAttributes = "snp12")
 #' summary(x)
 #'
-#' res = reconstruct(x, inferPO = TRUE, age = "1 > 2", linearInb = FALSE)
+#' res = reconstruct(x, inferPO = TRUE, age = "1 > 2")
 #'
 #' # Plot most likely pedigrees
 #' plot(res, top = 6)
@@ -79,7 +79,7 @@
 #'
 #' # ...and then reconstruct
 #' res2 = reconstruct(alleleMatrix = als, loci = loci, sex = sex,
-#'                    inferPO = TRUE, age = "1 > 2", linearInb = FALSE)
+#'                    inferPO = TRUE, age = "1 > 2")
 #'
 #' stopifnot(identical(res, res2))
 #'
@@ -107,7 +107,7 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
                        pedlist = NULL, inferPO = FALSE, sex = NULL,
                        age = NULL, knownPO = NULL, knownSub = NULL, allKnown = FALSE,
                        notPO = NULL, noChildren = NULL, connected = TRUE,
-                       linearInb = TRUE, sexSymmetry = TRUE,
+                       maxInbreeding = 1/16, linearInb = FALSE, sexSymmetry = TRUE,
                        sortResults = TRUE, founderInb = 0, numCores = 1,
                        verbose = TRUE) {
 
@@ -181,8 +181,8 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
     pedlist = buildPeds(labs = ids, sex = sex, extra = extra, age = age,
                         knownPO = knownPO, knownSub = knownSub, allKnown = allKnown,
                         notPO = notPO, noChildren = noChildren,
-                        connected = connected, linearInb = linearInb,
-                        sexSymmetry = sexSymmetry, verbose = verbose)
+                        connected = connected, maxInbreeding = maxInbreeding,
+                        linearInb = linearInb, sexSymmetry = sexSymmetry, verbose = verbose)
   }
 
   npeds = length(pedlist)

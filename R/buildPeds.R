@@ -41,11 +41,13 @@
 #'   children of their own.
 #' @param connected A logical. If TRUE (default), only connected pedigrees are
 #'   returned.
-#' @param linearInb Either TRUE (allow any linear inbreeding), FALSE (disallow
-#'   linear inbreeding) or a nonnegative integer indicating the maximum
-#'   separation linearly related spouses. For example, `linearInb = 1` allows
-#'   mating between parent and child, but not between grandparent and grandchild
-#'   (or more distant).
+#' @param maxInbreeding A single numeric indicating the highest permitted
+#'   inbreeding coefficient. Default: 1/16 (as with first-cousin parents.)
+#' @param linearInb A parameter controlling the maximum separation of linearly
+#'   related spouses. Either TRUE (allow all linear inbreeding), FALSE (disallow
+#'   all) or a non-negative integer. For example, `linearInb = 1` allows
+#'   parent/child mating, but not grandparent/grandchild or more distant linear
+#'   relatives. Default: FALSE.
 #' @param sexSymmetry A logical. If TRUE (default), pedigrees which are equal
 #'   except for the gender distribution of the *added* parents, are regarded as
 #'   equivalent, and only one of each equivalence class is returned. Example:
@@ -71,7 +73,7 @@
 #' @export
 buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, knownSub = NULL,
                      allKnown = FALSE, notPO = NULL, noChildren = NULL, connected = TRUE,
-                     linearInb = TRUE, sexSymmetry = TRUE, verbose = TRUE) {
+                     maxInbreeding = 1/16, linearInb = FALSE, sexSymmetry = TRUE, verbose = TRUE) {
 
   N = length(labs)
   labs = as.character(labs)
@@ -118,8 +120,18 @@ buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, k
   if(!all(noChildren %in% labs))
     stop2("Unknown label in `noChildren`: ", setdiff(noChildren, labs))
 
+  # Check `maxInbreeding`
+  if(length(maxInbreeding) != 1 || !is.numeric(maxInbreeding) || maxInbreeding < 0 || maxInbreeding > 1)
+    stop2("`maxInbreeding` must be a single number in the range [0, 1]: ", maxInbreeding %||% "NULL")
+
   # Convert `linearInb` to `maxLinearInb`
   maxLinearInb = if(isTRUE(linearInb)) Inf else if(isFALSE(linearInb)) 0 else linearInb
+
+  # If maxInbreeding disallows the weakest linear inbreeding, set the latter to 0
+  if(maxLinearInb > 0 && (maxInbreeding == 0 || maxInbreeding < 1/2^(maxLinearInb + 1))) {
+    maxLinearInb = 0
+    linearInb = "FALSE (adj)" # only used in glue below
+  }
 
   if(verbose) {
     .knownPO = sapply(knownPO, paste, collapse = "-")
@@ -139,6 +151,7 @@ buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, k
         No children: {toStr(noChildren)}
         Connected only: {connected}
         Symmetry filter: {sexSymmetry}
+        Max inbreeding: {maxInbreeding}
         Linear inbreeding: {linearInb}"
     ))
   }
@@ -146,13 +159,13 @@ buildPeds = function(labs, sex, extra = "parents", age = NULL, knownPO = NULL, k
   if(identical(extra, "parents")) {
     buildPedsParents(labs = labs, sex = sex, ageMat = ageMat, knownPO = knownPO_int,
                      allKnown = allKnown, notPO = notPO_int, noChildren = noChildren_int,
-                     connected = connected, maxLinearInb = maxLinearInb,
+                     connected = connected, maxInbreeding = maxInbreeding, maxLinearInb = maxLinearInb,
                      sexSymmetry = sexSymmetry, verbose = verbose)
   }
   else {
     buildPedsExtra(labs = labs, sex = sex, extra = extra, ageMat = ageMat, knownPO = knownPO_int,
                    allKnown = allKnown, notPO = notPO_int, noChildren = noChildren_int,
-                   connected = connected, maxLinearInb = maxLinearInb,
+                   connected = connected, maxInbreeding = maxInbreeding, maxLinearInb = maxLinearInb,
                    sexSymmetry = sexSymmetry, verbose = verbose)
   }
 }
