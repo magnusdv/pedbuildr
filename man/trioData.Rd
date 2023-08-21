@@ -5,22 +5,23 @@
 \alias{trioData}
 \title{Reconstruction example with three individuals}
 \format{
-A data frame with 3 rows and 104 columns. The first 4 columns contain
-pedigree info in standard format:
-\itemize{
-\item \code{id}: Individual ID
-\item \code{fid}: Paternal ID, where 0 means missing father
-\item \code{mid}: Maternal ID, where 0 means missing mother
-\item \code{sex}: 1 = male; 2 = female
-}
-
-The remaining 100 columns contain the genotypes, in the form a/b, where a
-and b are the observed alleles (labelled 1 and 2).
+A matrix with 3 rows and 100 columns. Each entry contains a genotype
+in the form a/b.
 }
 \usage{
 trioData
 }
 \description{
-This dataset contains simulated genotypes for 3 males at 100 SNP markers.
+This dataset contains simulated genotypes for 3 individuals at 100 SNP
+markers.
+}
+\examples{
+trioData[, 1:10]
+
+x = list(singleton(1), singleton(2), singleton(3)) |>
+  setMarkers(alleleMatrix = trioData, locusAttributes ="snp12")
+
+x
+
 }
 \keyword{datasets}

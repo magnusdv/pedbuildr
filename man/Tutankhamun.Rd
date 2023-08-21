@@ -10,8 +10,6 @@ A data frame with 7 rows and 12 columns:
 \item \code{id},\code{fid},\code{mid},\code{sex}: Pedigree columns in standard format
 \item \code{D13S317}, ...: Genotype columns for 8 markers
 }
-
-See help page for \link{trioData} for further details on format.
 }
 \source{
 Hawass et al. \emph{Ancestry and pathology in King Tutankhamun's family}.

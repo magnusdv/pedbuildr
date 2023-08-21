@@ -144,8 +144,8 @@ best in smaller cases.
 #-----------------
 
 # Built-in dataset `trioData`
-x = as.ped(trioData, locusAttributes = "snp12")
-summary(x)
+x = list(singleton(1), singleton(2), singleton(3)) |>
+  setMarkers(alleleMatrix = trioData, locusAttributes ="snp12")
 
 res = reconstruct(x, inferPO = TRUE, age = "1 > 2")
 
@@ -153,30 +153,24 @@ res = reconstruct(x, inferPO = TRUE, age = "1 > 2")
 plot(res, top = 6)
 
 
-### Alternative workflow: Extract data manually...
-als  = getAlleles(x)
-loci = getLocusAttributes(x)
-sex  = getSex(x)
-
-# ...and then reconstruct
-res2 = reconstruct(alleleMatrix = als, loci = loci, sex = sex,
-                   inferPO = TRUE, age = "1 > 2")
-
-stopifnot(identical(res, res2))
-
 #--------------------
 # Example 2: Siblings
 #--------------------
+library(forrel)
 
 ids = c("s1", "s2")
-y = nuclearPed(children = ids)
 
-# Simulate data
-y = forrel::markerSim(y, N = 50, ids = ids, seed = 123)
+# Create pedigree and simulate profiles with 20 STR markers
+y = nuclearPed(children = ids) |>
+  profileSim(markers = NorwegianFrequencies[1:20], ids = ids, seed = 123)
 
-# Reconstruct and plot
-res3 = reconstruct(y, connected = FALSE)
-res3
+# Reconstruct allowing 2 extra individuals and any inbreeding
+res2 = reconstruct(y, extra = 2, maxInb = 1)
+plot(res2)
+
+# With mutation modelling
+y = setMutmod(y, model = "equal", rate = 0.01)
+res3 = reconstruct(y, extra = 2, maxInb = 1)
 plot(res3)
 
 }

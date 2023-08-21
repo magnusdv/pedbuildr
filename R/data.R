@@ -1,17 +1,18 @@
 #' Reconstruction example with three individuals
 #'
-#' This dataset contains simulated genotypes for 3 males at 100 SNP markers.
+#' This dataset contains simulated genotypes for 3 individuals at 100 SNP
+#' markers.
 #'
-#' @format A data frame with 3 rows and 104 columns. The first 4 columns contain
-#'   pedigree info in standard format:
+#' @format A matrix with 3 rows and 100 columns. Each entry contains a genotype
+#'   in the form a/b.
 #'
-#'   * `id`: Individual ID
-#'   * `fid`: Paternal ID, where 0 means missing father
-#'   * `mid`: Maternal ID, where 0 means missing mother
-#'   * `sex`: 1 = male; 2 = female
+#' @examples
+#' trioData[, 1:10]
 #'
-#'   The remaining 100 columns contain the genotypes, in the form a/b, where a
-#'   and b are the observed alleles (labelled 1 and 2).
+#' x = list(singleton(1), singleton(2), singleton(3)) |>
+#'   setMarkers(alleleMatrix = trioData, locusAttributes ="snp12")
+#'
+#' x
 #'
 "trioData"
 
@@ -25,8 +26,6 @@
 #'
 #'   * `id`,`fid`,`mid`,`sex`: Pedigree columns in standard format
 #'   * `D13S317`, ...: Genotype columns for 8 markers
-#'
-#'   See help page for [trioData] for further details on format.
 #'
 #' @source Hawass et al. *Ancestry and pathology in King Tutankhamun's family*.
 #'   Jama (2010).
