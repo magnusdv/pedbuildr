@@ -20,9 +20,9 @@ knitr::opts_chunk$set(
 [![](https://cranlogs.r-pkg.org/badges/last-month/pedbuildr?color=yellow)](https://cran.r-project.org/package=pedbuildr)
 <!-- badges: end -->
 
-The goal of **pedbuildr** is to reconstruct pedigrees from genotype data. This is done by optimising the likelihood over all possible pedigrees subject to given restrictions. As part of the **ped suite** ecosystem of R packages for pedigree analysis, it uses on [pedtools](https://CRAN.R-project.org/package=pedtools) for handling pedigrees, and imports [pedprobr](https://CRAN.R-project.org/package=pedprobr) for calculating pedigree likelihoods.
+The goal of **pedbuildr** is to reconstruct pedigrees from genotype data. This is done by optimising the likelihood over all possible pedigrees subject to given restrictions. As part of the [pedsuite](https://magnusdv.github.io/pedsuite/) ecosystem of R packages for pedigree analysis, it uses [pedtools](https://github.com/magnusdv/pedtools) for handling pedigrees, and imports [pedprobr](https://github.com/magnusdv/pedprobr) for calculating pedigree likelihoods.
 
-See also the `ibdEstimate()` function of [forrel](https://CRAN.R-project.org/package=forrel), which does pairwise relatedness estimation.
+See also the `ibdEstimate()` function of [forrel](https://github.com/magnusdv/forrel), which does pairwise relatedness estimation.
 
 ## Installation
 The **pedbuildr** package can be installed from CRAN as follows:
@@ -37,45 +37,50 @@ devtools::install_github("magnusdv/pedbuildr")
 ```
 
 ## A reconstruction example
-The built-in dataset `trioData` contains simulated genotypes for three individuals at 100 SNP markers. As a simple demonstration we will try to reconstruct the pedigree connecting these individuals. 
-
 To get started, load **pedbuildr**.
 ```{r}
 library(pedbuildr)
 ```
 
-The `trioData` is a data frame in so-called *ped format*. Here are the first few columns:
+The built-in dataset `trioData` contains simulated genotypes for three individuals at 100 equifrequent SNP markers.
+Here are the first 10 columns:
 
 ```{r}
 trioData[, 1:10]
 ```
 
-We convert the data into a pedigree object, using the `as.ped()` function from **pedtools**.
-```{r}
-x = as.ped(trioData, locusAttributes = "snp12")
-summary(x)
+As a simple demonstration we will try to reconstruct the pedigree connecting these individuals assuming they are all males. To initialise the process we create them as singletons and attach the marker data. The `locusAttributes` argument tells R that all the markers are diallelic with alleles 1 and 2.
+
+```{r singletons, fig.height = 1.5, fig.width = 4, out.width = "50%"}
+x = list(singleton(1), 
+         singleton(2), 
+         singleton(3)) |> 
+  setMarkers(alleleMatrix = trioData, locusAttributes = "snp12")
+
+plotPedList(x, frames = FALSE)
 ```
-The `locusAttributes` argument tells R that all the markers are diallelic with alleles 1 and 2. By default, the alleles have equal frequencies.
 
 To reconstruct the pedigree, simply run `reconstruct()`:
-```{r}
+```{r reconstruct1}
 res = reconstruct(x)
 ```
 
 A tailor-made `plot` function makes it easy to visualise the most likely pedigrees:
-```{r reconstruct-trio, fig.height = 4, fig.width = 8}
+```{r top6, fig.height = 4, fig.width = 8}
 plot(res, top = 6)
 ```
+
+The most likely pedigree is plotted top left. The titles for the remaining pedigrees give the likelihood ratio (LR) comparing the first pedigree to the one shown. For example, the first solution is `r round(exp(res$loglik[1] - res$loglik[2]), 1)` more likely than the second.
 
 ## Further options
 *A priori* there are infinitely many possible pedigrees connecting a set of individuals. (For example, two individuals may be *k*'th cousins for any *k* = 1,2,... .) In order to obtain a manageable search space, `reconstruct()` offers a range of restriction parameters:
 
 * `extra`: The number of extra individuals allowed to connect the original individuals. (See further explanations below.)
-* `age`: A numerical age vector, or a character vector describing age inequalities. For example, `age = c("A > B,C", "B > D")` excludes B and C as ancestors of A, and D as an ancestor of B (but no assumption is made for C vs. D).
-* `inferPO`: If TRUE, an initial stage of pairwise IBD estimation is done, in order to infer certain parent-child pairs, as well as certain non-parent-child pairs. 
-* `knownPO`: Known parent–offspring pairs.
+* `age`: A vector of numeric (relative) ages or age inequalities. For example, `age = c("A > B,C", "B > D")` excludes B and C as ancestors of A, and D as an ancestor of B (but no assumption is made for C vs. D).
+* `inferPO`: When this is `TRUE`, an initial pairwise estimation step is done to infer high-confidence parent/child pairs, and also *non*-parent/child pairs. 
+* `knownPO`: Known parent–offspring pairs. Note that these are *unordered* pairs, i.e., with no assumption on who is the parent and who is the child. (If this is known, use `age` to indicate it.)
 * `notPO`: Pairs known not to be parent–offspring.
-* `allKnown`: If TRUE, then `knownPO` is the complete list of parent–offspring pairs.
+* `allKnown`: If TRUE, then `knownPO` is taken to be the complete list of parent–offspring pairs.
 * `noChildren`: Individuals known to have no children.
 * `maxInbreeding`: The highest permitted inbreeding coefficient in the pedigree. By default this is set to 1/16, which is appropriate for most projects involving human pedigrees.
 * `linearInb`: The allowed level of inbreeding between linear descendants. For example, `linearInb = 1` allows mating between parent–child, but not grandparent–grandchild. The default value `FALSE` disallows all inbreeding of this type.
@@ -83,16 +88,16 @@ plot(res, top = 6)
 * `sexSymmetry`: If TRUE (default) pedigrees are considered equal if they differ only in the
 sexes of the added parents, e.g., paternal versus maternal half-siblings.
 
-Let us re-run the reconstruction of `trioData` adding a few of these restrictions. We allow 3 extra individuals and indicate that individual 1 is older than the others. Furthermore, we ask the program to infer parent-child relationships automatically, and disallow linear inbreeding.
-```{r}
-res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE)
+Let us re-run the reconstruction of `trioData` adding a few of these restrictions. We allow 3 extra individuals and indicate that individual 1 is older than the others. Furthermore, we ask the program to infer parent-child relationships automatically. Finally we allow any amount of inbreeding.
+```{r reconstruct2, cache = T}
+res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE, maxInbreeding = 1)
 ```
 The most likely results this time are shown below:
-```{r reconstruct-trio-2, fig.height = 4.3, fig.width = 8}
+```{r top6new, fig.height = 4.5, fig.width = 8}
 plot(res2, top = 6)
 ```
 
-We see that the same pedigree "wins", but some esoteric alternatives have appeared among the runners-up.
+We see that the same pedigree "wins", but some inbred/esoteric alternatives have appeared among the runners-up.
 
 ## More about `extra`
 Arguably the most important parameter to `reconstruct()` is `extra`, which controls the size of the pedigrees to consider. It can be either a nonnegative integer, or the word "parents". If an integer, it sets the maximum number of extra members used to connect the original individuals. (The final pedigrees may contain further extras still, since missing parents are added at the end.)

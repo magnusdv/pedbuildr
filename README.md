@@ -13,15 +13,15 @@ status](https://www.r-pkg.org/badges/version/pedbuildr)](https://CRAN.R-project.
 
 The goal of **pedbuildr** is to reconstruct pedigrees from genotype
 data. This is done by optimising the likelihood over all possible
-pedigrees subject to given restrictions. As part of the **ped suite**
-ecosystem of R packages for pedigree analysis, it uses on
-[pedtools](https://CRAN.R-project.org/package=pedtools) for handling
-pedigrees, and imports
-[pedprobr](https://CRAN.R-project.org/package=pedprobr) for calculating
-pedigree likelihoods.
+pedigrees subject to given restrictions. As part of the
+[pedsuite](https://magnusdv.github.io/pedsuite/) ecosystem of R packages
+for pedigree analysis, it uses
+[pedtools](https://github.com/magnusdv/pedtools) for handling pedigrees,
+and imports [pedprobr](https://github.com/magnusdv/pedprobr) for
+calculating pedigree likelihoods.
 
 See also the `ibdEstimate()` function of
-[forrel](https://CRAN.R-project.org/package=forrel), which does pairwise
+[forrel](https://github.com/magnusdv/forrel), which does pairwise
 relatedness estimation.
 
 ## Installation
@@ -41,10 +41,6 @@ devtools::install_github("magnusdv/pedbuildr")
 
 ## A reconstruction example
 
-The built-in dataset `trioData` contains simulated genotypes for three
-individuals at 100 SNP markers. As a simple demonstration we will try to
-reconstruct the pedigree connecting these individuals.
-
 To get started, load **pedbuildr**.
 
 ``` r
@@ -52,31 +48,34 @@ library(pedbuildr)
 #> Loading required package: pedtools
 ```
 
-The `trioData` is a data frame in so-called *ped format*. Here are the
-first few columns:
+The built-in dataset `trioData` contains simulated genotypes for three
+individuals at 100 equifrequent SNP markers. Here are the first 10
+columns:
 
 ``` r
 trioData[, 1:10]
-#>   id fid mid sex <1> <2> <3> <4> <5> <6>
-#> 1  1   0   0   1 1/2 1/2 1/1 1/2 1/2 1/2
-#> 2  2   0   0   1 1/1 1/2 1/2 2/2 1/2 2/2
-#> 3  3   0   0   1 1/1 1/2 1/2 2/2 1/1 1/2
+#>   <1>   <2>   <3>   <4>   <5>   <6>   <7>   <8>   <9>   <10> 
+#> 1 "1/2" "1/2" "1/1" "1/2" "1/2" "1/2" "1/2" "2/2" "1/2" "1/2"
+#> 2 "1/1" "1/2" "1/2" "2/2" "1/2" "2/2" "1/2" "2/2" "1/2" "2/2"
+#> 3 "1/1" "1/2" "1/2" "2/2" "1/1" "1/2" "1/2" "1/2" "1/2" "2/2"
 ```
 
-We convert the data into a pedigree object, using the `as.ped()`
-function from **pedtools**.
+As a simple demonstration we will try to reconstruct the pedigree
+connecting these individuals assuming they are all males. To initialise
+the process we create them as singletons and attach the marker data. The
+`locusAttributes` argument tells R that all the markers are diallelic
+with alleles 1 and 2.
 
 ``` r
-x = as.ped(trioData, locusAttributes = "snp12")
-summary(x)
-#> List of 3 singletons.
-#> Labels: 1 (male), 2 (male), 3 (male).
-#> 100 attached markers.
+x = list(singleton(1), 
+         singleton(2), 
+         singleton(3)) |> 
+  setMarkers(alleleMatrix = trioData, locusAttributes = "snp12")
+
+plotPedList(x, frames = FALSE)
 ```
 
-The `locusAttributes` argument tells R that all the markers are
-diallelic with alleles 1 and 2. By default, the alleles have equal
-frequencies.
+<img src="man/figures/README-singletons-1.png" width="50%" style="display: block; margin: auto;" />
 
 To reconstruct the pedigree, simply run `reconstruct()`:
 
@@ -104,7 +103,7 @@ res = reconstruct(x)
 #> 
 #> Computing the likelihood of 44 pedigrees.
 #> Sorting by descending likelihood.
-#> Total time used:  2.87 secs
+#> Total time used:  1.6 secs
 ```
 
 A tailor-made `plot` function makes it easy to visualise the most likely
@@ -114,7 +113,12 @@ pedigrees:
 plot(res, top = 6)
 ```
 
-<img src="man/figures/README-reconstruct-trio-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-top6-1.png" style="display: block; margin: auto;" />
+
+The most likely pedigree is plotted top left. The titles for the
+remaining pedigrees give the likelihood ratio (LR) comparing the first
+pedigree to the one shown. For example, the first solution is 155.9 more
+likely than the second.
 
 ## Further options
 
@@ -125,17 +129,19 @@ any *k* = 1,2,… .) In order to obtain a manageable search space,
 
 - `extra`: The number of extra individuals allowed to connect the
   original individuals. (See further explanations below.)
-- `age`: A numerical age vector, or a character vector describing age
-  inequalities. For example, `age = c("A > B,C", "B > D")` excludes B
-  and C as ancestors of A, and D as an ancestor of B (but no assumption
-  is made for C vs. D).
-- `inferPO`: If TRUE, an initial stage of pairwise IBD estimation is
-  done, in order to infer certain parent-child pairs, as well as certain
-  non-parent-child pairs.
-- `knownPO`: Known parent–offspring pairs.
+- `age`: A vector of numeric (relative) ages or age inequalities. For
+  example, `age = c("A > B,C", "B > D")` excludes B and C as ancestors
+  of A, and D as an ancestor of B (but no assumption is made for C
+  vs. D).
+- `inferPO`: When this is `TRUE`, an initial pairwise estimation step is
+  done to infer high-confidence parent/child pairs, and also
+  *non*-parent/child pairs.
+- `knownPO`: Known parent–offspring pairs. Note that these are
+  *unordered* pairs, i.e., with no assumption on who is the parent and
+  who is the child. (If this is known, use `age` to indicate it.)
 - `notPO`: Pairs known not to be parent–offspring.
-- `allKnown`: If TRUE, then `knownPO` is the complete list of
-  parent–offspring pairs.
+- `allKnown`: If TRUE, then `knownPO` is taken to be the complete list
+  of parent–offspring pairs.
 - `noChildren`: Individuals known to have no children.
 - `maxInbreeding`: The highest permitted inbreeding coefficient in the
   pedigree. By default this is set to 1/16, which is appropriate for
@@ -153,11 +159,11 @@ any *k* = 1,2,… .) In order to obtain a manageable search space,
 Let us re-run the reconstruction of `trioData` adding a few of these
 restrictions. We allow 3 extra individuals and indicate that individual
 1 is older than the others. Furthermore, we ask the program to infer
-parent-child relationships automatically, and disallow linear
+parent-child relationships automatically. Finally we allow any amount of
 inbreeding.
 
 ``` r
-res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE)
+res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE, maxInbreeding = 1)
 #> Pairwise estimation:
 #>   PO: 2-3 
 #>   non-PO: 1-3 
@@ -172,23 +178,23 @@ res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE)
 #>   No children: -
 #>   Connected only: TRUE
 #>   Symmetry filter: TRUE
-#>   Max inbreeding: 0.0625
+#>   Max inbreeding: 1
 #>   Linear inbreeding: FALSE
 #> 
 #> Building pedigree list:
-#>   First 2: 2 candidates (0.0038 secs)
-#>   All 3 + 0 extra: 1 solutions | 3 candidates (0.00572 secs)
-#>   All 3 + 1 extra: 9 solutions | 30 candidates | 21 duplicates removed (0.0163 secs)
-#>   All 3 + 2 extra: 35 solutions | 266 candidates | 501 duplicates removed (0.349 secs)
-#>   All 3 + 3 extra: 183 solutions | 183 candidates | 459 duplicates removed (1.7 secs)
+#>   First 2: 2 candidates (0.0027 secs)
+#>   All 3 + 0 extra: 1 solutions | 3 candidates (0.00353 secs)
+#>   All 3 + 1 extra: 9 solutions | 30 candidates | 21 duplicates removed (0.0491 secs)
+#>   All 3 + 2 extra: 35 solutions | 266 candidates | 501 duplicates removed (0.221 secs)
+#>   All 3 + 3 extra: 183 solutions | 183 candidates | 459 duplicates removed (0.842 secs)
 #>   Total solutions: 228 
 #>   Converting to ped
-#>   Excessive inbreeding: 114 
-#>   Time used: 2.33 secs 
+#>   Excessive inbreeding: 0 
+#>   Time used: 1.07 secs 
 #> 
-#> Computing the likelihood of 114 pedigrees.
+#> Computing the likelihood of 228 pedigrees.
 #> Sorting by descending likelihood.
-#> Total time used:  22.6 secs
+#> Total time used:  18.1 secs
 ```
 
 The most likely results this time are shown below:
@@ -197,10 +203,10 @@ The most likely results this time are shown below:
 plot(res2, top = 6)
 ```
 
-<img src="man/figures/README-reconstruct-trio-2-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-top6new-1.png" style="display: block; margin: auto;" />
 
-We see that the same pedigree “wins”, but some esoteric alternatives
-have appeared among the runners-up.
+We see that the same pedigree “wins”, but some inbred/esoteric
+alternatives have appeared among the runners-up.
 
 ## More about `extra`
 
