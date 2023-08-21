@@ -38,17 +38,18 @@ of \code{x} are used.}
 \item{extra}{Either the word "parents" (default), or a non-negative integer.
 See Details.}
 
-\item{alleleMatrix}{A matrix with two columns for each marker.}
+\item{alleleMatrix}{A matrix with two columns for each marker. By default
+extracted from \code{x}}
 
-\item{loci}{A list of marker attributes.}
+\item{loci}{A list of marker attributes. By default extracted from \code{x}.}
 
-\item{pedlist}{A list of pedigrees. If NULL, \code{\link[=buildPeds]{buildPeds()}} is used to
-generate a list.}
+\item{pedlist}{A list of pedigrees to optimise over. If NULL, \code{\link[=buildPeds]{buildPeds()}}
+is used to generate a list.}
 
 \item{inferPO}{A logical. If TRUE, an initial stage of pairwise IBD
-estimation is done, in order to infer certain parent-child pairs, as well
-as certain \emph{non}-parent-child pairs. When this option is used, arguments to
-\code{knownPO} and \code{notPO} are ignored.}
+estimation is done to infer high-confidence parent/child pairs, and also
+\emph{non}-parent/child pairs. When this option is used, arguments to \code{knownPO}
+and \code{notPO} are ignored.}
 
 \item{sex}{A vector of the same length as \code{labs}, with entries 1 (male) or 2
 (female).}
@@ -96,7 +97,7 @@ paternal vs. maternal half sibs.}
 the most likely pedigree comes first.}
 
 \item{founderInb}{A number in the interval \verb{[0,1]}, used as background
-inbreeding level in all founders.}
+inbreeding level in all founders. Default: 0.}
 
 \item{numCores}{A positive integer. The number of cores used in
 parallelisation. Default: 1.}
@@ -107,6 +108,7 @@ parallelisation. Default: 1.}
 An object of class \code{pedrec}, which is essentially list with the
 following entries:
 \itemize{
+\item \code{labs}: The individual labels as given in \code{ids}.
 \item \code{pedlist}: A list of pedigrees, either built by \code{\link[=buildPeds]{buildPeds()}} or as
 supplied in the input argument \code{pedlist}. If \code{sortResults = TRUE}, the list
 is sorted so that the most likely pedigrees come first
@@ -120,7 +122,7 @@ failed
 }
 }
 \description{
-Reconstruct the most likely pedigree from genotype data.
+Reconstructs the most likely pedigree from genotype data.
 }
 \details{
 The parameter \code{extra} controls which of two algorithms are used to create the

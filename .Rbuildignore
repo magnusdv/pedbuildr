@@ -1,8 +1,10 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^README\.Rmd$
 ^data-raw$
 ^cran-comments\.md$
 ^CRAN-RELEASE$
 ^notes-private$
+^README\.Rmd$
+^README_cache$
 ^Rprof.out$
+^revdep$

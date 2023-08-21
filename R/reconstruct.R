@@ -1,6 +1,6 @@
 #' Pedigree reconstruction
 #'
-#' Reconstruct the most likely pedigree from genotype data.
+#' Reconstructs the most likely pedigree from genotype data.
 #'
 #' The parameter `extra` controls which of two algorithms are used to create the
 #' pedigree list.
@@ -20,16 +20,17 @@
 #' @param x A `pedtools::ped` object or a list of such.
 #' @param ids A vector of ID labels from `x`. By default, the genotyped members
 #'   of `x` are used.
-#' @param alleleMatrix A matrix with two columns for each marker.
-#' @param loci A list of marker attributes.
-#' @param pedlist A list of pedigrees. If NULL, [buildPeds()] is used to
-#'   generate a list.
+#' @param alleleMatrix A matrix with two columns for each marker. By default
+#'   extracted from `x`
+#' @param loci A list of marker attributes. By default extracted from `x`.
+#' @param pedlist A list of pedigrees to optimise over. If NULL, [buildPeds()]
+#'   is used to generate a list.
 #' @param inferPO A logical. If TRUE, an initial stage of pairwise IBD
-#'   estimation is done, in order to infer certain parent-child pairs, as well
-#'   as certain *non*-parent-child pairs. When this option is used, arguments to
-#'   `knownPO` and `notPO` are ignored.
+#'   estimation is done to infer high-confidence parent/child pairs, and also
+#'   *non*-parent/child pairs. When this option is used, arguments to `knownPO`
+#'   and `notPO` are ignored.
 #' @param founderInb A number in the interval `[0,1]`, used as background
-#'   inbreeding level in all founders.
+#'   inbreeding level in all founders. Default: 0.
 #' @param sortResults A logical. If TRUE (default), the output is sorted so that
 #'   the most likely pedigree comes first.
 #' @param numCores A positive integer. The number of cores used in
@@ -39,6 +40,8 @@
 #'
 #' @return An object of class `pedrec`, which is essentially list with the
 #'   following entries:
+#'
+#'   * `labs`: The individual labels as given in `ids`.
 #'
 #'   * `pedlist`: A list of pedigrees, either built by [buildPeds()] or as
 #'   supplied in the input argument `pedlist`. If `sortResults = TRUE`, the list
@@ -253,10 +256,10 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
   if(verbose)
     cat("Total time used: ", format(time, digits = 3), "\n")
 
-  structure(list(pedlist = pedlist,
+  structure(list(labs = ids,
+                 pedlist = pedlist,
                  logliks = logliks,
                  kappa = kappa,
-                 labs = ids,
                  alleleMatrix = alleleMatrix,
                  loci = loci,
                  errPeds = errPeds,
@@ -267,10 +270,10 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
 
 #' @export
 `[.pedrec` = function(x, i) {
-  structure(list(pedlist = x$pedlist[i],
+  structure(list(labs = x$labs,
+                 pedlist = x$pedlist[i],
                  logliks = x$logliks[i],
                  kappa = x$kappa,
-                 labs = x$labs,
                  alleleMatrix = x$alleleMatrix,
                  loci = x$loci),
             class = "pedrec")
