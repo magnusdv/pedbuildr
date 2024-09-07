@@ -63,16 +63,15 @@ trioData[, 1:10]
 As a simple demonstration we will try to reconstruct the pedigree
 connecting these individuals assuming they are all males. To initialise
 the process we create them as singletons and attach the marker data. The
-`locusAttributes` argument tells R that all the markers are diallelic
-with alleles 1 and 2.
+`locusAttributes` argument tells R that all the markers are SNPs with
+alleles 1 and 2.
 
 ``` r
-x = list(singleton(1), 
-         singleton(2), 
-         singleton(3)) |> 
+x = singletons(1:3) |> 
   setMarkers(alleleMatrix = trioData, locusAttributes = "snp12")
 
-plotPedList(x, frames = FALSE)
+# Plot the individuals including genotypes for the first two markers
+plot(x, marker = 1:2)
 ```
 
 <img src="man/figures/README-singletons-1.png" width="50%" style="display: block; margin: auto;" />
@@ -103,7 +102,7 @@ res = reconstruct(x)
 #> 
 #> Computing the likelihood of 44 pedigrees.
 #> Sorting by descending likelihood.
-#> Total time used:  1.6 secs
+#> Total time used:  0.5 secs
 ```
 
 A tailor-made `plot` function makes it easy to visualise the most likely
@@ -182,19 +181,19 @@ res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE, maxInbreeding 
 #>   Linear inbreeding: FALSE
 #> 
 #> Building pedigree list:
-#>   First 2: 2 candidates (0.0027 secs)
-#>   All 3 + 0 extra: 1 solutions | 3 candidates (0.00353 secs)
-#>   All 3 + 1 extra: 9 solutions | 30 candidates | 21 duplicates removed (0.0491 secs)
-#>   All 3 + 2 extra: 35 solutions | 266 candidates | 501 duplicates removed (0.221 secs)
-#>   All 3 + 3 extra: 183 solutions | 183 candidates | 459 duplicates removed (0.842 secs)
+#>   First 2: 2 candidates (0.00064 secs)
+#>   All 3 + 0 extra: 1 solutions | 3 candidates (0.000975 secs)
+#>   All 3 + 1 extra: 9 solutions | 30 candidates | 21 duplicates removed (0.00409 secs)
+#>   All 3 + 2 extra: 35 solutions | 266 candidates | 501 duplicates removed (0.0734 secs)
+#>   All 3 + 3 extra: 183 solutions | 183 candidates | 459 duplicates removed (0.377 secs)
 #>   Total solutions: 228 
 #>   Converting to ped
 #>   Excessive inbreeding: 0 
-#>   Time used: 1.07 secs 
+#>   Time used: 0.47 secs 
 #> 
 #> Computing the likelihood of 228 pedigrees.
 #> Sorting by descending likelihood.
-#> Total time used:  18.1 secs
+#> Total time used:  6.18 secs
 ```
 
 The most likely results this time are shown below:
