@@ -9,7 +9,7 @@
 #' @examples
 #' trioData[, 1:10]
 #'
-#' x = list(singleton(1), singleton(2), singleton(3)) |>
+#' x = singletons(1:3) |>
 #'   setMarkers(alleleMatrix = trioData, locusAttributes ="snp12")
 #'
 #' x

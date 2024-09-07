@@ -146,7 +146,7 @@ best in smaller cases.
 #-----------------
 
 # Built-in dataset `trioData`
-x = list(singleton(1), singleton(2), singleton(3)) |>
+x = singletons(1:3) |>
   setMarkers(alleleMatrix = trioData, locusAttributes ="snp12")
 
 res = reconstruct(x, inferPO = TRUE, age = "1 > 2")
