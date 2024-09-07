@@ -14,7 +14,7 @@ inferPO = function(alleleMatrix, loci, list = FALSE, verbose = TRUE) {
 
   kappa = ibdEstimate(slist, pairs, verbose = verbose)
 
-  # TODO: Let thresholds be function arguments instead of hard-coded
+  # TODO: Use GLR to test for PO
   PO = kappa[kappa$k0 < 0.01 & kappa$k2 < 0.5, ]
   notPO = kappa[kappa$N != 0 & kappa$k0 > 0.5, ]
 
