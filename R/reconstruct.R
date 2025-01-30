@@ -126,7 +126,7 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
 
     sex = getSex(x, ids)
     alleleMatrix = getAlleles(x, ids)
-    loci = getLocusAttributes(x, markers = loci)
+    loci = getLocusAttributes(x, markers = loci, checkComps = TRUE)
   }
   else {
     ids = rownames(alleleMatrix)
