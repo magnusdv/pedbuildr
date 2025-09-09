@@ -60,22 +60,34 @@ ftime = function(st, digits = 3)
   format(Sys.time() - st, digits = digits)
 
 
-# Equivalent to t.default(combn(x, 2)), but ~5 times faster.
-.comb2 = function(x) {
-  L = length(x)
-  vec = L > 1
-  n = if(vec) L else x
+# Quick version of combn(., 2) for matrix output
+.comb2 = function(n, vec = length(n) > 1){
+  if(vec) {
+    v = n
+    n = length(v)
+  }
+  if (n < 2) {
+    x = integer(0)
+    if(vec) x = v[x]
+    return(matrix(x, nrow = 0L, ncol = 2L))
+  }
+  if (n == 2) {
+    if(!vec) v = c(1L, 2L)
+    return(`dim<-`(v, c(1L, 2L)))
+  }
+  if (n == 3) {
+    x = c(1L, 1L, 2L, 2L, 3L, 3L)
+    if(vec) x = v[x]
+    return(`dim<-`(x, c(3L, 2L)))
+  }
 
-  if (n < 2)
-    return(matrix(nrow = 0, ncol = 2))
-  v1 = rep.int(seq_len(n - 1), (n - 1):1)
-  v2 = NULL
-  for (i in 2:n) v2 = c(v2, i:n)
-  res = cbind(v1, v2, deparse.level = 0)
+  x = rep.int(seq_len(n - 1), (n - 1):1)
+  y = sequence.default((n - 1):1, 2:n)
 
   if(vec)
-    res[] = x[res]
-  res
+    cbind(v[x], v[y], deparse.level = 0)
+  else
+    cbind(x, y, deparse.level = 0)
 }
 
 # Faster version of sort.int, especially for vectors of size 1 and 2

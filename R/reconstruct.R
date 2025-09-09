@@ -96,7 +96,6 @@
 #' plot(res3)
 #'
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' @importFrom forrel showInTriangle
 #' @importFrom parallel makeCluster stopCluster detectCores parLapply
 #'   clusterEvalQ clusterExport
 #' @export
