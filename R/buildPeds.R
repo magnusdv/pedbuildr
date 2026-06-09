@@ -104,8 +104,8 @@ buildPeds = function(labs, sex = 1, extra = "parents", age = NULL, knownPO = NUL
 
   # Check that IDs used are known or allowed extras (e1, e2, ...)
   checkLabs = c(unlist(knownPO), unlist(notPO), noChildren)
-  if(!all(checkLabs %in% labs))
-    stop2("Unknown pedigree member: ", setdiff(checkLabs, labs))
+  if(anyNA(match(checkLabs, labs)))
+    stop2("Unknown pedigree member: ", .mysetdiff(checkLabs, labs))
 
   # Convert numeric age vector to vector of inequalities
   if(is.numeric(age))
@@ -127,8 +127,8 @@ buildPeds = function(labs, sex = 1, extra = "parents", age = NULL, knownPO = NUL
   noChildren_int = match(noChildren, labs)
 
   # Check noChildren, and convert to internal
-  if(!all(noChildren %in% labs))
-    stop2("Unknown label in `noChildren`: ", setdiff(noChildren, labs))
+  if(anyNA(match(noChildren, labs)))
+    stop2("Unknown label in `noChildren`: ", .mysetdiff(noChildren, labs))
 
   # Check `maxInbreeding`
   if(length(maxInbreeding) != 1 || !is.numeric(maxInbreeding) || maxInbreeding < 0 || maxInbreeding > 1)
@@ -213,8 +213,8 @@ convertNumAge = function(age, labs) {
 
   # If age is named, convert to full vector
   if(!is.null(nms <- names(age))) {
-    if(!all(nms %in% labs))
-      stop2("Unknown name in `age`: ", setdiff(nms, labs))
+    if(anyNA(match(nms, labs)))
+      stop2("Unknown name in `age`: ", .mysetdiff(nms, labs))
     age.full = rep(NA_real_, N)
     names(age.full) = labs
     age.full[nms] = age
@@ -256,8 +256,8 @@ parseAge = function(a, labs, output = c("matrix", "list")) {
           older = rep(l$o, each = length(l$y)))
   }))
 
-  if(!all(res %in% labs))
-    stop2("Unknown ID label in `age`: ", sort(setdiff(res, labs)))
+  if(anyNA(match(res, labs)))
+    stop2("Unknown ID label in `age`: ", sort(.mysetdiff(res, labs)))
 
   # Convert to internal ordering
   cbind(younger = match(res[, "younger"], labs),

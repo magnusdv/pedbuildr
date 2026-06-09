@@ -78,8 +78,8 @@ newAdjMatrix = function(adj, sex, connected = NA) {
 # Validator for "adjMatrix" objects
 validateAdjMatrix = function(adj) {
   sex = attr(adj, "sex")
-  if(!all(sex %in% 0:2))
-    stop2("Illegal elements found in `sex` attribute vector: ", setdiff(sex, 0:2))
+  if(anyNA(match(sex, 0:2)))
+    stop2("Illegal elements found in `sex` attribute vector: ", .mysetdiff(sex, 0:2))
 
   if(nrow(adj) != (ncol(adj)))
     stop2("Adjacency matrix must be square")

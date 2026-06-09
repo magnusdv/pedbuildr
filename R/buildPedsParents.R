@@ -68,7 +68,7 @@ listPOsets = function(N, knownPO = NULL, allKnown = FALSE, notPO = NULL) {
   # Potential extra parent-offspring: All pairs except "knownPO" and "notPO"
   allPO = fast.combn(1:N, 2)
   allPOchar = sapply(allPO, paste, collapse = "-")
-  potentialPO = allPO[!allPOchar %in% c(knownPOchar, notPOchar)]
+  potentialPO = allPO[allPOchar %notin% c(knownPOchar, notPOchar)]
 
   if(length(potentialPO) == 0)
     return(list(knownPO))

@@ -181,7 +181,7 @@ addIndividual = function(a, addedSex, origN, final, connected = FALSE,
 
     # Force known PO: If not among parents, then children
     knownCh = .mysetdiff(knownPO, par, makeUnique = FALSE)
-    if(!all(knownCh %in% potCh))
+    if(anyNA(match(knownCh, potCh)))
       next
 
     # Loop over subsets of children
