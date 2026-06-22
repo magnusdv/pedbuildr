@@ -88,12 +88,12 @@
 #'
 #' # Reconstruct allowing 2 extra individuals and any inbreeding
 #' res2 = reconstruct(y, extra = 2, maxInb = 1)
-#' plot(res2)
+#' plot(res2, top = 6)
 #'
 #' # With mutation modelling
 #' y = setMutmod(y, model = "equal", rate = 0.01)
 #' res3 = reconstruct(y, extra = 2, maxInb = 1)
-#' plot(res3)
+#' plot(res3, top = 6)
 #'
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom parallel makeCluster stopCluster detectCores parLapply clusterEvalQ clusterExport
