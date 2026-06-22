@@ -194,12 +194,9 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
     x = setMarkersFAST(ped, amatList, loci)
 
     # Founder inbreeding
-    if(founderInb > 0) {
-      if(is.pedList(x))
-        x = lapply(x, function(comp) `founderInbreeding<-`(comp, founders(comp), value = founderInb))
-      else
-        founderInbreeding(x, founders(x)) = founderInb
-    }
+    if(founderInb > 0)
+      x = setFounderInbreeding(x, value = founderInb)
+
     # Compute loglik
     tryCatch(loglikTotal(x), error = function(e) {NA_real_})
   }
