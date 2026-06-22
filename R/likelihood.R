@@ -2,6 +2,13 @@
 # Utility: Compute total loglikelihood
 #' @importFrom pedprobr likelihood
 loglikTotal = function(x) {
+  sum(likelihood(x, logbase = exp(1)))
+}
+
+
+# Outdated code -------------------------------------------------------------------------------
+
+loglikTotalOLD = function(x) {
 
   # Catch potential fails (return NA)
   x = tryBreakLoops(x)
@@ -9,17 +16,15 @@ loglikTotal = function(x) {
     return(NA_real_)
 
   logliks = likelihood(x, logbase = exp(1))
-
   sum(logliks)
 }
-
 
 tryBreakLoops = function(x) {
   if(is.pedList(x))
     y = lapply(x, function(comp)
-      breakLoops(comp, verbose = FALSE, errorIfFail = FALSE))
+      pedprobr:::.breakLoops(comp, verbose = FALSE, errorIfFail = FALSE))
   else
-    y = breakLoops(x, verbose = FALSE, errorIfFail = FALSE)
+    y = pedprobr:::.breakLoops(x, verbose = FALSE, errorIfFail = FALSE)
 
   # In unsuccessful: Return NULL
   if(hasUnbrokenLoops(y))
