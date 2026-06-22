@@ -96,8 +96,7 @@
 #' plot(res3)
 #'
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' @importFrom parallel makeCluster stopCluster detectCores parLapply
-#'   clusterEvalQ clusterExport
+#' @importFrom parallel makeCluster stopCluster detectCores parLapply clusterEvalQ clusterExport
 #' @export
 reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NULL,
                        pedlist = NULL, inferPO = FALSE, sex = NULL,
