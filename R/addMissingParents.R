@@ -45,10 +45,16 @@ addMissingParents = function(a, maxLinearInb = Inf, sexSymmetry = FALSE) {
   }
 
   # List of descendants
-  checkInb = maxLinearInb < Inf
-  if(checkInb)
+  checkInb0 = maxLinearInb == 0
+  checkInb = maxLinearInb > 0 && maxLinearInb < Inf
+
+  if(checkInb0 || checkInb)
     descList = lapply(1:n, function(id)
       dagDescendants(a, id, minDist = maxLinearInb + 1))
+
+  # Quick check if no linear mating is allowed
+  if(checkInb0 && linearInb(a, descList = descList))
+    return(list())
 
   # All set partitions for the fathers and the mothers
   if(nMissFa > 0)
@@ -61,9 +67,24 @@ addMissingParents = function(a, maxLinearInb = Inf, sexSymmetry = FALSE) {
   else
     pMo = list(matrix(0L, ncol=1, nrow=1))
 
+  # Precompute partitions that would lead to linear inbreeding
+  if(checkInb0) {
+    badFa = vapply(pFa, linealPartition, logical(1),
+                   pairs = linealPairs(missingFa, descList))
+    badMo = vapply(pMo, linealPartition, logical(1),
+                   pairs = linealPairs(missingMo, descList))
+  } else {
+    badFa = rep(FALSE, length(pFa))
+    badMo = rep(FALSE, length(pMo))
+  }
+
   # Loop over all combinations
   res = vector(length(pFa) * length(pMo), mode = "list")
   for(i in seq_along(pFa)) for(j in seq_along(pMo)) {
+
+    if(badFa[i] || badMo[j])
+      next
+
     pf = pFa[[i]]
     pm = pMo[[j]]
     newfa = max(pf)

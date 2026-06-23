@@ -312,7 +312,7 @@ plot.pedrec = function(x, top = NULL, nrow = NA, titles = "LR",
 
   # Titles
   if(identical(titles, "LR")) {
-    ll = x$loglik
+    ll = x$logliks
     titles = bquote("Loglik" == .(round(ll[1], 2))) # bquote to avoid bold
     if(L > 1) {
       lr = sprintf("%.4g", exp(ll[1] - ll))

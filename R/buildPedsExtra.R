@@ -118,8 +118,9 @@ addIndividual = function(a, addedSex, origN, final, connected = FALSE,
   extra = n >= origN
 
   checkAge = length(ageList) > 0
+  checkInb = maxLinearInb > 0 && maxLinearInb < Inf
+
   thisAge = ageList[[k]]
-  checkInb = maxLinearInb < Inf
 
   prev = seq_len(n)
   sex = attr(a, "sex")
@@ -163,8 +164,8 @@ addIndividual = function(a, addedSex, origN, final, connected = FALSE,
     par = par[par > 0]
     npar = length(par)
 
-    # Quick check of parent-child inbreeding
-    if(maxLinearInb == 0 && npar == 2 && any(a[par, par]))
+    # Quick check: proposed parents must not be lineally related
+    if(maxLinearInb == 0 && linealParents(par, tmpAnc))
       next
 
     # Ancestors of parents (including parents themselves)
@@ -191,16 +192,12 @@ addIndividual = function(a, addedSex, origN, final, connected = FALSE,
       if(final && extra && (length(chs) == 0 || (length(chs) == 1 && npar == 0)))
         next
 
-      # Another quick check of parent-child inbreeding
-      if(maxLinearInb == 0 && any(a[c(par, chs), c(par, chs)]))
-        next
-
       # Add relations
       newA = tmpA
       newA[par, k] = TRUE
       newA[k, chs] = TRUE
 
-      # More general check for linear inbreeding
+      # Check for linear inbreeding (when maxLinearInb > 0)
       if(checkInb && linearInb2(newA, minDist = maxLinearInb + 1))
         next
 
@@ -221,23 +218,27 @@ addIndividual = function(a, addedSex, origN, final, connected = FALSE,
       }
 
       # Update ancestors
-      if(!final || checkAge) {
-        newAnc = tmpAnc
-        newAnc[[k]] = c(k, parAnc)
+      newAnc = tmpAnc
+      newAnc[[k]] = c(k, parAnc)
 
-        # Identify descendants
-        isDesc = vapply(prev, function(d)
-          !(d %in% par) && (d %in% chs || any(chs %in% newAnc[[d]])), logical(1))
-        desc = which(isDesc)
+      # Only descendants of the proposed children receive new ancestors
+      isDesc = vapply(prev, function(d)
+        !(d %in% par) && (d %in% chs || any(chs %in% newAnc[[d]])), logical(1))
+      desc = which(isDesc)
+      changed = c(k, desc)
 
-        # Add new ancestors to all descendants
-        if(length(parAnc))
-          newAnc[desc] = lapply(newAnc[desc], function(v) unique.default(c(v, k, parAnc)))
-        else
-          newAnc[desc] = lapply(newAnc[desc], function(v) c(v, k))
+      # Add the new individual, and its ancestors, to all descendants
+      if(length(parAnc))
+        newAnc[desc] = lapply(newAnc[desc], function(v) unique.default(c(v, k, parAnc)))
+      else
+        newAnc[desc] = lapply(newAnc[desc], function(v) c(v, k))
 
-        attr(newA, "anc") = newAnc
-      }
+      # Update the attribute
+      attr(newA, "anc") = newAnc
+
+      # Quick check for lineal mating
+      if(maxLinearInb == 0 && hasLinealMating(newA, newAnc, changed))
+        next
 
       # Check age data
       if(checkAge && ageViol(newA, newAnc, ageList))

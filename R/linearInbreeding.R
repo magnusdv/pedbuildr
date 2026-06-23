@@ -1,5 +1,6 @@
-# Check for linear inbreeding (of distance at least minDist)
-# Original version, very slow unless `descList` provided
+# Check for linear inbreeding (of distance at least minDist).
+# Used in `addMissingParents()`.
+# NB: Very slow unless `descList` provided.
 linearInb = function(a, descList = NULL, minDist = 1) {
   n = dim(a)[1]
   if(n < 3 || minDist >= n)
@@ -23,7 +24,7 @@ linearInb = function(a, descList = NULL, minDist = 1) {
   FALSE
 }
 
-# Faster version of the above
+# Faster version of the above, used in "extra" branch.
 linearInb2 = function(a, minDist = 1) {
   n = dim(a)[1]
   if(n < 3 || minDist >= n)
@@ -75,4 +76,57 @@ linearInb2 = function(a, minDist = 1) {
   }
 
   FALSE
+}
+
+
+linealParents = function(par, anc) {
+  length(par) == 2L &&
+    (par[1] %in% anc[[par[2]]] || par[2] %in% anc[[par[1]]])
+}
+
+hasLinealMating = function(a, anc, ids) {
+  # Check selected individuals for lineal mating between their parents.
+  # Used after adding the new individual. It is enough to inspect `ids`,
+  # since only these individuals received new ancestors.
+
+  for(id in ids) {
+    par = which(a[, id])
+
+    if(length(par) == 2L &&
+       (par[1] %in% anc[[par[2]]] || par[2] %in% anc[[par[1]]]))
+      return(TRUE)
+  }
+
+  FALSE
+}
+
+
+# Pairs of positions in `ids` where one individual descends from the other.
+# A partition is illegal if both positions are assigned to the same new parent.
+linealPairs = function(ids, descList) {
+
+  if(length(ids) < 2L)
+    return(matrix(integer(0), ncol = 2L))
+
+  out = lapply(seq_along(ids), function(i) {
+    j = match(descList[[ids[i]]], ids, nomatch = 0L)
+    j = j[j > 0L]
+    if(length(j))
+      cbind(i, j)
+  })
+
+  out = out[lengths(out) > 0L]
+
+  if(length(out))
+    do.call(rbind, out)
+  else
+    matrix(integer(0), ncol = 2L)
+}
+
+linealPartition = function(group, pairs) {
+  if(!nrow(pairs))
+    return(FALSE)
+
+  group = as.integer(group)
+  any(group[pairs[, 1]] == group[pairs[, 2]])
 }
