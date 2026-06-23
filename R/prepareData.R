@@ -74,11 +74,9 @@ prepareData = function(alleleMatrix, loci, verbose = FALSE) {
       loci[[k]]$afreq = c(obsFreq, 1 - sum(obsFreq))
 
       # Update mutation model
-      if (!is.null(mut)) {
-        lumpedMale = pedmut::lumpedMatrix(mut$male, lump)
-        lumpedFemale = pedmut::lumpedMatrix(mut$female, lump)
-        loci[[k]]$mutmod = pedmut::mutationModel(list(female = lumpedFemale, male = lumpedMale))
-      }
+      if (!is.null(mut))
+        loci[[k]]$mutmod = pedmut::lumpedModel(mut, lump = lump, check = FALSE)
+
 
       mess = sprintf("Lumping: %d -> %d alleles", length(origAlleles), length(keepAls) + 1)
     }
