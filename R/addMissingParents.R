@@ -80,12 +80,16 @@ addMissingParents = function(a, maxLinearInb = Inf, sexSymmetry = FALSE) {
     bottom = rbind(FA, MO)
 
     # Gender restriction
+    seen = new.env(hash = TRUE, parent = emptyenv())
+
     if(sexSymmetry && newpars > 1) {
       inv_vec = .rowSums(bottom * rep(pows, each = newpars), m = newpars, n = n)
       inv = paste(.mysortInt(inv_vec), collapse = "-")
-      if(inv %in% observedInvariants)
-        next
-      observedInvariants = c(observedInvariants, inv)
+      if(exists(inv, envir = seen, inherits = FALSE)) next
+      assign(inv, TRUE, envir = seen)
+
+      #if(inv %in% observedInvariants) next
+      #observedInvariants = c(observedInvariants, inv)
     }
 
     # Add blocks and create adjMatrix object
