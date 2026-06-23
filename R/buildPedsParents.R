@@ -39,7 +39,7 @@ buildPedsParents = function(labs, sex, ageMat = NULL, knownPO = NULL, allKnown =
   # Convert to list of pedigrees
   peds = lapply(DA_EXT, function(a) adj2ped(a, labs))
 
-  if(maxInbreeding < Inf) {
+  if(maxInbreeding < 1) {
     good = vapply(peds, function(p) all(inbreeding(p) <= maxInbreeding), FUN.VALUE = TRUE)
     peds = peds[good]
     if(verbose) {

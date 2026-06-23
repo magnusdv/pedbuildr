@@ -78,7 +78,7 @@ buildPedsExtra = function(labs, sex, extra = 0, ageMat = NULL, knownPO = NULL, a
 
   peds = lapply(ALLSOLS, function(a) adj2ped(addMissingParents1(a), labs))
 
-  if(maxInbreeding < Inf) {
+  if(maxInbreeding < 1) {
     good = vapply(peds, function(p) all(inbreeding(p) <= maxInbreeding), FUN.VALUE = TRUE)
     peds = peds[good]
     if(verbose) {
