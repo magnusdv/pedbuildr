@@ -144,8 +144,7 @@ addIndividual = function(a, addedSex, origN, final, connected = FALSE,
   }
 
   # Prepare main loop
-  len = length(potentialFa) * length(potentialMo) * 2^length(potentialCh)
-  RES = vector("list", length = len)
+  RES = vector("list", 64L)
 
   aExt = c(rbind(a, rep(FALSE, n)), rep(FALSE, n + 1))
   dim(aExt) = c(k, k)
@@ -248,9 +247,11 @@ addIndividual = function(a, addedSex, origN, final, connected = FALSE,
       if(extra && k > origN + 1)
         newA = canonicalPerm(newA, origN)
 
-      # Add to output list
-      RES[[i+1]] = newA
-      i = i+1
+      # Add to output list (grow if needed)
+      if(i == length(RES))
+        length(RES) = 2L * length(RES)
+      i = i + 1L
+      RES[[i]] = newA
     }
   }
 
