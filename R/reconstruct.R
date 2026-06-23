@@ -156,7 +156,7 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
     # (Optional) pairwise analysis to establish parent-child relationships
     if(inferPO) {
 
-      if(length(knownPO) > 0 | length(knownPO) > 0)
+      if(length(knownPO) > 0 | length(notPO) > 0)
         stop2("`knownPO` and `notPO` must be NULL when `inferPO = TRUE`")
 
       POresult = inferPO(alleleMatrix, loci, list = TRUE, verbose = FALSE)

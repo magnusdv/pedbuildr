@@ -56,6 +56,9 @@ listPOsets = function(N, knownPO = NULL, allKnown = FALSE, notPO = NULL) {
   if(allKnown)
     return(if(is.null(knownPO)) list() else list(knownPO))
 
+  if(N < 2L)
+    return(list())
+
   knownPO = lapply(knownPO, .mysortInt)
   notPO = lapply(notPO, .mysortInt)
 
