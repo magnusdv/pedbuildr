@@ -19,6 +19,7 @@ Depends:
 Imports: 
     forrel,
     glue,
+    mirai (>= 2.7.1),
     pedmut,
     pedprobr (>= 1.1.0),
     ribd

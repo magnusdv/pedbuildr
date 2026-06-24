@@ -17,6 +17,27 @@
 #' advantage of not requiring an explicit/ad hoc number of "extras", but works
 #' best in smaller cases.
 #'
+#' ## Parallel likelihood computation
+#' Likelihood calculations can be distributed across several R processes using
+#' the **mirai** package. To use this, start mirai workers before calling
+#' `reconstruct()`:
+#'
+#' ```r
+#' mirai::daemons(8)  # Start 8 workers
+#' res = reconstruct(x)
+#' mirai::daemons(0)  # Stop workers
+#' ```
+#'
+#' The call to `mirai::daemons(8)` starts 8 worker processes. These workers
+#' remain available for later calls until stopped with `mirai::daemons(0)`.
+#'
+#' If no mirai workers are running, `reconstruct()` still works and runs the
+#' likelihood calculations synchronously.
+#'
+#' The best number of workers depends on the number of pedigrees, marker data
+#' size, and available memory. For large reconstruction runs, values such as 6,
+#' 8, 12 or more may give substantial gains.
+#'
 #' @param x A `pedtools::ped` object or a list of such.
 #' @param ids A vector of ID labels from `x`. By default, the genotyped members
 #'   of `x` are used.
@@ -33,8 +54,8 @@
 #'   inbreeding level in all founders. Default: 0.
 #' @param sortResults A logical. If TRUE (default), the output is sorted so that
 #'   the most likely pedigree comes first.
-#' @param numCores A positive integer. The number of cores used in
-#'   parallelisation. Default: 1.
+#' @param numCores Deprecated. Use `mirai::daemons()` to set the number of
+#'   workers.
 #' @param verbose A logical.
 #' @inheritParams buildPeds
 #'
@@ -95,8 +116,8 @@
 #' res3 = reconstruct(y, extra = 2, maxInb = 1)
 #' plot(res3, top = 6)
 #'
-#' @importFrom utils setTxtProgressBar txtProgressBar
-#' @importFrom parallel makeCluster stopCluster detectCores parLapply clusterEvalQ clusterExport
+#' @importFrom mirai daemons daemons_set info mirai_map
+#' @importFrom utils txtProgressBar setTxtProgressBar
 #' @export
 reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NULL,
                        pedlist = NULL, inferPO = FALSE, sex = NULL,
@@ -187,48 +208,53 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
   if(verbose)
     cat("\nComputing the likelihood of", npeds, "pedigrees.\n")
 
-
-  # Main loglik function
-  loglikFUN = function(ped, amatList, loci) {
-    # Attach marker data
-    x = setMarkersFAST(ped, amatList, loci)
-
-    # Founder inbreeding
-    if(founderInb > 0)
-      x = setFounderInbreeding(x, value = founderInb)
-
-    # Compute loglik
-    tryCatch(loglikTotal(x), error = function(e) {NA_real_})
+  if(numCores > 1) {
+    s = "`numCores` has been deprecated; use `mirai::daemons()` for parallelisation. See `?reconstruct`."
+    warning(s, call. = FALSE)
   }
 
+  progbar = verbose && interactive()
 
-  # Parallelise
-  if(numCores > 1) {
-    cl = makeCluster(numCores)
-    on.exit(stopCluster(cl))
-    clusterEvalQ(cl, library(pedbuildr))
-    clusterExport(cl, c("loglikFUN", "setMarkersFAST", ".myintersect"), envir = environment())
+  # Use mirai workers if available, otherwise run synchronously
+  hasDaemons = mirai::daemons_set()
+  nworkers = if(hasDaemons) mirai::info()[["connections"]] else 1L
 
-    if(verbose) message("Using ", length(cl), " cores")
 
-    # Loop through pedigrees
-    loglikList = parLapply(cl, pedlist, function(ped) loglikFUN(ped, amatList, loci))
+  # Multiple workers
+  if(nworkers > 1) {
+
+    # Split pedigrees into batches of 8
+    nchunks = min(npeds, 8L * nworkers)
+    chunkSize = ceiling(npeds / nchunks)
+    pedChunks = split(pedlist, ceiling(seq_len(npeds) / chunkSize))
+
+    if(verbose)
+      message(sprintf("Parallelisation: %d mirai workers; %d batches of ~%d pedigrees",
+              nworkers, length(pedChunks), chunkSize))
+
+    # Compute likelihoods in parallel
+    mm = mirai::mirai_map(pedChunks, lapply,
+      .args = list(FUN = loglikWrapper, amatList = amatList, loci = loci, founderInb = founderInb))
+
+    loglikMirai = if(progbar) mm[mirai::.progress] else mm[]
+    logliks = unlist(loglikMirai, recursive = TRUE, use.names = FALSE)
+
   }
   else {
-    # Setup progress bar
-    if(progbar <- verbose && interactive())
+
+    if(verbose)
+      message("No parallelisation; use `mirai::daemons(n)` to set up multiple workers.")
+
+    if(progbar)
       pb = txtProgressBar(min = 0, max = npeds, style = 3)
 
-    loglikList = lapply(seq_len(npeds), function(i) {
+    logliks = vapply(seq_len(npeds), FUN.VALUE = numeric(1), function(i) {
       if(progbar) setTxtProgressBar(pb, i)
-      loglikFUN(pedlist[[i]], amatList, loci)
+      loglikWrapper(pedlist[[i]], amatList, loci, founderInb)
     })
 
-    # Close progress bar
     if(progbar) close(pb)
   }
-
-  logliks = unlist(loglikList)
 
   # Deal with failed likelihoods
   errs = is.na(logliks)
@@ -249,7 +275,7 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
 
   time = Sys.time() - st
   if(verbose)
-    cat("Total time used: ", format(time, digits = 3), "\n")
+    cat("Total time used:", format(time, digits = 3), "\n")
 
   structure(list(labs = ids,
                  pedlist = pedlist,

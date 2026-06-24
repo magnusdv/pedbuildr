@@ -99,8 +99,8 @@ the most likely pedigree comes first.}
 \item{founderInb}{A number in the interval \verb{[0,1]}, used as background
 inbreeding level in all founders. Default: 0.}
 
-\item{numCores}{A positive integer. The number of cores used in
-parallelisation. Default: 1.}
+\item{numCores}{Deprecated. Use \code{mirai::daemons()} to set the number of
+workers.}
 
 \item{verbose}{A logical.}
 }
@@ -139,6 +139,27 @@ generates all directed acyclic graphs between the original individuals. Then
 their parents are added and merged in all possible ways. This option has the
 advantage of not requiring an explicit/ad hoc number of "extras", but works
 best in smaller cases.
+\subsection{Parallel likelihood computation}{
+
+Likelihood calculations can be distributed across several R processes using
+the \strong{mirai} package. To use this, start mirai workers before calling
+\code{reconstruct()}:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{mirai::daemons(8)  # Start 8 workers
+res = reconstruct(x)
+mirai::daemons(0)  # Stop workers
+}\if{html}{\out{</div>}}
+
+The call to \code{mirai::daemons(8)} starts 8 worker processes. These workers
+remain available for later calls until stopped with \code{mirai::daemons(0)}.
+
+If no mirai workers are running, \code{reconstruct()} still works and runs the
+likelihood calculations synchronously.
+
+The best number of workers depends on the number of pedigrees, marker data
+size, and available memory. For large reconstruction runs, values such as 6,
+8, 12 or more may give substantial gains.
+}
 }
 \examples{
 #-----------------
