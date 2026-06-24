@@ -38,10 +38,10 @@ addMissingParents = function(a, maxLinearInb = Inf, sexSymmetry = FALSE) {
   # Founders (needed in a later step)
   fou = idvec[colSums(a) == 0]
 
-  # Setup for gender symmetry restriction
+  # Setup for sex symmetry restriction
   if(sexSymmetry) {
-    observedInvariants = character()
     pows = 2^(0:(n - 1))
+    seen = new.env(hash = TRUE, parent = emptyenv())
   }
 
   # List of descendants
@@ -57,15 +57,8 @@ addMissingParents = function(a, maxLinearInb = Inf, sexSymmetry = FALSE) {
     return(list())
 
   # All set partitions for the fathers and the mothers
-  if(nMissFa > 0)
-    pFa = partitions[[nMissFa]]
-  else
-    pFa = list(matrix(0L, ncol=1, nrow=1))
-
-  if(nMissMo > 0)
-    pMo = partitions[[nMissMo]]
-  else
-    pMo = list(matrix(0L, ncol=1, nrow=1))
+  pFa = if(nMissFa > 0) partitions[[nMissFa]] else list(matrix(0L, ncol=1, nrow=1))
+  pMo = if(nMissMo > 0) partitions[[nMissMo]] else list(matrix(0L, ncol=1, nrow=1))
 
   # Precompute partitions that would lead to linear inbreeding
   if(checkInb0) {
@@ -77,9 +70,6 @@ addMissingParents = function(a, maxLinearInb = Inf, sexSymmetry = FALSE) {
     badFa = rep(FALSE, length(pFa))
     badMo = rep(FALSE, length(pMo))
   }
-
-  if(sexSymmetry)
-    seen = new.env(hash = TRUE, parent = emptyenv())
 
   # Loop over all combinations
   res = vector(length(pFa) * length(pMo), mode = "list")

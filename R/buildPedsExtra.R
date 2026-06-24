@@ -61,12 +61,13 @@ buildPedsExtra = function(labs, sex, extra = 0, ageMat = NULL, knownPO = NULL, a
       Mlist = unlist(lapply(Mlist, function(a) addFUN(a, k)), recursive = FALSE)
       nCand0 = length(Mlist)
       Mlist = removeDuplicates(Mlist, sexSymmetry)
-      intermediate[[ex]] = validSolutions(Mlist, N, connected)
+      sols = validSolutions(Mlist, N, connected)
+      intermediate[ex] = list(sols) # single brackets to avoid deletion by NULL
 
       if(verbose) {
         nCand = length(Mlist)
         cat(sprintf("  All %d + %d extra: %d solutions | %d candidates | %d duplicates removed (%s)\n",
-                    N, ex, length(intermediate[[ex]]), nCand, nCand0 - nCand, ftime(st)))
+                    N, ex, length(sols), nCand, nCand0 - nCand, ftime(st)))
       }
     }
 

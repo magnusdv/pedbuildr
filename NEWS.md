@@ -4,7 +4,7 @@
 
 * The `numCores` argument has been deprecated, as parallelisation is now controlled through the mirai framework.
 
-* More robust likelihood calculations, due to more flexible loop breaking in **pedtools** and **pedprobr**. As a result, the likelihood function should now in principle "never" fail, removing the need for separate handling of such failures. For back compatibility, the `errPed` and `errIdx` elements of the output of `reconstruct()` are still present.
+* More robust likelihood calculations. In particular, due to improved loop breaking in **pedtools** and **pedprobr**, many complex looped pedigrees that previously failed are now handled correctly.
 
 * `buildPeds()` is significantly faster than before in the default case with `linearInb = 0`, i.e., when mating between lineally related individuals is disallowed.
 

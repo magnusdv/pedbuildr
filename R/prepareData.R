@@ -1,6 +1,6 @@
 # Lump alleles and prepare alleleMatrix for fast marker creation
 
-#' @importFrom pedmut isLumpable lumpedMatrix mutationModel
+#' @importFrom pedmut isLumpable
 prepareData = function(alleleMatrix, loci, verbose = FALSE) {
 
   # Number of markers

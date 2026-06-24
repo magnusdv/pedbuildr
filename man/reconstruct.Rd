@@ -48,8 +48,8 @@ is used to generate a list.}
 
 \item{inferPO}{A logical. If TRUE, an initial stage of pairwise IBD
 estimation is done to infer high-confidence parent/child pairs, and also
-\emph{non}-parent/child pairs. When this option is used, arguments to \code{knownPO}
-and \code{notPO} are ignored.}
+\emph{non}-parent/child pairs. When this option is used, \code{knownPO} and \code{notPO}
+must be NULL.}
 
 \item{sex}{A vector of the same length as \code{labs}, with entries 1 (male) or 2
 (female).}
@@ -188,12 +188,12 @@ y = nuclearPed(children = ids) |>
   profileSim(markers = NorwegianFrequencies[1:20], ids = ids, seed = 123)
 
 # Reconstruct allowing 2 extra individuals and any inbreeding
-res2 = reconstruct(y, extra = 2, maxInb = 1)
+res2 = reconstruct(y, extra = 2, maxInbreeding = 1)
 plot(res2, top = 6)
 
 # With mutation modelling
 y = setMutmod(y, model = "equal", rate = 0.01)
-res3 = reconstruct(y, extra = 2, maxInb = 1)
+res3 = reconstruct(y, extra = 2, maxInbreeding = 1)
 plot(res3, top = 6)
 
 }

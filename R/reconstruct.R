@@ -48,8 +48,8 @@
 #'   is used to generate a list.
 #' @param inferPO A logical. If TRUE, an initial stage of pairwise IBD
 #'   estimation is done to infer high-confidence parent/child pairs, and also
-#'   *non*-parent/child pairs. When this option is used, arguments to `knownPO`
-#'   and `notPO` are ignored.
+#'   *non*-parent/child pairs. When this option is used, `knownPO` and `notPO`
+#'   must be NULL.
 #' @param founderInb A number in the interval `[0,1]`, used as background
 #'   inbreeding level in all founders. Default: 0.
 #' @param sortResults A logical. If TRUE (default), the output is sorted so that
@@ -108,12 +108,12 @@
 #'   profileSim(markers = NorwegianFrequencies[1:20], ids = ids, seed = 123)
 #'
 #' # Reconstruct allowing 2 extra individuals and any inbreeding
-#' res2 = reconstruct(y, extra = 2, maxInb = 1)
+#' res2 = reconstruct(y, extra = 2, maxInbreeding = 1)
 #' plot(res2, top = 6)
 #'
 #' # With mutation modelling
 #' y = setMutmod(y, model = "equal", rate = 0.01)
-#' res3 = reconstruct(y, extra = 2, maxInb = 1)
+#' res3 = reconstruct(y, extra = 2, maxInbreeding = 1)
 #' plot(res3, top = 6)
 #'
 #' @importFrom mirai daemons daemons_set info mirai_map
@@ -208,7 +208,7 @@ reconstruct = function(x, ids, extra = "parents", alleleMatrix = NULL, loci = NU
   if(verbose)
     cat("\nComputing the likelihood of", npeds, "pedigrees.\n")
 
-  if(numCores > 1) {
+  if(!missing(numCores)) {
     s = "`numCores` has been deprecated; use `mirai::daemons()` for parallelisation. See `?reconstruct`."
     warning(s, call. = FALSE)
   }

@@ -162,7 +162,7 @@ addEdge = function(adj, id, father, mother, remaining, storage, verbose = TRUE, 
     remaining[SEX == SEX[id], kids] = FALSE
     remaining[id, kids] = TRUE # restore these
 
-    # no kids are parent of c(id,f,m) # TODO: utvid til alle ancs!!!
+    # no kids are parent of c(id,f,m)
     remaining[kids, c(id, parents)] = FALSE
   }
 
