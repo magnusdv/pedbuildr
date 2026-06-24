@@ -241,7 +241,7 @@ addIndividual = function(a, addedSex, origN, final, connected = FALSE,
         next
 
       # Check age data
-      if(checkAge && ageViol(newA, newAnc, ageList))
+      if(checkAge && ageViol(newAnc, ageList, changed))
         next
 
       # Canonical ordering of extras
@@ -351,11 +351,12 @@ validSolutions = function(DA, checkLonely = FALSE, connected = FALSE) {
   DA
 }
 
-ageViol = function(a, anc, ageList) {
-  for(i in 1:dim(a)[1]) {
+ageViol = function(anc, ageList, ids = seq_along(anc)) {
+  for(i in ids) {
     y = ageList[[i]]$younger
     if(length(y) && any(y %in% anc[[i]]))
       return(TRUE)
   }
-  return(FALSE)
+
+  FALSE
 }
