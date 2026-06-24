@@ -74,7 +74,7 @@ x = singletons(1:3) |>
 plot(x, marker = 1:2)
 ```
 
-<img src="man/figures/README-singletons-1.png" width="50%" style="display: block; margin: auto;" />
+<img src="man/figures/README-singletons-1.png" alt="" width="50%" style="display: block; margin: auto;" />
 
 To reconstruct the pedigree, simply run `reconstruct()`:
 
@@ -101,8 +101,9 @@ res = reconstruct(x)
 #>   Excessive inbreeding: 0 
 #> 
 #> Computing the likelihood of 44 pedigrees.
+#> No parallelisation; use `mirai::daemons(n)` to set up multiple workers.
 #> Sorting by descending likelihood.
-#> Total time used:  0.5 secs
+#> Total time used: 0.47 secs
 ```
 
 A tailor-made `plot` function makes it easy to visualise the most likely
@@ -112,7 +113,7 @@ pedigrees:
 plot(res, top = 6)
 ```
 
-<img src="man/figures/README-top6-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-top6-1.png" alt="" style="display: block; margin: auto;" />
 
 The most likely pedigree is plotted top left. The titles for the
 remaining pedigrees give the likelihood ratio (LR) comparing the first
@@ -181,19 +182,19 @@ res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE, maxInbreeding 
 #>   Linear inbreeding: FALSE
 #> 
 #> Building pedigree list:
-#>   First 2: 2 candidates (0.00064 secs)
-#>   All 3 + 0 extra: 1 solutions | 3 candidates (0.000975 secs)
-#>   All 3 + 1 extra: 9 solutions | 30 candidates | 21 duplicates removed (0.00409 secs)
-#>   All 3 + 2 extra: 35 solutions | 266 candidates | 501 duplicates removed (0.0734 secs)
-#>   All 3 + 3 extra: 183 solutions | 183 candidates | 459 duplicates removed (0.377 secs)
+#>   First 2: 2 candidates (0.00124 secs)
+#>   All 3 + 0 extra: 1 solutions | 3 candidates (0.00167 secs)
+#>   All 3 + 1 extra: 9 solutions | 30 candidates | 21 duplicates removed (0.00448 secs)
+#>   All 3 + 2 extra: 35 solutions | 266 candidates | 501 duplicates removed (0.0866 secs)
+#>   All 3 + 3 extra: 183 solutions | 183 candidates | 459 duplicates removed (0.363 secs)
 #>   Total solutions: 228 
 #>   Converting to ped
-#>   Excessive inbreeding: 0 
-#>   Time used: 0.47 secs 
+#>   Time used: 0.372 secs 
 #> 
 #> Computing the likelihood of 228 pedigrees.
+#> No parallelisation; use `mirai::daemons(n)` to set up multiple workers.
 #> Sorting by descending likelihood.
-#> Total time used:  6.18 secs
+#> Total time used: 5.79 secs
 ```
 
 The most likely results this time are shown below:
@@ -202,7 +203,7 @@ The most likely results this time are shown below:
 plot(res2, top = 6)
 ```
 
-<img src="man/figures/README-top6new-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-top6new-1.png" alt="" style="display: block; margin: auto;" />
 
 We see that the same pedigree “wins”, but some inbred/esoteric
 alternatives have appeared among the runners-up.

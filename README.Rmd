@@ -89,7 +89,7 @@ The most likely pedigree is plotted top left. The titles for the remaining pedig
 sexes of the added parents, e.g., paternal versus maternal half-siblings.
 
 Let us re-run the reconstruction of `trioData` adding a few of these restrictions. We allow 3 extra individuals and indicate that individual 1 is older than the others. Furthermore, we ask the program to infer parent-child relationships automatically. Finally we allow any amount of inbreeding.
-```{r reconstruct2, cache = T}
+```{r reconstruct2}
 res2 = reconstruct(x, extra = 3, age = "1 > 2,3", inferPO = TRUE, maxInbreeding = 1)
 ```
 The most likely results this time are shown below:
