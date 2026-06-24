@@ -9,3 +9,4 @@
 ^Rprof.out$
 ^revdep$
 ^CRAN-SUBMISSION$
+^\.github$
