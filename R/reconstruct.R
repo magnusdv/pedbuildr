@@ -322,11 +322,11 @@ print.pedrec = function(x, ...) {
 
 #' @importFrom graphics par plot text title
 #' @export
-plot.pedrec = function(x, top = NULL, nrow = NA, titles = "LR",
+plot.pedrec = function(x, top = 6, nrow = NA, titles = "LR",
                        labs = x$labs, highlight = x$labs,
                        hatched = rownames(x$alleleMatrix), ...) {
 
-  if(!is.null(top))
+  if(!is.null(top) && length(x$pedlist) > top)
     x = x[seq_len(top)]
 
   L = length(x$pedlist)
